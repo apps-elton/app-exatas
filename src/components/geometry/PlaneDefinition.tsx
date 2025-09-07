@@ -21,7 +21,7 @@ interface PlaneDefinitionProps {
 }
 
 // Função para obter as posições dos vértices de diferentes geometrias
-function getVertexPositions(params: GeometryParams, isEquilateral?: boolean): THREE.Vector3[] {
+function getVertexPositions(params: GeometryParams, style: StyleOptions, isEquilateral?: boolean): THREE.Vector3[] {
   const vertices: THREE.Vector3[] = [];
   
   switch (params.type) {
@@ -115,72 +115,93 @@ function getVertexPositions(params: GeometryParams, isEquilateral?: boolean): TH
     case 'cylinder': {
       const radius = params.radius || 2;
       const height = isEquilateral ? radius * 2 : (params.height || 4);
-      const radialSegments = 64;
-      const geom = new THREE.CylinderGeometry(radius, radius, height, radialSegments);
-      geom.translate(0, height / 2, 0);
-      const pos = geom.attributes.position.array as ArrayLike<number>;
-      const seen = new Set<string>();
-      for (let i = 0; i < pos.length; i += 3) {
-        const x = pos[i] as number, y = pos[i + 1] as number, z = pos[i + 2] as number;
-        const key = `${x.toFixed(4)},${y.toFixed(4)},${z.toFixed(4)}`;
-        if (!seen.has(key)) {
-          vertices.push(new THREE.Vector3(x, y, z));
-          seen.add(key);
-        }
+      const numGeneratrices = Math.min(style.cylinderGeneratrices || 8, 10); // Máximo 10 vértices
+      
+      // Vértices da base inferior (circunferência)
+      for (let i = 0; i < numGeneratrices; i++) {
+        const angle = (i * 2 * Math.PI) / numGeneratrices;
+        vertices.push(new THREE.Vector3(
+          radius * Math.cos(angle),
+          0,
+          radius * Math.sin(angle)
+        ));
+      }
+      
+      // Vértices da base superior (circunferência)
+      for (let i = 0; i < numGeneratrices; i++) {
+        const angle = (i * 2 * Math.PI) / numGeneratrices;
+        vertices.push(new THREE.Vector3(
+          radius * Math.cos(angle),
+          height,
+          radius * Math.sin(angle)
+        ));
       }
       break;
     }
     case 'cone': {
       const radius = params.radius || 2;
       const height = isEquilateral ? radius * 2 : (params.height || 4);
-      const radialSegments = 64;
-      const geom = new THREE.ConeGeometry(radius, height, radialSegments);
-      geom.translate(0, height / 2, 0);
-      const pos = geom.attributes.position.array as ArrayLike<number>;
-      const seen = new Set<string>();
-      for (let i = 0; i < pos.length; i += 3) {
-        const x = pos[i] as number, y = pos[i + 1] as number, z = pos[i + 2] as number;
-        const key = `${x.toFixed(4)},${y.toFixed(4)},${z.toFixed(4)}`;
-        if (!seen.has(key)) {
-          vertices.push(new THREE.Vector3(x, y, z));
-          seen.add(key);
-        }
+      const numGeneratrices = Math.min(style.coneGeneratrices || 8, 10); // Máximo 10 vértices
+      
+      // Vértices da base (circunferência)
+      for (let i = 0; i < numGeneratrices; i++) {
+        const angle = (i * 2 * Math.PI) / numGeneratrices;
+        vertices.push(new THREE.Vector3(
+          radius * Math.cos(angle),
+          0,
+          radius * Math.sin(angle)
+        ));
       }
+      
+      // Vértice do topo
+      vertices.push(new THREE.Vector3(0, height, 0));
       break;
     }
     case 'dodecahedron': {
       const side = params.sideLength || 2;
       const radius = side * (Math.sqrt(3) * (1 + Math.sqrt(5))) / 4;
-      const geom = new THREE.DodecahedronGeometry(radius);
-      geom.translate(0, radius, 0);
-      const pos = geom.attributes.position.array as ArrayLike<number>;
-      const seen = new Set<string>();
-      for (let i = 0; i < pos.length; i += 3) {
-        const x = pos[i] as number, y = pos[i + 1] as number, z = pos[i + 2] as number;
-        const key = `${x.toFixed(4)},${y.toFixed(4)},${z.toFixed(4)}`;
-        if (!seen.has(key)) {
-          vertices.push(new THREE.Vector3(x, y, z));
-          seen.add(key);
-        }
-      }
+      
+      // Vértices do dodecaedro regular (20 vértices únicos)
+      const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
+      const scale = radius / Math.sqrt(3);
+      
+      // Apenas os 20 vértices únicos do dodecaedro
+      const uniqueVertices = [
+        // Cubo unitário
+        [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1],
+        [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1],
+        // Retângulos no plano YZ
+        [0, phi, 1/phi], [0, phi, -1/phi], [0, -phi, 1/phi], [0, -phi, -1/phi],
+        // Retângulos no plano XZ  
+        [1/phi, 0, phi], [-1/phi, 0, phi], [1/phi, 0, -phi], [-1/phi, 0, -phi],
+        // Retângulos no plano XY
+        [phi, 1/phi, 0], [phi, -1/phi, 0], [-phi, 1/phi, 0], [-phi, -1/phi, 0]
+      ];
+      
+      uniqueVertices.forEach(([x, y, z]) => {
+        vertices.push(new THREE.Vector3(x * scale, y * scale + radius, z * scale));
+      });
       break;
     }
     case 'icosahedron': {
       const side = params.sideLength || 2;
-      const phi = (1 + Math.sqrt(5)) / 2;
+      const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
       const radius = (side * phi) / (2 * Math.sin(Math.PI / 5));
-      const geom = new THREE.IcosahedronGeometry(radius);
-      geom.translate(0, radius, 0);
-      const pos = geom.attributes.position.array as ArrayLike<number>;
-      const seen = new Set<string>();
-      for (let i = 0; i < pos.length; i += 3) {
-        const x = pos[i] as number, y = pos[i + 1] as number, z = pos[i + 2] as number;
-        const key = `${x.toFixed(4)},${y.toFixed(4)},${z.toFixed(4)}`;
-        if (!seen.has(key)) {
-          vertices.push(new THREE.Vector3(x, y, z));
-          seen.add(key);
-        }
-      }
+      
+      // Apenas os 12 vértices únicos do icosaedro
+      const scale = radius / Math.sqrt(phi * phi + 1);
+      const uniqueVertices = [
+        // Retângulos no plano YZ
+        [0, 1, phi], [0, 1, -phi], [0, -1, phi], [0, -1, -phi],
+        // Retângulos no plano XZ
+        [1, phi, 0], [1, -phi, 0], [-1, phi, 0], [-1, -phi, 0],
+        // Retângulos no plano XY
+        [phi, 0, 1], [phi, 0, -1], [-phi, 0, 1], [-phi, 0, -1]
+      ];
+      
+      uniqueVertices.forEach(([x, y, z]) => {
+        vertices.push(new THREE.Vector3(x * scale, y * scale + radius, z * scale));
+      });
       break;
     }
     default:
@@ -236,7 +257,7 @@ export function PlaneDefinition({
   onElementSelect,
   isEquilateral
 }: PlaneDefinitionProps) {
-  const vertexPositions = useMemo(() => getVertexPositions(params, isEquilateral), [params, isEquilateral]);
+  const vertexPositions = useMemo(() => getVertexPositions(params, style, isEquilateral), [params, style, isEquilateral]);
   
   // Debug: log para verificar se os planos estão sendo recebidos
   React.useEffect(() => {
