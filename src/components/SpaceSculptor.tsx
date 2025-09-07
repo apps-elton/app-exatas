@@ -13,6 +13,7 @@ import { Shapes, PenTool, Camera, Unlock, Download, Undo2, Redo2 } from 'lucide-
 import { toast } from 'sonner';
 import { ThemeToggle } from './ThemeToggle';
 import EquationRenderer from './EquationRenderer';
+import ImageDownloadMenu from './ImageDownloadMenu';
 import { ConstructionType } from './geometry/GeometricConstructions';
 
 export default function SpaceSculptor() {
@@ -349,23 +350,32 @@ export default function SpaceSculptor() {
     toast.success('Vista resetada');
   }, []);
 
-  const handleExportImage = useCallback(() => {
+  const handleExportImage = useCallback((format: 'png' | 'jpg' = 'png', quality: 'hd' | 'medium' | 'low' = 'hd') => {
     if (geometryCanvasRef.current) {
       const canvas = geometryCanvasRef.current.querySelector('canvas');
       if (canvas) {
-      const dataURL = canvas.toDataURL('image/png', 1.0);
+        const qualityMap = { hd: 1.0, medium: 0.8, low: 0.6 };
+        const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+        const extension = format;
+        const qualityValue = qualityMap[quality];
+        
+        // Para PNG, a qualidade sempre é 1.0 (lossless)
+        const finalQuality = format === 'png' ? 1.0 : qualityValue;
+        
+        const dataURL = canvas.toDataURL(mimeType, finalQuality);
         const link = document.createElement('a');
-        link.download = `geometria-${params.type}-${Date.now()}.png`;
+        const qualityLabel = quality === 'hd' ? 'HD' : quality === 'medium' ? 'media' : 'baixa';
+        link.download = `geometria-${params.type}-${qualityLabel}-${Date.now()}.${extension}`;
         link.href = dataURL;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success('Imagem da geometria exportada!');
+        toast.success(`Imagem da geometria exportada em ${format.toUpperCase()} (${qualityLabel})!`);
       }
     }
   }, [params.type]);
 
-  const handleExportCombined = useCallback(async () => {
+  const handleExportCombined = useCallback(async (format: 'png' | 'jpg' = 'png', quality: 'hd' | 'medium' | 'low' = 'hd') => {
     if (!geometryCanvasRef.current) return;
     try {
       const geometryCanvas = geometryCanvasRef.current.querySelector('canvas');
@@ -395,15 +405,23 @@ export default function SpaceSculptor() {
         });
       }
 
-      // Exportar imagem combinada em alta resolução
-      const dataURL = tempCanvas.toDataURL('image/png', 1.0);
+      const qualityMap = { hd: 1.0, medium: 0.8, low: 0.6 };
+      const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+      const extension = format;
+      const qualityValue = qualityMap[quality];
+      
+      // Para PNG, a qualidade sempre é 1.0 (lossless)
+      const finalQuality = format === 'png' ? 1.0 : qualityValue;
+      
+      const dataURL = tempCanvas.toDataURL(mimeType, finalQuality);
       const link = document.createElement('a');
-      link.download = `geometria-completa-${params.type}-${Date.now()}.png`;
+      const qualityLabel = quality === 'hd' ? 'HD' : quality === 'medium' ? 'media' : 'baixa';
+      link.download = `geometria-completa-${params.type}-${qualityLabel}-${Date.now()}.${extension}`;
       link.href = dataURL;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Imagem completa exportada!');
+      toast.success(`Imagem completa exportada em ${format.toUpperCase()} (${qualityLabel})!`);
     } catch (error) {
       toast.error('Erro ao exportar imagem combinada');
     }
@@ -722,16 +740,10 @@ export default function SpaceSculptor() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline"
-              size="sm" 
-              onClick={handleExportImage}
-              className="flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Exportar Geometria
-            </Button>
-            <Button 
+            <ImageDownloadMenu 
+              onExport={handleExportImage}
+            />
+            <Button
               variant={options.isFrozen ? "default" : "outline"} 
               size="sm" 
               onClick={options.isFrozen ? handleUnfreezeView : handleFreezeView}

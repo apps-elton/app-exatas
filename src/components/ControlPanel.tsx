@@ -15,6 +15,7 @@ import { TeacherSuggestions } from './TeacherSuggestions';
 import { GeometryCalculations } from './GeometryCalculations';
 import MultiplePlanesManager from './MultiplePlanesManager';
 import { toast } from 'sonner';
+import ImageDownloadMenu from './ImageDownloadMenu';
 
 interface ControlPanelProps {
   params: GeometryParams;
@@ -25,7 +26,7 @@ interface ControlPanelProps {
   onOptionsChange: (options: VisualizationOptions) => void;
   onStyleChange: (style: StyleOptions) => void;
   onResetView: () => void;
-  onExportImage: () => void;
+  onExportImage: (format?: 'png' | 'jpg', quality?: 'hd' | 'medium' | 'low') => void;
   onVertexSelect?: (vertexIndex: number) => void;
 }
 
@@ -1630,10 +1631,9 @@ export default function ControlPanel({
             Resetar Vista
           </Button>
 
-          <Button variant="outline" onClick={onExportImage} className="w-full">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Imagem
-          </Button>
+          <ImageDownloadMenu 
+            onExport={(format, quality) => onExportImage(format, quality)}
+          />
         </CardContent>
       </Card>
 

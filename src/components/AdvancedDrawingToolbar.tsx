@@ -28,6 +28,7 @@ import {
 import EquationEditor from './EquationEditor';
 import { DRAWING_COLORS } from '@/types/drawing';
 import { ConstructionType } from './geometry/GeometricConstructions';
+import ImageDownloadMenu from './ImageDownloadMenu';
 
 type ToolType = 'select' | 'pen' | 'eraser' | 'text';
 
@@ -48,7 +49,7 @@ interface AdvancedDrawingToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onSave: () => void;
-  onExportCombined: () => void;
+  onExportCombined: (format?: 'png' | 'jpg', quality?: 'hd' | 'medium' | 'low') => void;
   onEquationAdd?: (latex: string, rendered: string) => void;
   // Construções geométricas
   showGeometricConstructions?: boolean;
@@ -384,16 +385,9 @@ export default function AdvancedDrawingToolbar({
             <Download className="w-4 h-4" />
           </Button>
 
-          <Button
-            variant="default"
-            size="sm"
-            onClick={onExportCombined}
-            title="Baixar geometria + desenho"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Exportar Completo
-          </Button>
+          <ImageDownloadMenu 
+            onExport={(format, quality) => onExportCombined(format, quality)}
+          />
 
           {/* Equation Editor */}
           {onEquationAdd && (
