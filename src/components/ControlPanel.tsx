@@ -564,6 +564,34 @@ export default function ControlPanel({
                 />
               </div>
               {options.showVertexSelection && (
+                <div className="bg-orange-100 dark:bg-orange-900/20 p-3 rounded-md border border-orange-200 dark:border-orange-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <p className="text-xs font-medium text-orange-700 dark:text-orange-300">
+                      MODO SEÇÃO MERIDIANA ATIVO
+                    </p>
+                  </div>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">
+                    Selecione 2 vértices (laranja) para definir plano meridiano
+                  </p>
+                  {(style.selectedVerticesForMeridian?.length || 0) > 0 && (
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-orange-600 dark:text-orange-400">
+                        Selecionados: {style.selectedVerticesForMeridian?.length || 0}/2
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleStyleChange('selectedVerticesForMeridian', [])}
+                        className="h-5 px-2 text-xs"
+                      >
+                        Limpar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {options.showVertexSelection && (
                 <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                   Clique em dois vértices não consecutivos para definir a seção meridiana.
                   {style.selectedVerticesForMeridian.length > 0 && (
@@ -639,6 +667,35 @@ export default function ControlPanel({
               </div>
               {options.showVertexConnector && (
                 <div className="space-y-2">
+                  <div className="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <p className="text-xs font-medium text-yellow-700 dark:text-yellow-300">
+                        MODO CONEXÃO DE VÉRTICES ATIVO
+                      </p>
+                    </div>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mb-1">
+                      Selecione vértices (amarelo) para conectar com linhas
+                    </p>
+                    {(style.selectedVerticesForGeneral?.length || 0) > 0 && (
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                          Conectados: {style.selectedVerticesForGeneral?.length || 0} vértices
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            handleStyleChange('selectedVerticesForGeneral', []);
+                            handleStyleChange('intersectionPositions', []);
+                          }}
+                          className="h-5 px-2 text-xs"
+                        >
+                          Limpar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                    <div className="space-y-2">
                       <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                         <div>Clique nos vértices para conectá-los. Vértices já conectados podem ser reutilizados em novas conexões.</div>

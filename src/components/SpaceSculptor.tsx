@@ -909,11 +909,13 @@ export default function SpaceSculptor() {
                         ...style,
                         selectedVerticesForMeridian: [...current, vertexIndex]
                       });
+                      toast.success(`🔶 Vértice ${vertexIndex} selecionado para seção meridiana (${current.length + 1}/2)`);
                     } else {
                       setStyle({
                         ...style,
                         selectedVerticesForMeridian: [vertexIndex]
                       });
+                      toast.success(`🔶 Nova seleção iniciada - Vértice ${vertexIndex} selecionado (1/2)`);
                     }
                   }
                   
@@ -924,6 +926,7 @@ export default function SpaceSculptor() {
                       ...prev,
                       selectedVerticesForGeneral: [...current, vertexIndex]
                     }));
+                    toast.success(`🔸 Vértice ${vertexIndex} conectado (total: ${current.length + 1})`);
                   }
                 }}
                        onStyleChange={(key, value) => {

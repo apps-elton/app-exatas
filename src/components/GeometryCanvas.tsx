@@ -409,8 +409,8 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
             onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
           }}
           edgeColor={style.edgeColor}
-          vertexColor="#ffff00"
-          selectedVertexColor={style.edgeColor}
+          vertexColor="#ffff00" // Amarelo para conexão geral
+          selectedVertexColor="#ffd700" // Dourado quando selecionado
           connectionType="general"
           lineWidth={style.rotationSpeed}
           onClearSelection={() => {
@@ -430,8 +430,8 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           selectedVertices={style.selectedVerticesForMeridian}
           onVertexSelect={onVertexSelect}
           edgeColor={style.meridianSectionColor}
-          vertexColor="#ffff00"
-          selectedVertexColor="#ff6b6b"
+          vertexColor="#ff8c00" // Laranja para seção meridiana
+          selectedVertexColor="#ff4500" // Vermelho-laranja quando selecionado
           connectionType="meridian"
           onClearSelection={() => {
             if (!onStyleChange) return;
