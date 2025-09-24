@@ -1,12 +1,14 @@
 import React from 'react';
 import { GeometryParams } from '@/types/geometry';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface GeometryCalculationsProps {
   params: GeometryParams;
 }
 
 export function GeometryCalculations({ params }: GeometryCalculationsProps) {
+  const { t } = useLanguage();
   const formatWithPi = (coefficient: number): string => {
     if (coefficient === 0) return '0';
     if (coefficient === 1) return 'π';
@@ -142,7 +144,7 @@ export function GeometryCalculations({ params }: GeometryCalculationsProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Cálculos Geométricos</CardTitle>
+        <CardTitle className="text-lg">{t('calculations.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {renderCalculations()}

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import * as THREE from 'three';
+import { Text } from '@react-three/drei';
 import { GeometryParams } from '@/types/geometry';
 
 interface VertexConnectorProps {
@@ -14,6 +15,14 @@ interface VertexConnectorProps {
   connectionType?: 'meridian' | 'general';
   lineWidth?: number;
   vertexPositions?: THREE.Vector3[];
+  showVerticesOnly?: boolean; // Novo: mostrar apenas vértices sem conexões
+  hideVertices?: boolean; // Novo: ocultar vértices completamente
+  connections?: Array<{ // Conexões criadas
+    id: string;
+    type: string;
+    vertices: number[];
+    color: string;
+  }>;
 }
 
 export function VertexConnector({ 
@@ -22,167 +31,193 @@ export function VertexConnector({
   selectedVertices = [],
   onVertexSelect,
   onClearSelection,
-  edgeColor = "#ff0000",
+  edgeColor = "#00ff00",
   vertexColor = "#00ffff", 
   selectedVertexColor = "#ff0000",
   connectionType = 'general',
-  lineWidth = 1,
-  vertexPositions = []
+  lineWidth = 2,
+  vertexPositions = [],
+  showVerticesOnly = false,
+  hideVertices = false,
+  connections = []
 }: VertexConnectorProps) {
   const [intersectionPoints, setIntersectionPoints] = useState<THREE.Vector3[]>([]);
   const [persistentIntersections, setPersistentIntersections] = useState<THREE.Vector3[]>([]);
 
-  if (!showVertexConnections || !['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type)) return null;
+  // Se não deve mostrar nada, retornar null
+  if (!showVertexConnections) return null;
+  
+  // Lista de geometrias suportadas
+  const supportedGeometries = [
+    'cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 
+    'dodecahedron', 'icosahedron', 'cylinder', 'cone'
+  ];
+  
+  if (!supportedGeometries.includes(params.type)) return null;
 
   const getVertices = (): THREE.Vector3[] => {
+    // Se já temos posições fornecidas, usar essas
+    if (vertexPositions && vertexPositions.length > 0) {
+      return vertexPositions;
+    }
+    
     const vertices: THREE.Vector3[] = [];
     
-    if (params.type === 'cube') {
-      const size = params.sideLength || 2;
-      const half = size / 2;
-      
-      // 8 vértices do cubo (base em y=0)
-      vertices.push(
-        new THREE.Vector3(-half, 0, -half),      // 0
-        new THREE.Vector3(half, 0, -half),       // 1
-        new THREE.Vector3(half, 0, half),        // 2
-        new THREE.Vector3(-half, 0, half),       // 3
-        new THREE.Vector3(-half, size, -half),   // 4
-        new THREE.Vector3(half, size, -half),    // 5
-        new THREE.Vector3(half, size, half),     // 6
-        new THREE.Vector3(-half, size, half)     // 7
-      );
-    } else if (params.type === 'prism') {
-      const { height = 4, baseEdgeLength = 2, numSides = 5 } = params;
-      const n = numSides;
-      const r = baseEdgeLength / (2 * Math.sin(Math.PI / n));
-      
-      // Vértices da base inferior
-      for (let i = 0; i < n; i++) {
-        const angle = (i * 2 * Math.PI) / n;
-        vertices.push(new THREE.Vector3(r * Math.cos(angle), 0, r * Math.sin(angle)));
+    switch (params.type) {
+      case 'cube': {
+        const size = params.sideLength || 2;
+        const half = size / 2;
+        
+        vertices.push(
+          new THREE.Vector3(-half, 0, -half),
+          new THREE.Vector3(half, 0, -half),
+          new THREE.Vector3(half, 0, half),
+          new THREE.Vector3(-half, 0, half),
+          new THREE.Vector3(-half, size, -half),
+          new THREE.Vector3(half, size, -half),
+          new THREE.Vector3(half, size, half),
+          new THREE.Vector3(-half, size, half)
+        );
+        break;
       }
       
-      // Vértices da base superior
-      for (let i = 0; i < n; i++) {
-        const angle = (i * 2 * Math.PI) / n;
-        vertices.push(new THREE.Vector3(r * Math.cos(angle), height, r * Math.sin(angle)));
-      }
-    } else if (params.type === 'pyramid') {
-      const { height = 4, baseEdgeLength = 2, numSides = 5 } = params;
-      const n = numSides;
-      const r = baseEdgeLength / (2 * Math.sin(Math.PI / n));
-      
-      // Vértices da base
-      for (let i = 0; i < n; i++) {
-        const angle = (i * 2 * Math.PI) / n;
-        vertices.push(new THREE.Vector3(r * Math.cos(angle), 0, r * Math.sin(angle)));
-      }
-      
-      // Ápice da pirâmide
-      vertices.push(new THREE.Vector3(0, height, 0));
-    } else if (params.type === 'tetrahedron') {
-      const { sideLength = 2 } = params;
-      const a = sideLength;
-      const height = a * Math.sqrt(2/3);
-      const r = a / Math.sqrt(3);
-      
-      // Vértices da base triangular
-      vertices.push(new THREE.Vector3(r, 0, 0));                      // 0
-      vertices.push(new THREE.Vector3(-r/2, 0, r * Math.sqrt(3)/2));  // 1
-      vertices.push(new THREE.Vector3(-r/2, 0, -r * Math.sqrt(3)/2)); // 2
-      
-      // Vértice do topo
-      vertices.push(new THREE.Vector3(0, height, 0));                 // 3
-    } else if (params.type === 'octahedron') {
-      const { sideLength = 2 } = params;
-      const a = sideLength;
-      
-      // Vértices do octaedro regular (escalados e posicionados)
-      const scaleFactor = a / Math.sqrt(2);
-      const offset = scaleFactor;
-      
-      vertices.push(
-        new THREE.Vector3(scaleFactor, offset, 0),     // 0
-        new THREE.Vector3(-scaleFactor, offset, 0),    // 1  
-        new THREE.Vector3(0, offset, scaleFactor),     // 2
-        new THREE.Vector3(0, offset, -scaleFactor),    // 3
-        new THREE.Vector3(0, offset + scaleFactor, 0), // 4 (topo)
-        new THREE.Vector3(0, 0, 0)                     // 5 (base)
-      );
-    } else if (params.type === 'dodecahedron') {
-      // Usar geometria Three.js para obter vértices únicos
-      const { sideLength = 2 } = params;
-      const radius = sideLength * (Math.sqrt(3) * (1 + Math.sqrt(5))) / 4;
-      const geometry = new THREE.DodecahedronGeometry(radius);
-      
-      // Aplicar mesmo offset que na geometria principal
-      geometry.translate(0, radius, 0);
-      
-      // Extrair apenas vértices únicos
-      const uniqueVertices = new Map<string, THREE.Vector3>();
-      const positions = geometry.attributes.position.array;
-      
-      for (let i = 0; i < positions.length; i += 3) {
-        const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-        const key = `${vertex.x.toFixed(4)},${vertex.y.toFixed(4)},${vertex.z.toFixed(4)}`;
-        if (!uniqueVertices.has(key)) {
-          uniqueVertices.set(key, vertex);
+      case 'prism': {
+        const { height = 4, baseEdgeLength = 2, numSides = 5 } = params;
+        const r = baseEdgeLength / (2 * Math.sin(Math.PI / numSides));
+        
+        // Base inferior
+        for (let i = 0; i < numSides; i++) {
+          const angle = (i * 2 * Math.PI) / numSides;
+          vertices.push(new THREE.Vector3(r * Math.cos(angle), 0, r * Math.sin(angle)));
         }
-      }
-      
-      vertices.push(...Array.from(uniqueVertices.values()));
-      
-    } else if (params.type === 'icosahedron') {
-      // Usar geometria Three.js para obter vértices únicos
-      const { sideLength = 2 } = params;
-      const phi = (1 + Math.sqrt(5)) / 2;
-      const radius = (sideLength * phi) / (2 * Math.sin(Math.PI / 5));
-      const geometry = new THREE.IcosahedronGeometry(radius);
-      
-      // Aplicar mesmo offset que na geometria principal
-      geometry.translate(0, radius, 0);
-      
-      // Extrair apenas vértices únicos
-      const uniqueVertices = new Map<string, THREE.Vector3>();
-      const positions = geometry.attributes.position.array;
-      
-      for (let i = 0; i < positions.length; i += 3) {
-        const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
-        const key = `${vertex.x.toFixed(4)},${vertex.y.toFixed(4)},${vertex.z.toFixed(4)}`;
-        if (!uniqueVertices.has(key)) {
-          uniqueVertices.set(key, vertex);
+        
+        // Base superior
+        for (let i = 0; i < numSides; i++) {
+          const angle = (i * 2 * Math.PI) / numSides;
+          vertices.push(new THREE.Vector3(r * Math.cos(angle), height, r * Math.sin(angle)));
         }
+        break;
       }
       
-      vertices.push(...Array.from(uniqueVertices.values()));
-    } else if (params.type === 'cylinder') {
-      const { height = 4, radius = 2 } = params;
-      const segments = 8; // Reduzido de 16 para 8 segmentos
-      
-      // Vértices da base inferior
-      for (let i = 0; i < segments; i++) {
-        const angle = (i * 2 * Math.PI) / segments;
-        vertices.push(new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle)));
+      case 'pyramid': {
+        const { height = 4, baseEdgeLength = 2, numSides = 5 } = params;
+        const r = baseEdgeLength / (2 * Math.sin(Math.PI / numSides));
+        
+        // Base
+        for (let i = 0; i < numSides; i++) {
+          const angle = (i * 2 * Math.PI) / numSides;
+          vertices.push(new THREE.Vector3(r * Math.cos(angle), 0, r * Math.sin(angle)));
+        }
+        
+        // Ápice
+        vertices.push(new THREE.Vector3(0, height, 0));
+        break;
       }
       
-      // Vértices da base superior
-      for (let i = 0; i < segments; i++) {
-        const angle = (i * 2 * Math.PI) / segments;
-        vertices.push(new THREE.Vector3(radius * Math.cos(angle), height, radius * Math.sin(angle)));
+      case 'tetrahedron': {
+        const { sideLength = 2 } = params;
+        const a = sideLength;
+        const height = a * Math.sqrt(2/3);
+        const r = a / Math.sqrt(3);
+        
+        vertices.push(
+          new THREE.Vector3(r, 0, 0),
+          new THREE.Vector3(-r/2, 0, r * Math.sqrt(3)/2),
+          new THREE.Vector3(-r/2, 0, -r * Math.sqrt(3)/2),
+          new THREE.Vector3(0, height, 0)
+        );
+        break;
       }
-    } else if (params.type === 'cone') {
-      const { height = 4, radius = 2 } = params;
-      const segments = 8; // Reduzido de 16 para 8 segmentos
       
-      // Vértices da base
-      for (let i = 0; i < segments; i++) {
-        const angle = (i * 2 * Math.PI) / segments;
-        vertices.push(new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle)));
+      case 'octahedron': {
+        const { sideLength = 2 } = params;
+        const scale = sideLength / Math.sqrt(2);
+        const offset = scale;
+        
+        vertices.push(
+          new THREE.Vector3(scale, offset, 0),
+          new THREE.Vector3(-scale, offset, 0),
+          new THREE.Vector3(0, offset, scale),
+          new THREE.Vector3(0, offset, -scale),
+          new THREE.Vector3(0, offset + scale, 0),
+          new THREE.Vector3(0, 0, 0)
+        );
+        break;
       }
       
-      // Ápice do cone
-      vertices.push(new THREE.Vector3(0, height, 0));
+      case 'dodecahedron': {
+        const { sideLength = 2 } = params;
+        const radius = sideLength * (Math.sqrt(3) * (1 + Math.sqrt(5))) / 4;
+        const geometry = new THREE.DodecahedronGeometry(radius);
+        geometry.translate(0, radius, 0);
+        
+        const uniqueVertices = new Map<string, THREE.Vector3>();
+        const positions = geometry.attributes.position.array;
+        
+        for (let i = 0; i < positions.length; i += 3) {
+          const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+          const key = `${vertex.x.toFixed(4)},${vertex.y.toFixed(4)},${vertex.z.toFixed(4)}`;
+          if (!uniqueVertices.has(key)) {
+            uniqueVertices.set(key, vertex);
+          }
+        }
+        
+        vertices.push(...Array.from(uniqueVertices.values()));
+        break;
+      }
+      
+      case 'icosahedron': {
+        const { sideLength = 2 } = params;
+        const phi = (1 + Math.sqrt(5)) / 2; // Número áureo
+        const radius = (sideLength * phi) / (2 * Math.sin(Math.PI / 5));
+        
+        // Usar vértices manuais para garantir consistência
+        const scale = radius / Math.sqrt(phi * phi + 1);
+        
+        const vertexCoords = [
+          [0, 1, phi], [0, 1, -phi], [0, -1, phi], [0, -1, -phi],
+          [1, phi, 0], [1, -phi, 0], [-1, phi, 0], [-1, -phi, 0],
+          [phi, 0, 1], [phi, 0, -1], [-phi, 0, 1], [-phi, 0, -1]
+        ];
+        
+        vertexCoords.forEach(([x, y, z]) => {
+          vertices.push(new THREE.Vector3(x * scale, y * scale + radius, z * scale));
+        });
+        break;
+      }
+      
+      case 'cylinder': {
+        const { height = 4, radius = 2 } = params;
+        const segments = 8;
+        
+        // Base inferior
+        for (let i = 0; i < segments; i++) {
+          const angle = (i * 2 * Math.PI) / segments;
+          vertices.push(new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle)));
+        }
+        
+        // Base superior
+        for (let i = 0; i < segments; i++) {
+          const angle = (i * 2 * Math.PI) / segments;
+          vertices.push(new THREE.Vector3(radius * Math.cos(angle), height, radius * Math.sin(angle)));
+        }
+        break;
+      }
+      
+      case 'cone': {
+        const { height = 4, radius = 2 } = params;
+        const segments = 8;
+        
+        // Base
+        for (let i = 0; i < segments; i++) {
+          const angle = (i * 2 * Math.PI) / segments;
+          vertices.push(new THREE.Vector3(radius * Math.cos(angle), 0, radius * Math.sin(angle)));
+        }
+        
+        // Ápice
+        vertices.push(new THREE.Vector3(0, height, 0));
+        break;
+      }
     }
     
     return vertices;
@@ -190,17 +225,19 @@ export function VertexConnector({
 
   const vertices = getVertices();
 
-  // Função para calcular intersecção entre duas linhas 3D
-  const getLineIntersection = (line1Start: THREE.Vector3, line1End: THREE.Vector3, line2Start: THREE.Vector3, line2End: THREE.Vector3): THREE.Vector3 | null => {
-    // Usar geometria 3D real em vez de projeção 2D
+  // Calcular intersecção entre duas linhas 3D
+  const getLineIntersection = (
+    line1Start: THREE.Vector3, 
+    line1End: THREE.Vector3, 
+    line2Start: THREE.Vector3, 
+    line2End: THREE.Vector3
+  ): THREE.Vector3 | null => {
     const dir1 = line1End.clone().sub(line1Start).normalize();
     const dir2 = line2End.clone().sub(line2Start).normalize();
     
-    // Verificar se as linhas são paralelas
     const cross = dir1.clone().cross(dir2);
-    if (cross.length() < 0.0001) return null; // Linhas paralelas
+    if (cross.length() < 0.0001) return null;
     
-    // Calcular o ponto mais próximo entre as duas linhas
     const w0 = line1Start.clone().sub(line2Start);
     const a = dir1.dot(dir1);
     const b = dir1.dot(dir2);
@@ -214,124 +251,106 @@ export function VertexConnector({
     const t1 = (b * e - c * d) / denom;
     const t2 = (a * e - b * d) / denom;
     
-    // Verificar se os parâmetros estão dentro dos segmentos
     if (t1 < 0 || t1 > 1 || t2 < 0 || t2 > 1) return null;
     
-    // Calcular os pontos mais próximos em cada linha
     const p1 = line1Start.clone().add(dir1.clone().multiplyScalar(t1 * line1Start.distanceTo(line1End)));
     const p2 = line2Start.clone().add(dir2.clone().multiplyScalar(t2 * line2Start.distanceTo(line2End)));
     
-    // Se as linhas realmente se intersectam, os pontos devem ser muito próximos
     if (p1.distanceTo(p2) > 0.1) return null;
     
-    // Retornar o ponto médio como intersecção
     return p1.clone().add(p2).multiplyScalar(0.5);
   };
 
-  // Função para verificar se dois vetores são perpendiculares
   const areVectorsPerpendicular = (v1: THREE.Vector3, v2: THREE.Vector3, tolerance = 0.01): boolean => {
     const dotProduct = v1.normalize().dot(v2.normalize());
     return Math.abs(dotProduct) < tolerance;
   };
 
-  // Função para criar indicador de ângulo reto
   const createRightAngleIndicator = (point: THREE.Vector3, dir1: THREE.Vector3, dir2: THREE.Vector3) => {
     const size = 0.3;
-    const group = [];
+    const indicators = [];
     
-    // Criar duas linhas perpendiculares para formar o símbolo de ângulo reto
     const v1 = dir1.clone().normalize().multiplyScalar(size);
     const v2 = dir2.clone().normalize().multiplyScalar(size);
     
-    // Ponto de encontro + primeira direção
     const corner1 = point.clone().add(v1);
-    // Ponto de encontro + segunda direção  
     const corner2 = point.clone().add(v2);
-    // Fechar o quadrado do ângulo reto
     const corner3 = point.clone().add(v1).add(v2);
     
-    // Linha 1: do ponto ao corner1
-    const curve1 = new THREE.LineCurve3(point, corner1);
-    const tube1 = new THREE.TubeGeometry(curve1, 1, 0.01, 4, false);
-    
-    // Linha 2: do ponto ao corner2
-    const curve2 = new THREE.LineCurve3(point, corner2);
-    const tube2 = new THREE.TubeGeometry(curve2, 1, 0.01, 4, false);
-    
-    // Linha 3: de corner1 ao corner3
-    const curve3 = new THREE.LineCurve3(corner1, corner3);
-    const tube3 = new THREE.TubeGeometry(curve3, 1, 0.01, 4, false);
-    
-    // Linha 4: de corner2 ao corner3
-    const curve4 = new THREE.LineCurve3(corner2, corner3);
-    const tube4 = new THREE.TubeGeometry(curve4, 1, 0.01, 4, false);
-    
-    return [
-      <mesh key="right-angle-1" geometry={tube1}>
-        <meshBasicMaterial color="#ffff00" />
-      </mesh>,
-      <mesh key="right-angle-2" geometry={tube2}>
-        <meshBasicMaterial color="#ffff00" />
-      </mesh>,
-      <mesh key="right-angle-3" geometry={tube3}>
-        <meshBasicMaterial color="#ffff00" />
-      </mesh>,
-      <mesh key="right-angle-4" geometry={tube4}>
-        <meshBasicMaterial color="#ffff00" />
-      </mesh>
+    // Criar linhas do indicador de ângulo reto
+    const lines = [
+      [point, corner1],
+      [point, corner2],
+      [corner1, corner3],
+      [corner2, corner3]
     ];
+    
+    lines.forEach((line, index) => {
+      const curve = new THREE.LineCurve3(line[0], line[1]);
+      const tube = new THREE.TubeGeometry(curve, 1, 0.01, 4, false);
+      
+      indicators.push(
+        <mesh key={`right-angle-${index}`} geometry={tube} renderOrder={3}>
+          <meshBasicMaterial color="#ffff00" />
+        </mesh>
+      );
+    });
+    
+    return indicators;
   };
 
   const renderConnections = () => {
+    console.log('=== RENDER CONNECTIONS DEBUG ===');
+    console.log('Selected Vertices:', selectedVertices);
+    console.log('Connection Type:', connectionType);
+    console.log('Show Vertices Only:', showVerticesOnly);
+    console.log('Hide Vertices:', hideVertices);
+    
+    if (showVerticesOnly || hideVertices) return [];
+    
     const connections = [];
     const segments = [];
     const newIntersections: THREE.Vector3[] = [];
     const rightAngleIndicators = [];
     const allAvailableVertices = [...vertices, ...persistentIntersections];
     
-    // Conectar vértices em pares usando posições corretas (incluindo intersecções persistentes)
-    for (let i = 0; i < selectedVertices.length; i += 2) {
-      if (i + 1 < selectedVertices.length) {
-        let startVertex: THREE.Vector3 | undefined;
-        let endVertex: THREE.Vector3 | undefined;
+    // Conectar vértices sequencialmente (cada vértice com o próximo)
+    for (let i = 0; i < selectedVertices.length - 1; i++) {
+      const startVertexIndex = selectedVertices[i];
+      const endVertexIndex = selectedVertices[i + 1];
+      
+      const startVertex = allAvailableVertices[startVertexIndex];
+      const endVertex = allAvailableVertices[endVertexIndex];
+      
+      console.log(`Connecting vertices: ${startVertexIndex} -> ${endVertexIndex}`);
+      console.log('Start Vertex:', startVertex);
+      console.log('End Vertex:', endVertex);
+      
+      if (startVertex && endVertex) {
+        const segmentDirection = endVertex.clone().sub(startVertex);
+        segments.push({ start: startVertex, end: endVertex, direction: segmentDirection });
         
-        // Obter vértices de índices (originais + intersecções persistentes)
-        if (selectedVertices[i] < allAvailableVertices.length) {
-          startVertex = allAvailableVertices[selectedVertices[i]];
-        }
+        // Criar linha de conexão mais simples usando LineSegments
+        const geometry = new THREE.BufferGeometry().setFromPoints([startVertex, endVertex]);
         
-        if (selectedVertices[i + 1] < allAvailableVertices.length) {
-          endVertex = allAvailableVertices[selectedVertices[i + 1]];
-        }
+        const connectionColor = connectionType === 'meridian' ? edgeColor : "#00ff00";
         
-        if (startVertex && endVertex) {
-          // Armazenar segmento para cálculo de intersecção
-          const segmentDirection = endVertex.clone().sub(startVertex);
-          segments.push({ start: startVertex, end: endVertex, direction: segmentDirection });
-          
-          // Usar TubeGeometry para criar linhas com espessura visível
-          const curve = new THREE.LineCurve3(startVertex, endVertex);
-          const tubeGeometry = new THREE.TubeGeometry(
-            curve, 
-            1, // segments
-            Math.max(0.005, lineWidth * 0.01), // radius baseado na espessura
-            8, // radial segments
-            false // closed
-          );
-          
-          // Usar cor específica para conexões, independente da cor das arestas
-          const connectionColor = connectionType === 'meridian' ? edgeColor : "#00ff00"; // Verde para conexões gerais
-          
-          connections.push(
-            <mesh key={`connection-${i/2}`} geometry={tubeGeometry}>
-              <meshBasicMaterial color={connectionColor} />
-            </mesh>
-          );
-        }
+        connections.push(
+          <lineSegments key={`connection-${i}`} geometry={geometry} renderOrder={2}>
+            <lineBasicMaterial color={connectionColor} linewidth={3} />
+          </lineSegments>
+        );
+        
+        console.log(`Conexão criada entre vértices ${startVertexIndex} e ${endVertexIndex}`);
+      } else {
+        console.warn(`Não foi possível conectar vértices: ${startVertexIndex} -> ${endVertexIndex}`);
+        console.warn('Start vertex exists:', !!startVertex);
+        console.warn('End vertex exists:', !!endVertex);
+        console.warn('All available vertices:', allAvailableVertices.length);
       }
     }
     
-    // Calcular intersecções apenas se há pelo menos 2 segmentos válidos
+    // Calcular intersecções
     if (segments.length >= 2) {
       for (let i = 0; i < segments.length; i++) {
         for (let j = i + 1; j < segments.length; j++) {
@@ -341,18 +360,15 @@ export function VertexConnector({
           );
           
           if (intersection) {
-            // Verificar se a intersecção está suficientemente longe das extremidades dos segmentos
             const distToStart1 = intersection.distanceTo(segments[i].start);
             const distToEnd1 = intersection.distanceTo(segments[i].end);
             const distToStart2 = intersection.distanceTo(segments[j].start);
             const distToEnd2 = intersection.distanceTo(segments[j].end);
             
-            // Verificar se já existe uma intersecção muito próxima (evitar duplicatas)
             const isDuplicate = allAvailableVertices.some(vertex => 
               vertex.distanceTo(intersection) < 0.1
             );
             
-            // Apenas adicionar intersecção se não estiver muito próxima das extremidades e não for duplicata
             const minDistance = 0.2;
             if (distToStart1 > minDistance && distToEnd1 > minDistance && 
                 distToStart2 > minDistance && distToEnd2 > minDistance && !isDuplicate) {
@@ -360,23 +376,23 @@ export function VertexConnector({
               newIntersections.push(intersection);
               const intersectionIndex = allAvailableVertices.length + newIntersections.indexOf(intersection);
               
-              // Verificar se os segmentos são perpendiculares
+              // Adicionar indicador de ângulo reto se aplicável
               if (areVectorsPerpendicular(segments[i].direction, segments[j].direction)) {
-                const rightAngleIndicator = createRightAngleIndicator(
+                const indicators = createRightAngleIndicator(
                   intersection, 
                   segments[i].direction, 
                   segments[j].direction
                 );
-                rightAngleIndicators.push(...rightAngleIndicator);
+                rightAngleIndicators.push(...indicators);
               }
               
+              // Ponto de intersecção clicável
               connections.push(
                 <mesh 
                   key={`intersection-${i}-${j}`} 
                   position={intersection}
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Adicionar à lista persistente quando clicado
                     setPersistentIntersections(prev => {
                       if (!prev.some(p => p.distanceTo(intersection) < 0.1)) {
                         return [...prev, intersection];
@@ -385,6 +401,7 @@ export function VertexConnector({
                     });
                     onVertexSelect?.(intersectionIndex, intersection);
                   }}
+                  renderOrder={3}
                 >
                   <sphereGeometry args={[0.06]} />
                   <meshBasicMaterial color="#ff00ff" />
@@ -399,56 +416,183 @@ export function VertexConnector({
     return [...connections, ...rightAngleIndicators];
   };
 
-  // Renderizar vértices clicáveis (originais + intersecções persistentes)
+  // Renderizar vértices clicáveis
   const renderSelectableVertices = () => {
+    if (hideVertices) return [];
+    
     const vertexElements = [];
     
-    // Vértices originais da geometria
+    console.log('=== RENDER VERTICES DEBUG ===');
+    console.log('Show Vertex Connections:', showVertexConnections);
+    console.log('Vertices available:', vertices.length);
+    console.log('Selected vertices:', selectedVertices);
+    console.log('Vertex color:', vertexColor);
+    console.log('Selected vertex color:', selectedVertexColor);
+    
+    // Vértices originais
     vertices.forEach((vertex, index) => {
+      const isSelected = selectedVertices.includes(index);
+      console.log(`Vertex ${index}:`, vertex, 'Selected:', isSelected);
+      
       vertexElements.push(
-        <mesh 
-          key={`vertex-${index}`} 
-          position={vertex}
-          onClick={(e) => {
-            e.stopPropagation();
-            onVertexSelect?.(index, vertex);
-          }}
-        >
-          <sphereGeometry args={[0.08]} />
-          <meshBasicMaterial 
-            color={selectedVertices.includes(index) ? selectedVertexColor : vertexColor} 
-          />
-        </mesh>
+        <group key={`vertex-group-${index}`}>
+          <mesh 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`=== VERTEX CLICKED ===`);
+              console.log(`Clicked vertex ${index} at position:`, vertex);
+              console.log('onVertexSelect function exists:', !!onVertexSelect);
+              onVertexSelect?.(index, vertex);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              // Mudar cursor para pointer
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              // Restaurar cursor
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.12]} />
+            <meshBasicMaterial 
+              color={isSelected ? selectedVertexColor : vertexColor}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+          {/* Mostrar índice do vértice quando selecionado */}
+          {isSelected && (
+            <Text
+              position={[vertex.x, vertex.y + 0.2, vertex.z]}
+              fontSize={0.15}
+              color="#ffffff"
+              anchorX="center"
+              anchorY="middle"
+              renderOrder={5}
+            >
+              {(selectedVertices.indexOf(index) + 1).toString()}
+            </Text>
+          )}
+        </group>
       );
     });
     
-    // Intersecções persistentes como vértices selecionáveis
+    // Intersecções persistentes
     persistentIntersections.forEach((intersection, index) => {
       const globalIndex = vertices.length + index;
       vertexElements.push(
-        <mesh 
-          key={`persistent-intersection-${index}`} 
-          position={intersection}
-          onClick={(e) => {
-            e.stopPropagation();
-            onVertexSelect?.(globalIndex, intersection);
-          }}
-        >
-          <sphereGeometry args={[0.06]} />
-          <meshBasicMaterial 
-            color={selectedVertices.includes(globalIndex) ? selectedVertexColor : "#ff99ff"} 
-          />
-        </mesh>
+        <group key={`persistent-intersection-${index}`}>
+          <mesh 
+            position={intersection}
+            onClick={(e) => {
+              e.stopPropagation();
+              onVertexSelect?.(globalIndex, intersection);
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.06]} />
+            <meshBasicMaterial 
+              color={selectedVertices.includes(globalIndex) ? selectedVertexColor : "#ff99ff"}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+          {selectedVertices.includes(globalIndex) && (
+            <Text
+              position={[intersection.x, intersection.y + 0.2, intersection.z]}
+              fontSize={0.15}
+              color="#ffffff"
+              anchorX="center"
+              anchorY="middle"
+              renderOrder={5}
+            >
+              {(selectedVertices.indexOf(globalIndex) + 1).toString()}
+            </Text>
+          )}
+        </group>
       );
     });
     
     return vertexElements;
   };
 
+  // Botão de limpar seleção
+  const renderClearButton = () => {
+    if (!onClearSelection || selectedVertices.length === 0) return null;
+    
+    return (
+      <group>
+        <mesh 
+          position={[0, -2, 0]} 
+          onClick={(e) => {
+            e.stopPropagation();
+            onClearSelection();
+            setPersistentIntersections([]); // Limpar intersecções também
+          }}
+          renderOrder={10}
+        >
+          <boxGeometry args={[2, 0.5, 0.1]} />
+          <meshBasicMaterial color="#ff0000" />
+        </mesh>
+        <Text
+          position={[0, -2, 0.06]}
+          fontSize={0.15}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          renderOrder={11}
+        >
+          Limpar Seleção
+        </Text>
+      </group>
+    );
+  };
+
+  // Renderizar conexões criadas
+  const renderCreatedConnections = () => {
+    console.log('=== RENDER CREATED CONNECTIONS DEBUG ===');
+    console.log('Connections:', connections);
+    console.log('Vertices:', vertices);
+    
+    return connections.map((connection, index) => {
+      if (connection.vertices.length < 2) return null;
+      
+      const startVertex = vertices[connection.vertices[0]];
+      const endVertex = vertices[connection.vertices[1]];
+      
+      console.log(`Rendering connection ${index}:`, connection);
+      console.log('Start vertex:', startVertex);
+      console.log('End vertex:', endVertex);
+      
+      if (!startVertex || !endVertex) {
+        console.warn(`Cannot render connection ${index} - invalid vertices`);
+        return null;
+      }
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints([startVertex, endVertex]);
+      
+      return (
+        <lineSegments key={`created-connection-${connection.id}`} geometry={geometry} renderOrder={2}>
+          <lineBasicMaterial color={connection.color} linewidth={3} />
+        </lineSegments>
+      );
+    });
+  };
+
   return (
-    <group>
+    <group name="vertex-connector-group">
       {renderSelectableVertices()}
       {renderConnections()}
+      {renderCreatedConnections()}
+      {renderClearButton()}
+      
+      {/* Indicadores de status removidos para melhor UX */}
     </group>
   );
 }
+
+export default VertexConnector;

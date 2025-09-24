@@ -1,8 +1,8 @@
+@import './styles/equations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './styles/equations.css';
 
 /* GeoTeach Design System - Modern geometry visualization */
 

@@ -57,6 +57,8 @@ export interface VisualizationOptions {
   showDimensions: boolean;
   showShadow: boolean;
   isFrozen: boolean;
+  // Ferramenta ativa para evitar conflitos entre modos
+  activeTool?: 'none' | 'cross-section' | 'meridian-section' | 'vertex-connector' | 'plane-definition' | 'construction';
   // Formas inscritas e circunscritas
   showInscribedSphere: boolean;
   showCircumscribedSphere: boolean;
@@ -155,6 +157,8 @@ export interface StyleOptions {
   circumscribedEdgeColor: string;
   // Cor da seção meridiana
   meridianSectionColor: string;
+  // Opacidade da seção meridiana
+  meridianSectionOpacity: number;
   // Número de geratrizes para cilindros e cones
   cylinderGeneratrices: number;
   coneGeneratrices: number;
@@ -198,6 +202,25 @@ export interface StyleOptions {
   circumscribedCircleThickness: number;
   lateralApothemThickness: number;
   baseApothemThickness: number;
+  // Cores para apótemas
+  baseApothemColor: string;
+  lateralApothemColor: string;
+  // Modo ativo de seleção de vértices
+  activeVertexMode: 'none' | 'meridian' | 'plane' | 'connection' | 'construction';
+  // Conexões entre vértices
+  connections: GeometricConstruction[];
+  // Espessura dos segmentos
+  segmentThickness: number;
+  // Espessura das arestas
+  edgeThickness: number;
+  // Cor dos segmentos
+  segmentColor: string;
+  // Controles de arestas para sólidos inscritos
+  inscribedEdgeThickness: number;
+  inscribedEdgeColor: string;
+  // Controles de arestas para sólidos circunscritos
+  circumscribedEdgeThickness: number;
+  circumscribedEdgeColor: string;
 }
 
 export interface Vector3D {

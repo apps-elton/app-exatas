@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ interface ImageDownloadMenuProps {
 }
 
 const ImageDownloadMenu: React.FC<ImageDownloadMenuProps> = ({ onExport, disabled = false }) => {
+  const { t } = useLanguage();
   const qualities = [
     { key: 'hd' as const, label: 'HD (1.0)', description: 'Máxima qualidade' },
     { key: 'medium' as const, label: 'Média (0.8)', description: 'Qualidade média' },
@@ -32,7 +34,7 @@ const ImageDownloadMenu: React.FC<ImageDownloadMenuProps> = ({ onExport, disable
           className="gap-2"
         >
           <Download className="w-4 h-4" />
-          Baixar
+{t('button.download')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

@@ -104,6 +104,8 @@ const getDefaultStyle = (): StyleOptions => ({
   inscribedEdgeColor: '#00ff88',
   circumscribedEdgeColor: '#00aaff',
   meridianSectionColor: '#ff6600',
+  // Opacidade da seção meridiana
+  meridianSectionOpacity: 0.5,
   cylinderGeneratrices: 8,
   coneGeneratrices: 8,
   selectedVerticesForMeridian: [],
@@ -127,7 +129,20 @@ const getDefaultStyle = (): StyleOptions => ({
   inscribedCircleThickness: 1.0,
   circumscribedCircleThickness: 1.0,
   lateralApothemThickness: 1.0,
-  baseApothemThickness: 1.0
+  baseApothemThickness: 1.0,
+  // Cores para apótemas
+  baseApothemColor: '#00ff00',
+  lateralApothemColor: '#00ff00',
+  // Modo ativo de seleção de vértices
+  activeVertexMode: 'none',
+  // Conexões entre vértices
+  connections: [],
+  // Espessura dos segmentos
+  segmentThickness: 1.0,
+  // Espessura das arestas
+  edgeThickness: 1,
+  // Cor dos segmentos
+  segmentColor: '#00ff00'
 });
 
 // Hook para gerenciar estados independentes por geometria

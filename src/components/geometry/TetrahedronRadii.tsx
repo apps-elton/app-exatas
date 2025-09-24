@@ -28,8 +28,8 @@ export function TetrahedronRadii({
   // Altura do tetraedro regular
   const height = a * Math.sqrt(2/3);
   
-  // Raio inscrito do tetraedro regular (do centro até uma face)
-  const inscribedRadius = a / (2 * Math.sqrt(6));
+  // Raio inscrito do tetraedro regular (apótema da base triangular)
+  const inscribedRadius = a / (2 * Math.sqrt(3));
   
   // Raio circunscrito do tetraedro regular (do centro até um vértice)
   const circumscribedRadius = a * Math.sqrt(6) / 4;
@@ -45,7 +45,7 @@ export function TetrahedronRadii({
 
   return (
     <group>
-      {/* Raio Inscrito - do centro do tetraedro perpendicularmente até o centro da face da base */}
+      {/* Raio Inscrito - apótema da base (do centro do triângulo até o ponto médio de uma aresta) */}
       {showInscribedRadius && (
         <TetrahedronInscribedRadius 
           inscribedRadius={inscribedRadius}
@@ -80,10 +80,12 @@ function TetrahedronInscribedRadius({
   color: string; 
   thickness: number; 
 }) {
-  // O raio inscrito vai do centro do tetraedro até o centro da base
+  // O raio inscrito é o apótema da base - vai do centro do triângulo da base até o ponto médio de uma aresta
+  // Centro da base está em (0, 0, 0)
+  // Ponto médio de uma aresta da base está em (inscribedRadius, 0, 0)
   const points = [
-    new THREE.Vector3(0, centerY, 0), // Centro do tetraedro
-    new THREE.Vector3(0, 0, 0) // Centro da base
+    new THREE.Vector3(0, 0, 0), // Centro da base
+    new THREE.Vector3(inscribedRadius, 0, 0) // Ponto médio de uma aresta da base
   ];
   
   const geometry = new THREE.BufferGeometry().setFromPoints(points);

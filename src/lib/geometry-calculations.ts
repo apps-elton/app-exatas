@@ -195,7 +195,7 @@ export class GeometryCalculator {
     const lateralApothem = Math.sqrt(height * height + apothem * apothem);
     
     // Raios
-    const inscribedRadius = a / (2 * Math.sqrt(6)); // Raio inscrito correto do tetraedro
+    const inscribedRadius = a / (2 * Math.sqrt(3)); // Raio inscrito (apótema da base triangular)
     const circumscribedRadius = a * Math.sqrt(6) / 4; // Raio da esfera circunscrita
 
     return {

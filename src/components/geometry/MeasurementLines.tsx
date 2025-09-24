@@ -289,24 +289,30 @@ function InscribedRadiusLine({ params, style }: { params: GeometryParams; style?
     );
   }
   
-  // Para tetraedro, usar raio inscrito = a/(2√6)  
+  // Para tetraedro, usar raio inscrito = a/(2√3) (apótema da base triangular)
   if (params.type === 'tetrahedron') {
     const { sideLength = 2 } = params;
-    const inscribedRadius = sideLength / (2 * Math.sqrt(6));
+    const inscribedRadius = sideLength / (2 * Math.sqrt(3));
     const height = sideLength * Math.sqrt(2/3);
     const centerY = height / 4; // Centro de massa do tetraedro
     const thickness = Math.max(0.01, (style?.inscribedRadiusThickness || 1) * 0.02);
     
-    const distance = Math.sqrt(inscribedRadius * inscribedRadius + centerY * centerY);
-    const angle = Math.atan2(centerY, inscribedRadius);
+    // Calcular o ponto médio de uma aresta da base
+    const circumRadius = sideLength / Math.sqrt(3);
+    const vertex1 = new THREE.Vector3(circumRadius, 0, 0);
+    const vertex2 = new THREE.Vector3(-circumRadius/2, 0, circumRadius * Math.sqrt(3)/2);
+    const edgeMidpoint = new THREE.Vector3().lerpVectors(vertex1, vertex2, 0.5);
+    
+    const distance = Math.sqrt(edgeMidpoint.x * edgeMidpoint.x + edgeMidpoint.z * edgeMidpoint.z + centerY * centerY);
+    const angle = Math.atan2(centerY, Math.sqrt(edgeMidpoint.x * edgeMidpoint.x + edgeMidpoint.z * edgeMidpoint.z));
     
     return (
       <group>
-        <mesh position={[inscribedRadius/2, centerY/2, 0]} rotation={[0, 0, -angle]}>
+        <mesh position={[edgeMidpoint.x/2, centerY/2, edgeMidpoint.z/2]} rotation={[0, Math.atan2(edgeMidpoint.z, edgeMidpoint.x), -angle]}>
           <cylinderGeometry args={[thickness, thickness, distance]} />
           <meshBasicMaterial color={style?.inscribedRadiusColor || "#ff6600"} />
         </mesh>
-        <mesh position={[inscribedRadius, 0, 0]}>
+        <mesh position={[edgeMidpoint.x, 0, edgeMidpoint.z]}>
           <sphereGeometry args={[Math.max(0.02, thickness * 1.5)]} />
           <meshBasicMaterial color={style?.inscribedRadiusColor || "#ff6600"} />
         </mesh>
@@ -378,15 +384,15 @@ function CircumscribedRadiusLine({ params, style }: { params: GeometryParams; st
     <group>
       <mesh position={[circumscribedRadius/2, 0, 0]} rotation={[0, 0, -Math.PI/2]}>
         <cylinderGeometry args={[thickness, thickness, circumscribedRadius]} />
-        <meshBasicMaterial color="#ff0066" />
+        <meshBasicMaterial color={style?.circumscribedCircleColor || "#ff0066"} />
       </mesh>
       <mesh position={[circumscribedRadius, 0, 0]}>
         <sphereGeometry args={[Math.max(0.02, thickness * 1.5)]} />
-        <meshBasicMaterial color="#ff0066" />
+        <meshBasicMaterial color={style?.circumscribedCircleColor || "#ff0066"} />
       </mesh>
       <mesh position={[0, 0, 0]}>
         <sphereGeometry args={[Math.max(0.02, thickness * 1.2)]} />
-        <meshBasicMaterial color="#ff0066" />
+        <meshBasicMaterial color={style?.circumscribedCircleColor || "#ff0066"} />
       </mesh>
     </group>
   );

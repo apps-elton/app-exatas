@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/context/LanguageContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ interface EquationEditorProps {
 }
 
 export default function EquationEditor({ onEquationAdd }: EquationEditorProps) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [latexInput, setLatexInput] = useState('');
   const [previewHtml, setPreviewHtml] = useState('');
@@ -82,7 +84,7 @@ export default function EquationEditor({ onEquationAdd }: EquationEditorProps) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Calculator className="w-4 h-4" />
-          Adicionar Equação
+{t('drawing.add_equation')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -144,7 +146,7 @@ export default function EquationEditor({ onEquationAdd }: EquationEditorProps) {
               </Button>
               <Button onClick={handleAddEquation}>
                 <Plus className="w-4 h-4 mr-2" />
-                Adicionar Equação
+      {t('drawing.add_equation')}
               </Button>
             </div>
           </TabsContent>

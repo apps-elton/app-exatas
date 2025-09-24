@@ -17,20 +17,15 @@ export function UnfoldingSystem({ params, showUnfolded, style }: UnfoldingSystem
 
   return (
     <>
-      {/* Sólido 3D à esquerda */}
-      <group position={[-3, 0, 0]} scale={[0.8, 0.8, 0.8]}>
-        <SolidShape params={params} faceColor={faceColor} edgeColor={edgeColor} faceOpacity={faceOpacity} />
-      </group>
-      
-      {/* Planificação à direita */}
-      <group position={[3, 0, 0]} scale={[0.7, 0.7, 0.7]}>
+      {/* Planificação centralizada e bem organizada */}
+      <group position={[0, 0, 0]} scale={[1.2, 1.2, 1.2]}>
         <UnfoldedShape params={params} faceColor={faceColor} edgeColor={edgeColor} faceOpacity={faceOpacity} />
       </group>
       
-      {/* Plano de apoio para visualização */}
-      <mesh position={[3, -0.05, 0]} rotation={[-Math.PI/2, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshBasicMaterial color="#f8f9fa" transparent opacity={0.2} side={THREE.DoubleSide} />
+      {/* Plano de apoio sutil para visualização */}
+      <mesh position={[0, -0.1, 0]} rotation={[-Math.PI/2, 0, 0]}>
+        <planeGeometry args={[15, 15]} />
+        <meshBasicMaterial color="#f8f9fa" transparent opacity={0.1} side={THREE.DoubleSide} />
       </mesh>
     </>
   );
@@ -108,7 +103,7 @@ function calculateCubeUnfolding(params: GeometryParams): UnfoldingResult {
   
   return {
     faces: [
-      // Cruz tradicional do cubo
+      // Cruz tradicional do cubo - melhor organizada
       { type: 'rectangle', position: [0, 0, 0], rotation: [0, 0, 0], dimensions: { width: size, height: size }, id: 'front' },
       { type: 'rectangle', position: [0, size, 0], rotation: [0, 0, 0], dimensions: { width: size, height: size }, id: 'top' },
       { type: 'rectangle', position: [0, -size, 0], rotation: [0, 0, 0], dimensions: { width: size, height: size }, id: 'bottom' },
@@ -195,14 +190,14 @@ function calculatePyramidUnfolding(params: GeometryParams): UnfoldingResult {
   
   const apothem = baseEdgeLength / (2 * Math.tan(Math.PI / numSides));
   const slantHeight = Math.sqrt(height * height + apothem * apothem);
-  const spacing = baseEdgeLength + 0.5;
+  const spacing = baseEdgeLength + 1;
   
   const faces: UnfoldedFace[] = [
     // Base poligonal no centro
     { type: 'polygon', position: [0, 0, 0], rotation: [0, 0, 0], dimensions: { sideLength: baseEdgeLength, sides: numSides }, id: 'base' }
   ];
   
-  // Faces laterais triangulares ao redor da base
+  // Faces laterais triangulares organizadas ao redor da base
   for (let i = 0; i < numSides; i++) {
     const angle = (i / numSides) * Math.PI * 2;
     const x = spacing * Math.cos(angle);

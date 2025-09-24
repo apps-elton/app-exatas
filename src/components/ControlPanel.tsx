@@ -1,5 +1,6 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,11 +12,12 @@ import { GeometryParams, GeometryType, VisualizationOptions, StyleOptions } from
 import { GeometryProperties } from '@/types/geometry';
 import { formatNumber } from '@/lib/geometry-calculations';
 import { RotateCcw, Download, Play, Pause } from 'lucide-react';
-import { TeacherSuggestions } from './TeacherSuggestions';
 import { GeometryCalculations } from './GeometryCalculations';
 import MultiplePlanesManager from './MultiplePlanesManager';
 import { toast } from 'sonner';
 import ImageDownloadMenu from './ImageDownloadMenu';
+import DrawingTablet, { DrawingStroke, DrawingStyle, DrawingTool } from './DrawingTablet';
+import DrawingOverlay3D from './DrawingOverlay3D';
 
 interface ControlPanelProps {
   params: GeometryParams;
@@ -28,6 +30,16 @@ interface ControlPanelProps {
   onResetView: () => void;
   onExportImage: (format?: 'png' | 'jpg', quality?: 'hd' | 'medium' | 'low') => void;
   onVertexSelect?: (vertexIndex: number) => void;
+  // Props da mesa digitalizadora
+  isTabletActive?: boolean;
+  onTabletToggle?: (active: boolean) => void;
+  drawingStrokes?: DrawingStroke[];
+  onDrawingChange?: (strokes: DrawingStroke[]) => void;
+  // Configurações da mesa digitalizadora
+  tabletStyle?: DrawingStyle;
+  tabletTool?: DrawingTool;
+  onTabletStyleChange?: (style: DrawingStyle) => void;
+  onTabletToolChange?: (tool: DrawingTool) => void;
 }
 
 export default function ControlPanel({
@@ -40,8 +52,19 @@ export default function ControlPanel({
   onStyleChange,
   onResetView,
   onExportImage,
-  onVertexSelect
+  onVertexSelect,
+  // Props da mesa digitalizadora
+  isTabletActive = false,
+  onTabletToggle,
+  drawingStrokes = [],
+  onDrawingChange,
+  // Configurações da mesa digitalizadora
+  tabletStyle,
+  tabletTool,
+  onTabletStyleChange,
+  onTabletToolChange
 }: ControlPanelProps) {
+  const { t } = useLanguage();
   
   const handleTypeChange = (type: GeometryType) => {
     // Reset vertex connections when changing geometry type
@@ -164,16 +187,16 @@ export default function ControlPanel({
   };
 
   const geometryTypes: { value: GeometryType; label: string }[] = [
-    { value: 'pyramid', label: 'Pirâmide' },
-    { value: 'cylinder', label: 'Cilindro' },
-    { value: 'cone', label: 'Cone' },
-    { value: 'cube', label: 'Cubo' },
-    { value: 'sphere', label: 'Esfera' },
-    { value: 'prism', label: 'Prisma' },
-    { value: 'tetrahedron', label: 'Tetraedro (4 faces)' },
-    { value: 'octahedron', label: 'Octaedro (8 faces)' },
-    { value: 'dodecahedron', label: 'Dodecaedro (12 faces)' },
-    { value: 'icosahedron', label: 'Icosaedro (20 faces)' }
+    { value: 'pyramid', label: t('geometry.pyramid') },
+    { value: 'cylinder', label: t('geometry.cylinder') },
+    { value: 'cone', label: t('geometry.cone') },
+    { value: 'cube', label: t('geometry.cube') },
+    { value: 'sphere', label: t('geometry.sphere') },
+    { value: 'prism', label: t('geometry.prism') },
+    { value: 'tetrahedron', label: t('geometry.tetrahedron_4_faces') },
+    { value: 'octahedron', label: t('geometry.octahedron_8_faces') },
+    { value: 'dodecahedron', label: t('geometry.dodecahedron_12_faces') },
+    { value: 'icosahedron', label: t('geometry.icosahedron_20_faces') }
   ];
 
   const colors = [
@@ -192,11 +215,11 @@ export default function ControlPanel({
       {/* Shape Selection */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Forma Geométrica</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('geometry_form.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Tipo</Label>
+            <Label className="text-sm font-medium">{t('geometry_form.type')}</Label>
             <Select value={params.type} onValueChange={handleTypeChange}>
               <SelectTrigger>
                 <SelectValue />
@@ -216,14 +239,14 @@ export default function ControlPanel({
       {/* Parameters */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Parâmetros</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('panel.parameters')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Height - for most shapes except sphere and tetrahedron */}
           {!['sphere', 'tetrahedron'].includes(params.type) && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Altura: {params.height?.toFixed(1)}
+{t('params.height')}: {params.height?.toFixed(1)}
               </Label>
               <Slider
                 value={[params.height || 4]}
@@ -275,7 +298,7 @@ export default function ControlPanel({
             <>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
-                  Lados: {params.numSides}
+{t('params.sides')}: {params.numSides}
                 </Label>
                 <Slider
                   value={[params.numSides || 5]}
@@ -288,7 +311,7 @@ export default function ControlPanel({
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">
-                  Aresta da Base: {params.baseEdgeLength?.toFixed(1)}
+{t('params.base_edge')}: {params.baseEdgeLength?.toFixed(1)}
                 </Label>
                 <Slider
                   value={[params.baseEdgeLength || 2]}
@@ -307,11 +330,11 @@ export default function ControlPanel({
       {/* Visualization Options */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Visualização</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('panel.visualization')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <Label htmlFor="edges" className="text-sm font-medium">Arestas</Label>
+            <Label htmlFor="edges" className="text-sm font-medium">{t('options.show_edges')}</Label>
             <Switch
               id="edges"
               checked={options.showEdges}
@@ -319,7 +342,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="vertices" className="text-sm font-medium">Vértices</Label>
+            <Label htmlFor="vertices" className="text-sm font-medium">{t('options.show_vertices')}</Label>
             <Switch
               id="vertices"
               checked={options.showVertices}
@@ -327,7 +350,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="faces" className="text-sm font-medium">Faces</Label>
+            <Label htmlFor="faces" className="text-sm font-medium">{t('options.show_faces')}</Label>
             <Switch
               id="faces"
               checked={options.fillFaces}
@@ -336,7 +359,7 @@ export default function ControlPanel({
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="height" className="text-sm font-medium">Altura</Label>
+              <Label htmlFor="height" className="text-sm font-medium">{t('options.show_height')}</Label>
               <Switch
                 id="height"
                 checked={options.showHeight}
@@ -352,7 +375,7 @@ export default function ControlPanel({
           </div>
            <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="radius" className="text-sm font-medium">Raio da Base</Label>
+              <Label htmlFor="radius" className="text-sm font-medium">{t('options.show_base_radius')}</Label>
               <Switch
                 id="radius"
                 checked={options.showBaseRadius}
@@ -373,7 +396,7 @@ export default function ControlPanel({
             <>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="inscribed" className="text-sm font-medium">Raio Inscrito</Label>
+                  <Label htmlFor="inscribed" className="text-sm font-medium">{t('geometric.inscribed_radius')}</Label>
                   <Switch
                     id="inscribed"
                     checked={options.showInscribedRadius}
@@ -389,7 +412,7 @@ export default function ControlPanel({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="circumscribed" className="text-sm font-medium">Raio Circunscrito</Label>
+                  <Label htmlFor="circumscribed" className="text-sm font-medium">{t('geometric.circumscribed_radius')}</Label>
                   <Switch
                     id="circumscribed"
                     checked={options.showCircumscribedRadius}
@@ -405,7 +428,7 @@ export default function ControlPanel({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="inscribed-circle" className="text-sm font-medium">Circunferência Inscrita</Label>
+                  <Label htmlFor="inscribed-circle" className="text-sm font-medium">{t('geometric.inscribed_circumference')}</Label>
                   <Switch
                     id="inscribed-circle"
                     checked={options.showInscribedCircle}
@@ -421,7 +444,7 @@ export default function ControlPanel({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="circumscribed-circle" className="text-sm font-medium">Circunferência Circunscrita</Label>
+                  <Label htmlFor="circumscribed-circle" className="text-sm font-medium">{t('geometric.circumscribed_circumference')}</Label>
                   <Switch
                     id="circumscribed-circle"
                     checked={options.showCircumscribedCircle}
@@ -466,7 +489,7 @@ export default function ControlPanel({
                 </div>
                 {options.showLateralApothem && (
                   <>
-                    {renderColorPicker("Cor do Apótema da Pirâmide", "heightLineColor", true, "lateralApothem")}
+                    {renderColorPicker("Cor do Apótema da Pirâmide", "lateralApothemColor", true, "lateralApothem")}
                     {renderThicknessControl("Espessura do Apótema da Pirâmide", "lateralApothemThickness", true, "lateralApothemThickness")}
                   </>
                 )}
@@ -482,7 +505,7 @@ export default function ControlPanel({
                 </div>
                 {options.showBaseApothem && (
                   <>
-                    {renderColorPicker("Cor do Apótema da Base", "inscribedCircleColor", true, "baseApothem")}
+                    {renderColorPicker("Cor do Apótema da Base", "baseApothemColor", true, "baseApothem")}
                     {renderThicknessControl("Espessura do Apótema da Base", "baseApothemThickness", true, "baseApothemThickness")}
                   </>
                 )}
@@ -502,7 +525,7 @@ export default function ControlPanel({
             </div>
           )}
           <div className="flex items-center justify-between">
-            <Label htmlFor="labels" className="text-sm font-medium">Rótulos</Label>
+            <Label htmlFor="labels" className="text-sm font-medium">{t('geometric.labels')}</Label>
             <Switch
               id="labels"
               checked={options.showLabels}
@@ -510,7 +533,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="grid" className="text-sm font-medium">Malha</Label>
+            <Label htmlFor="grid" className="text-sm font-medium">{t('geometric.mesh')}</Label>
             <Switch
               id="grid"
               checked={options.showGrid}
@@ -518,7 +541,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="cross-section" className="text-sm font-medium">Seção Transversal</Label>
+            <Label htmlFor="cross-section" className="text-sm font-medium">{t('visualization.cross_section')}</Label>
             <Switch
               id="cross-section"
               checked={options.showCrossSection}
@@ -543,11 +566,25 @@ export default function ControlPanel({
             </div>
           )}
           <div className="flex items-center justify-between">
-            <Label htmlFor="meridian-section" className="text-sm font-medium">Seção Meridiana</Label>
+            <Label htmlFor="meridian-section" className="text-sm font-medium">{t('visualization.meridian_section')}</Label>
              <Switch
                id="meridian-section"
                checked={options.showMeridianSection}
-               onCheckedChange={(checked) => handleOptionChange('showMeridianSection', checked)}
+               onCheckedChange={(checked) => {
+                 handleOptionChange('showMeridianSection', checked);
+                 if (checked && ['cylinder', 'cone', 'cube', 'prism', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'pyramid', 'sphere'].includes(params.type)) {
+                   // Ativar automaticamente o modo meridiano para geometrias suportadas
+                   handleStyleChange('activeVertexMode', 'meridian');
+                   // Limpar seleções de outros modos
+                   handleStyleChange('selectedVerticesForGeneral', []);
+                   handleStyleChange('selectedVerticesForPlane', []);
+                   toast.info('🔶 Seção Meridiana ativada - Modo meridiano ativo');
+                 } else if (!checked) {
+                   // Desativar o modo quando desliga o switch
+                   handleStyleChange('activeVertexMode', 'none');
+                   handleStyleChange('selectedVerticesForMeridian', []);
+                 }
+               }}
                disabled={!['cylinder', 'cone', 'cube', 'prism', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'pyramid', 'sphere'].includes(params.type)}
              />
           </div>
@@ -631,7 +668,7 @@ export default function ControlPanel({
             </div>
           )}
           <div className="flex items-center justify-between">
-            <Label htmlFor="dimensions" className="text-sm font-medium">Dimensões</Label>
+            <Label htmlFor="dimensions" className="text-sm font-medium">{t('visualization.dimensions')}</Label>
             <Switch
               id="dimensions"
               checked={options.showDimensions}
@@ -639,7 +676,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="shadow" className="text-sm font-medium">Sombras</Label>
+            <Label htmlFor="shadow" className="text-sm font-medium">{t('options.show_shadow')}</Label>
             <Switch
               id="shadow"
               checked={options.showShadow}
@@ -647,7 +684,7 @@ export default function ControlPanel({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="unfolded" className="text-sm font-medium">Planificação</Label>
+            <Label htmlFor="unfolded" className="text-sm font-medium">{t('visualization.unfolding')}</Label>
             <Switch
               id="unfolded"
               checked={options.showUnfolded}
@@ -655,14 +692,27 @@ export default function ControlPanel({
             />
           </div>
           {/* Conectores de Vértices */}
-          {['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type) && (
+          {(
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="vertex-connector" className="text-sm font-medium">Conectar Vértices</Label>
+                <Label htmlFor="vertex-connector" className="text-sm font-medium">{t('drawing.connect_vertices')}</Label>
                 <Switch
                   id="vertex-connector"
                   checked={options.showVertexConnector}
-                  onCheckedChange={(checked) => handleOptionChange('showVertexConnector', checked)}
+                  onCheckedChange={(checked) => {
+                    handleOptionChange('showVertexConnector', checked);
+                    if (checked) {
+                      // Ativar automaticamente o modo de conexão
+                      handleStyleChange('activeVertexMode', 'connection');
+                      // Limpar seleções de outros modos
+                      handleStyleChange('selectedVerticesForMeridian', []);
+                      handleStyleChange('selectedVerticesForPlane', []);
+                      toast.info('🔗 Conectar Vértices ativado - Modo conexão ativo');
+                    } else {
+                      // Desativar o modo quando desliga o switch
+                      handleStyleChange('activeVertexMode', 'none');
+                    }
+                  }}
                 />
               </div>
               {options.showVertexConnector && (
@@ -671,12 +721,17 @@ export default function ControlPanel({
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <p className="text-xs font-medium text-yellow-700 dark:text-yellow-300">
-                        MODO CONEXÃO DE VÉRTICES ATIVO
+                        CONECTAR VÉRTICES ATIVO
                       </p>
                     </div>
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mb-1">
-                      Selecione vértices (amarelo) para conectar com linhas
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mb-2">
+                      Clique em 2 vértices amarelos para criar uma conexão
                     </p>
+                    {(style.connections?.length || 0) > 0 && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mb-2">
+                        ✓ {style.connections?.length || 0} conexões criadas
+                      </p>
+                    )}
                     {(style.selectedVerticesForGeneral?.length || 0) > 0 && (
                       <div className="flex items-center justify-between mt-2">
                         <p className="text-xs text-yellow-600 dark:text-yellow-400">
@@ -696,6 +751,14 @@ export default function ControlPanel({
                       </div>
                     )}
                   </div>
+                  
+                  {/* Controles padronizados de Cor e Espessura */}
+                  <div className="space-y-2 mt-3">
+                    {renderColorPicker("Cor dos Segmentos", "segmentColor", true, "segmentColor")}
+                    {renderThicknessControl("Espessura dos Segmentos", "segmentThickness", true, "segmentThickness", 0.5, 8, 0.5)}
+                    {renderThicknessControl("Espessura das Arestas", "edgeThickness", true, "edgeThickness", 0.5, 5, 0.5)}
+                  </div>
+                  
                    <div className="space-y-2">
                       <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                         <div>Clique nos vértices para conectá-los. Vértices já conectados podem ser reutilizados em novas conexões.</div>
@@ -721,37 +784,6 @@ export default function ControlPanel({
                         )}
                       </div>
                      
-                     {/* Controles de Cor e Espessura */}
-                     <div className="space-y-2">
-                       <Label className="text-sm font-medium">Cor dos Segmentos</Label>
-                       <div className="grid grid-cols-7 gap-1">
-                         {colors.map((color) => (
-                           <button
-                             key={color.value}
-                             className="w-6 h-6 rounded border-2 hover:scale-110 transition-transform"
-                             style={{
-                               backgroundColor: color.value,
-                               borderColor: style.edgeColor === color.value ? '#000' : '#ccc'
-                             }}
-                             onClick={() => handleStyleChange('edgeColor', color.value)}
-                           />
-                         ))}
-                       </div>
-                     </div>
-                     
-                     <div className="space-y-2">
-                       <Label className="text-sm font-medium">
-                         Espessura: {style.rotationSpeed}
-                       </Label>
-                       <Slider
-                         value={[style.rotationSpeed]}
-                         onValueChange={([value]) => handleStyleChange('rotationSpeed', value)}
-                         min={0.5}
-                         max={5}
-                         step={0.1}
-                         className="w-full"
-                       />
-                     </div>
                    </div>
                    
                     <div className="space-y-2">
@@ -760,7 +792,12 @@ export default function ControlPanel({
                           size="sm" 
                           variant="outline" 
                           className="w-full"
-                          onClick={() => handleStyleChange('selectedVerticesForGeneral', [] as number[])}
+                          onClick={() => {
+                            handleStyleChange('selectedVerticesForGeneral', []);
+                            handleStyleChange('intersectionPositions', []);
+                            handleStyleChange('connections', []);
+                            toast.success('Todas as conexões foram limpas');
+                          }}
                         >
                           Limpar Conexões
                         </Button>
@@ -788,19 +825,172 @@ export default function ControlPanel({
             </div>
           )}
 
+          {/* Controles de Modo de Seleção */}
+          <div className="space-y-3">
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              🎯 {t('vertex_modes.title')}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant={style.activeVertexMode === 'meridian' ? 'default' : 'outline'}
+                onClick={() => {
+                  console.log('=== MODO MERIDIANA DEBUG ===');
+                  console.log('Modo atual:', style.activeVertexMode);
+                  console.log('Planos atuais:', style.planes);
+                  console.log('Vértices selecionados:', style.selectedVerticesForMeridian);
+                  
+                  if (style.activeVertexMode === 'meridian') {
+                    handleStyleChange('activeVertexMode', 'none');
+                  } else {
+                    // Limpar seleções de outros modos antes de ativar meridiana
+                    handleStyleChange('selectedVerticesForGeneral', []);
+                    handleStyleChange('selectedVerticesForPlane', []);
+                    handleStyleChange('intersectionPositions', []);
+                    handleStyleChange('activeVertexMode', 'meridian');
+                  }
+                }}
+                className="text-xs"
+              >
+                🔶 {t('vertex_modes.meridian')}
+              </Button>
+              <Button
+                size="sm"
+                variant={style.activeVertexMode === 'plane' ? 'default' : 'outline'}
+                onClick={() => {
+                  console.log('=== MODO PLANO DEBUG ===');
+                  console.log('Modo atual:', style.activeVertexMode);
+                  console.log('Planos atuais:', style.planes);
+                  console.log('Vértices selecionados:', style.selectedVerticesForPlane);
+                  console.log('showPlaneDefinition:', options.showPlaneDefinition);
+                  
+                  if (style.activeVertexMode === 'plane') {
+                    handleStyleChange('activeVertexMode', 'none');
+                  } else {
+                    // Limpar seleções de outros modos antes de ativar planos
+                    handleStyleChange('selectedVerticesForGeneral', []);
+                    handleStyleChange('selectedVerticesForMeridian', []);
+                    handleStyleChange('intersectionPositions', []);
+                    handleStyleChange('activeVertexMode', 'plane');
+                    
+                    // Ativar automaticamente o showPlaneDefinition se não estiver ativo
+                    if (!options.showPlaneDefinition) {
+                      handleOptionChange('showPlaneDefinition', true);
+                      toast.info('🔶 Definição de Planos ativada');
+                    }
+                  }
+                }}
+                className="text-xs"
+              >
+                📐 {t('vertex_modes.planes')}
+              </Button>
+              <Button
+                size="sm"
+                variant={style.activeVertexMode === 'connection' ? 'default' : 'outline'}
+                onClick={() => {
+                  console.log('=== MODO CONEXÃO DEBUG ===');
+                  console.log('Modo atual:', style.activeVertexMode);
+                  console.log('Planos atuais:', style.planes);
+                  console.log('Vértices selecionados:', style.selectedVerticesForGeneral);
+                  console.log('Conexões existentes:', style.connections);
+                  
+                  if (style.activeVertexMode === 'connection') {
+                    handleStyleChange('activeVertexMode', 'none');
+                  } else {
+                    // Limpar seleções de outros modos antes de ativar conexões
+                    console.log('Mudando para modo conexão...');
+                    handleStyleChange('selectedVerticesForMeridian', []);
+                    handleStyleChange('selectedVerticesForPlane', []);
+                    handleStyleChange('activeVertexMode', 'connection');
+                    console.log('Modo alterado para connection');
+                  }
+                }}
+                className="text-xs"
+              >
+                🔗 {t('vertex_modes.connections')}
+              </Button>
+              <Button
+                size="sm"
+                variant={style.activeVertexMode === 'construction' ? 'default' : 'outline'}
+                onClick={() => {
+                  if (style.activeVertexMode === 'construction') {
+                    handleStyleChange('activeVertexMode', 'none');
+                  } else {
+                    handleStyleChange('activeVertexMode', 'construction');
+                  }
+                }}
+                className="text-xs"
+              >
+                📏 {t('vertex_modes.constructions')}
+              </Button>
+            </div>
+            {style.activeVertexMode !== 'none' && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    Modo ativo: <strong>{style.activeVertexMode}</strong>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Definição de Planos por 3 Vértices */}
           {['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type) && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="plane-definition" className="text-sm font-medium">Definir Plano (3 Pontos)</Label>
+                <Label htmlFor="plane-definition" className="text-sm font-medium">{t('plane_definition.title')}</Label>
                 <Switch
                   id="plane-definition"
                   checked={options.showPlaneDefinition}
-                  onCheckedChange={(checked) => handleOptionChange('showPlaneDefinition', checked)}
+                  onCheckedChange={(checked) => {
+                    handleOptionChange('showPlaneDefinition', checked);
+                    if (checked) {
+                      // Ativar automaticamente o modo de planos
+                      handleStyleChange('activeVertexMode', 'plane');
+                      // Limpar seleções de outros modos
+                      handleStyleChange('selectedVerticesForMeridian', []);
+                      handleStyleChange('selectedVerticesForGeneral', []);
+                      toast.info('📐 Definição de Planos ativada - Modo planos ativo');
+                    } else {
+                      // Desativar o modo quando desliga o switch
+                      handleStyleChange('activeVertexMode', 'none');
+                      handleStyleChange('selectedVerticesForPlane', []);
+                    }
+                  }}
                 />
               </div>
               {options.showPlaneDefinition && (
                 <div className="space-y-4">
+                  {/* Indicador de Modo Ativo */}
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-md border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                        MODO CRIAÇÃO DE PLANOS ATIVO
+                      </p>
+                    </div>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
+                      Clique em 3 vértices amarelos para definir um plano
+                    </p>
+                    {(style.selectedVerticesForPlane?.length || 0) > 0 && (
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-blue-600 dark:text-blue-400">
+                          Selecionados: {style.selectedVerticesForPlane?.length || 0}/3 vértices
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleStyleChange('selectedVerticesForPlane', [])}
+                          className="h-5 px-2 text-xs"
+                        >
+                          Limpar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
                   <MultiplePlanesManager 
                     style={style}
                     handleStyleChange={handleStyleChange}
@@ -858,7 +1048,18 @@ export default function ControlPanel({
 
                   {/* Botões de Controle */}
                   <div className="space-y-2">
-                    {style.selectedVerticesForPlane && style.selectedVerticesForPlane.length >= 3 && style.planes.length < 5 && (
+                    {(() => {
+                      console.log('=== BOTÃO CRIAR PLANO DEBUG ===');
+                      console.log('selectedVerticesForPlane:', style.selectedVerticesForPlane);
+                      console.log('selectedVerticesForPlane.length:', style.selectedVerticesForPlane?.length);
+                      console.log('planes.length:', style.planes?.length);
+                      console.log('Should show button:', style.selectedVerticesForPlane && 
+                                 style.selectedVerticesForPlane.length >= 3 && 
+                                 style.planes.length < 5);
+                      return style.selectedVerticesForPlane && 
+                             style.selectedVerticesForPlane.length >= 3 && 
+                             style.planes.length < 5;
+                    })() && (
                       <Button 
                         size="sm" 
                         variant="default" 
@@ -870,32 +1071,37 @@ export default function ControlPanel({
                           console.log('=== CRIANDO NOVO PLANO (ControlPanel) ===');
                           console.log('Planos existentes:', currentPlanes);
                           console.log('Vértices selecionados:', currentSelection);
+                          console.log('Active mode:', style.activeVertexMode);
                           
                           if (currentSelection.length >= 3 && currentPlanes.length < 5) {
-                            // Criar novo plano com nome
+                            // Criar novo plano com nome único
+                            const planeNumber = currentPlanes.length + 1;
                             const newPlane = {
-                              id: `plane-${Date.now()}-control`,
-                              name: `Plano ${currentPlanes.length + 1}`,
+                              id: `plane-${Date.now()}-${planeNumber}`,
+                              name: `Plano ${planeNumber}`,
                               vertices: [...currentSelection],
                               color: style.planeColor,
                               opacity: style.planeOpacity
                             };
                             
-                            console.log('Novo plano:', newPlane);
+                            console.log('Novo plano criado:', newPlane);
                             
                             // Garantir que mantemos os planos existentes
                             const updatedPlanes = [...currentPlanes, newPlane];
                             console.log('Lista final de planos:', updatedPlanes);
+                            console.log('Total de planos após criação:', updatedPlanes.length);
                             
                             // Atualizar estado de forma segura
-                            handleStyleChange('planes', updatedPlanes as any);
+                            onStyleChange({ ...style, planes: updatedPlanes });
                             
                             // Limpar seleção após criar plano
-                            setTimeout(() => {
-                              handleStyleChange('selectedVerticesForPlane', [] as number[]);
-                            }, 100);
+                            handleStyleChange('selectedVerticesForPlane', []);
                             
-                            toast.success(`${newPlane.name} criado com sucesso!`);
+                            toast.success(`✅ ${newPlane.name} criado com sucesso! (${updatedPlanes.length}/5 planos)`);
+                          } else if (currentSelection.length < 3) {
+                            toast.error('⚠️ Selecione pelo menos 3 vértices para criar um plano');
+                          } else if (currentPlanes.length >= 5) {
+                            toast.error('⚠️ Limite máximo de 5 planos atingido');
                           }
                         }}
                       >
@@ -906,6 +1112,52 @@ export default function ControlPanel({
                     {style.planes.length >= 5 && (
                       <div className="text-xs text-yellow-600 bg-yellow-100/20 p-2 rounded">
                         Limite máximo de 5 planos atingido
+                      </div>
+                    )}
+
+                    {/* Lista de planos existentes */}
+                    {style.planes && style.planes.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Planos Criados ({style.planes.length}/5)
+                        </div>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
+                          {style.planes.map((plane, index) => (
+                            <div key={plane.id} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded text-xs">
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-3 h-3 rounded border" 
+                                  style={{ backgroundColor: plane.color }}
+                                ></div>
+                                <span>{plane.name}</span>
+                                <span className="text-gray-500">({plane.vertices.length} vértices)</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                onClick={() => {
+                                  const updatedPlanes = style.planes.filter(p => p.id !== plane.id);
+                                  onStyleChange({ ...style, planes: updatedPlanes });
+                                  toast.success(`${plane.name} removido`);
+                                }}
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full text-red-600 hover:text-red-700"
+                          onClick={() => {
+                            onStyleChange({ ...style, planes: [] });
+                            toast.success('Todos os planos removidos');
+                          }}
+                        >
+                          Limpar Todos os Planos
+                        </Button>
                       </div>
                     )}
 
@@ -934,7 +1186,7 @@ export default function ControlPanel({
                               variant="destructive" 
                               onClick={() => {
                                 const newPlanes = style.planes.filter(p => p.id !== plane.id);
-                                handleStyleChange('planes', newPlanes as any);
+                                onStyleChange({ ...style, planes: newPlanes });
                                 toast.success('Plano removido!');
                               }}
                               className="h-6 w-6 p-0"
@@ -962,7 +1214,7 @@ export default function ControlPanel({
                                     const updatedPlanes = style.planes.map(p => 
                                       p.id === plane.id ? { ...p, color: color.value } : p
                                     );
-                                    handleStyleChange('planes', updatedPlanes as any);
+                                    onStyleChange({ ...style, planes: updatedPlanes });
                                   }}
                                 />
                               ))}
@@ -979,7 +1231,7 @@ export default function ControlPanel({
                                 const updatedPlanes = style.planes.map(p => 
                                   p.id === plane.id ? { ...p, opacity: value } : p
                                 );
-                                handleStyleChange('planes', updatedPlanes as any);
+                                onStyleChange({ ...style, planes: updatedPlanes });
                               }}
                               min={0.1}
                               max={0.8}
@@ -995,7 +1247,7 @@ export default function ControlPanel({
                         variant="destructive" 
                         className="w-full mt-2"
                         onClick={() => {
-                          handleStyleChange('planes', [] as any);
+                          onStyleChange({ ...style, planes: [] });
                           toast.success('Todos os planos foram removidos!');
                         }}
                       >
@@ -1025,7 +1277,7 @@ export default function ControlPanel({
       {/* Formas Inscritas e Circunscritas */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Formas Inscritas/Circunscritas</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('shapes.inscribed_circumscribed')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Para Cubo */}
@@ -1190,7 +1442,7 @@ export default function ControlPanel({
                            value={[style.cylinderGeneratrices]}
                            onValueChange={([value]) => handleStyleChange('cylinderGeneratrices', value)}
                            min={2}
-                           max={20}
+                           max={8}
                            step={1}
                            className="w-full"
                          />
@@ -1213,6 +1465,62 @@ export default function ControlPanel({
                        </div>
                      )}
                     </div>
+                  </div>
+                )}
+
+                {/* Controles de opacidade, espessura e cor das arestas para sólidos inscritos */}
+                {(options.showInscribedCube || options.showInscribedSphere || options.showInscribedCylinder || options.showInscribedCone || options.showInscribedOctahedron) && (
+                  <div className="space-y-4 p-3 bg-muted/30 rounded-lg">
+                    <Label className="text-sm font-medium text-primary">Controles dos Sólidos Inscritos</Label>
+                    
+                    {/* Opacidade dos sólidos inscritos */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">
+                        Opacidade: {Math.round((style.inscribedShapeOpacity || 0.4) * 100)}%
+                      </Label>
+                      <Slider
+                        value={[style.inscribedShapeOpacity || 0.4]}
+                        onValueChange={([value]) => handleStyleChange('inscribedShapeOpacity', value)}
+                        min={0.1}
+                        max={1.0}
+                        step={0.1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Cor das arestas dos sólidos inscritos */}
+                    {renderColorPicker("Cor das Arestas Inscritas", "inscribedEdgeColor", true, "inscribedEdgeColor")}
+                    
+                    {/* Espessura das arestas dos sólidos inscritos */}
+                    {renderThicknessControl("Espessura das Arestas Inscritas", "inscribedEdgeThickness", true, "inscribedEdgeThickness")}
+                  </div>
+                )}
+
+                {/* Controles de opacidade, espessura e cor das arestas para sólidos circunscritos */}
+                {(options.showCircumscribedCube || options.showCircumscribedSphere || options.showCircumscribedCylinder || options.showCircumscribedCone) && (
+                  <div className="space-y-4 p-3 bg-muted/30 rounded-lg">
+                    <Label className="text-sm font-medium text-primary">Controles dos Sólidos Circunscritos</Label>
+                    
+                    {/* Opacidade dos sólidos circunscritos */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">
+                        Opacidade: {Math.round((style.circumscribedShapeOpacity || 0.3) * 100)}%
+                      </Label>
+                      <Slider
+                        value={[style.circumscribedShapeOpacity || 0.3]}
+                        onValueChange={([value]) => handleStyleChange('circumscribedShapeOpacity', value)}
+                        min={0.1}
+                        max={1.0}
+                        step={0.1}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Cor das arestas dos sólidos circunscritos */}
+                    {renderColorPicker("Cor das Arestas Circunscritas", "circumscribedEdgeColor", true, "circumscribedEdgeColor")}
+                    
+                    {/* Espessura das arestas dos sólidos circunscritos */}
+                    {renderThicknessControl("Espessura das Arestas Circunscritas", "circumscribedEdgeThickness", true, "circumscribedEdgeThickness")}
                   </div>
                 )}
              </>
@@ -1264,7 +1572,7 @@ export default function ControlPanel({
 
           {!['cube', 'sphere', 'cylinder', 'cone'].includes(params.type) && (
             <p className="text-sm text-muted-foreground text-center py-4">
-              Selecione cubo, esfera, cilindro ou cone para ver opções de inscrição/circunscrição
+{t('shapes.instruction')}
             </p>
           )}
         </CardContent>
@@ -1273,11 +1581,11 @@ export default function ControlPanel({
       {/* Style Options */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Estilo</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('panel.style')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor das Arestas</Label>
+            <Label className="text-sm font-medium">{t('colors.edge_color')}</Label>
             <Select value={style.edgeColor} onValueChange={(value) => handleStyleChange('edgeColor', value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -1296,7 +1604,7 @@ export default function ControlPanel({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor Seção Meridiana</Label>
+            <Label className="text-sm font-medium">{t('colors.meridian_section_color')}</Label>
             <Select value={style.heightLineColor} onValueChange={(value) => handleStyleChange('heightLineColor', value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -1315,7 +1623,7 @@ export default function ControlPanel({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor da Altura</Label>
+            <Label className="text-sm font-medium">{t('colors.height_color')}</Label>
             <Select value={style.heightLineColor} onValueChange={(value) => handleStyleChange('heightLineColor', value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -1334,7 +1642,7 @@ export default function ControlPanel({
           </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Cor da Face</Label>
+              <Label className="text-sm font-medium">{t('colors.face_color')}</Label>
               <Select value={style.faceColor} onValueChange={(value) => handleStyleChange('faceColor', value)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -1353,7 +1661,7 @@ export default function ControlPanel({
             </div>
             
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Cor da Circunferência Inscrita</Label>
+              <Label className="text-sm font-medium">{t('colors.inscribed_circumference_color')}</Label>
               <Select value={style.inscribedCircleColor} onValueChange={(value) => handleStyleChange('inscribedCircleColor', value)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -1372,7 +1680,7 @@ export default function ControlPanel({
             </div>
             
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Cor da Circunferência Circunscrita</Label>
+              <Label className="text-sm font-medium">{t('colors.circumscribed_circumference_color')}</Label>
               <Select value={style.circumscribedCircleColor} onValueChange={(value) => handleStyleChange('circumscribedCircleColor', value)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -1391,7 +1699,7 @@ export default function ControlPanel({
             </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor Formas Inscritas</Label>
+            <Label className="text-sm font-medium">{t('colors.inscribed_shapes_color')}</Label>
             <Select value={style.inscribedShapeColor} onValueChange={(value) => handleStyleChange('inscribedShapeColor', value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -1522,7 +1830,7 @@ export default function ControlPanel({
           )}
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor Formas Circunscritas</Label>
+            <Label className="text-sm font-medium">{t('colors.circumscribed_shapes_color')}</Label>
             <Select value={style.circumscribedShapeColor} onValueChange={(value) => handleStyleChange('circumscribedShapeColor', value)}>
               <SelectTrigger>
                 <SelectValue />
@@ -1541,7 +1849,7 @@ export default function ControlPanel({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Cor da Seção Meridiana</Label>
+            <Label className="text-sm font-medium">{t('colors.meridian_section_color')}</Label>
             <Select 
               value={style.meridianSectionColor} 
               onValueChange={(value) => handleStyleChange('meridianSectionColor', value)}
@@ -1568,7 +1876,22 @@ export default function ControlPanel({
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Opacidade: {(style.faceOpacity * 100).toFixed(0)}%
+{t('opacity.meridian_section')}: {(style.meridianSectionOpacity * 100).toFixed(0)}%
+            </Label>
+            <Slider
+              value={[style.meridianSectionOpacity]}
+              onValueChange={([value]) => handleStyleChange('meridianSectionOpacity', value)}
+              min={0.1}
+              max={1}
+              step={0.1}
+              className="w-full"
+              disabled={!options.showMeridianSection}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+{t('opacity.general')}: {(style.faceOpacity * 100).toFixed(0)}%
             </Label>
             <Slider
               value={[style.faceOpacity]}
@@ -1645,7 +1968,7 @@ export default function ControlPanel({
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">
-              Velocidade: {style.rotationSpeed.toFixed(1)}x
+{t('speed.rotation')}: {style.rotationSpeed.toFixed(1)}x
             </Label>
             <Slider
               value={[style.rotationSpeed]}
@@ -1662,7 +1985,7 @@ export default function ControlPanel({
       {/* Interactive Controls */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Controles</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('controls.title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button
@@ -1678,14 +2001,14 @@ export default function ControlPanel({
             ) : (
               <>
                 <Play className="w-4 h-4 mr-2" />
-                Auto Rotação
+{t('controls.auto_rotation')}
               </>
             )}
           </Button>
 
           <Button variant="outline" onClick={onResetView} className="w-full">
             <RotateCcw className="w-4 h-4 mr-2" />
-            Resetar Vista
+{t('controls.reset_view')}
           </Button>
 
           <ImageDownloadMenu 
@@ -1697,12 +2020,12 @@ export default function ControlPanel({
       {/* Properties Display */}
       <Card className="control-section">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg text-primary">Propriedades</CardTitle>
+          <CardTitle className="text-lg text-primary">{t('panel.properties')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {properties.baseArea && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Área da Base:</span>
+              <span className="text-muted-foreground">{t('properties.base_area')}:</span>
               <span className="font-mono">{formatNumber(properties.baseArea)}</span>
             </div>
           )}
@@ -1714,7 +2037,7 @@ export default function ControlPanel({
           )}
           {properties.totalArea && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Área Total:</span>
+              <span className="text-muted-foreground">{t('properties.total_area_label')}</span>
               <span className="font-mono">{formatNumber(properties.totalArea)}</span>
             </div>
           )}
@@ -1726,19 +2049,19 @@ export default function ControlPanel({
           )}
           {properties.inscribedRadius && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Raio Inscrito:</span>
+              <span className="text-muted-foreground">{t('properties.inscribed_radius_label')}</span>
               <span className="font-mono">{formatNumber(properties.inscribedRadius)}</span>
             </div>
           )}
           {properties.circumscribedRadius && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Raio Circunscrito:</span>
+              <span className="text-muted-foreground">{t('properties.circumscribed_radius_label')}</span>
               <span className="font-mono">{formatNumber(properties.circumscribedRadius)}</span>
             </div>
           )}
           <Separator />
           <div className="flex justify-between text-sm font-medium">
-            <span className="text-primary">Volume:</span>
+            <span className="text-primary">{t('properties.volume_label')}</span>
             <span className="font-mono text-primary">{formatNumber(properties.volume)}</span>
           </div>
         </CardContent>
@@ -1747,8 +2070,18 @@ export default function ControlPanel({
       {/* Seção de Cálculos Geométricos */}
       <GeometryCalculations params={params} />
 
-      {/* Teacher Suggestions */}
-      <TeacherSuggestions />
+      {/* Mesa Digitalizadora */}
+      <DrawingTablet
+        isActive={isTabletActive}
+        onToggle={() => onTabletToggle?.(!isTabletActive)}
+        onDrawingChange={onDrawingChange}
+        currentStyle={tabletStyle}
+        currentTool={tabletTool}
+        onStyleChange={onTabletStyleChange}
+        onToolChange={onTabletToolChange}
+        className="control-section"
+      />
+
     </div>
   );
 }

@@ -28,6 +28,15 @@ export default function MultiplePlanesManager({
   const activePlaneIndex = style.activePlaneIndex || 0;
   const planeConfigs = style.planeConfigs || [];
 
+  // Inicializar automaticamente se não há configurações
+  React.useEffect(() => {
+    if (!style.planeConfigs || style.planeConfigs.length === 0) {
+      console.log('=== INICIALIZANDO PLANE CONFIGS ===');
+      console.log('maxPlanes:', maxPlanes);
+      initializePlaneConfigs(maxPlanes);
+    }
+  }, [maxPlanes]);
+
   const initializePlaneConfigs = (numPlanes: number) => {
     const configs = Array.from({length: numPlanes}, (_, i) => ({
       id: i + 1,
@@ -73,7 +82,16 @@ export default function MultiplePlanesManager({
     const currentSelection = style.selectedVerticesForPlane || [];
     const planeNumber = activePlaneIndex + 1;
     
+    console.log('=== MULTIPLE PLANES MANAGER - CRIAR PLANO ===');
+    console.log('Planos existentes:', currentPlanes);
+    console.log('Seleção atual:', currentSelection);
+    console.log('Número do plano:', planeNumber);
+    console.log('Índice do plano ativo:', activePlaneIndex);
+    
     if (currentSelection.length >= 3) {
+      // Verificar se já existe um plano com o mesmo número
+      const existingPlaneIndex = currentPlanes.findIndex(p => p.name === `Plano ${planeNumber}`);
+      
       // Criar novo plano com ID único baseado no índice
       const newPlane = {
         id: `plane-${Date.now()}-${planeNumber}-multi`,
@@ -83,9 +101,15 @@ export default function MultiplePlanesManager({
         opacity: style.planeOpacity
       };
       
+      console.log('Novo plano criado:', newPlane);
+      
       // Remover plano anterior com o mesmo número se existir
       const filteredPlanes = currentPlanes.filter(p => !p.id.includes(`-${planeNumber}-`));
       const updatedPlanes = [...filteredPlanes, newPlane];
+      
+      console.log('Planos após filtragem:', filteredPlanes);
+      console.log('Planos atualizados:', updatedPlanes);
+      console.log('Total de planos:', updatedPlanes.length);
       
       // Atualizar configurações
       const configs = [...planeConfigs];
@@ -98,10 +122,14 @@ export default function MultiplePlanesManager({
         handleStyleChange('planeConfigs', configs);
       }
       
+      // Garantir que os planos anteriores sejam preservados
       handleStyleChange('planes', updatedPlanes);
       handleStyleChange('selectedVerticesForPlane', []);
       
-      toast.success(`${newPlane.name} criado com sucesso!`);
+      toast.success(`${newPlane.name} criado com sucesso! (${updatedPlanes.length}/5 planos)`);
+    } else {
+      console.warn('Não foi possível criar plano - seleção insuficiente');
+      toast.error('Selecione pelo menos 3 vértices para criar um plano');
     }
   };
 
@@ -261,7 +289,12 @@ export default function MultiplePlanesManager({
               size="sm" 
               variant="default" 
               className="w-full"
-              onClick={createPlane}
+              onClick={() => {
+                console.log('=== BOTÃO CRIAR PLANO CLICADO (MultiplePlanesManager) ===');
+                console.log('selectedVerticesForPlane:', style.selectedVerticesForPlane);
+                console.log('activePlaneIndex:', activePlaneIndex);
+                createPlane();
+              }}
             >
               Criar Plano {activePlaneIndex + 1}
             </Button>

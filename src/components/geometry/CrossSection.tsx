@@ -1,14 +1,17 @@
 import * as THREE from 'three';
-import { GeometryParams } from '@/types/geometry';
+import { GeometryParams, VisualizationOptions } from '@/types/geometry';
 
 interface CrossSectionProps {
   params: GeometryParams;
   showCrossSection: boolean;
   sectionHeight: number;
+  options?: VisualizationOptions;
 }
 
-export function CrossSection({ params, showCrossSection, sectionHeight }: CrossSectionProps) {
+export function CrossSection({ params, showCrossSection, sectionHeight, options }: CrossSectionProps) {
   if (!showCrossSection) return null;
+  // Seção transversal permanece visível independente da ferramenta ativa
+  // Só some se explicitamente desativada via showCrossSection
 
   let maxHeight = 4;
   

@@ -2,6 +2,30 @@ import React from 'react';
 import { GeometryParams, VisualizationOptions, StyleOptions } from '@/types/geometry';
 import * as THREE from 'three';
 
+// Função para criar arestas com espessura real usando TubeGeometry
+const createThickEdges = (geometry: THREE.BufferGeometry, thickness: number = 2) => {
+  const edges = new THREE.EdgesGeometry(geometry);
+  const positions = edges.attributes.position.array;
+  const thickEdges: JSX.Element[] = [];
+  
+  for (let i = 0; i < positions.length; i += 6) {
+    const start = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+    const end = new THREE.Vector3(positions[i + 3], positions[i + 4], positions[i + 5]);
+    
+    const curve = new THREE.LineCurve3(start, end);
+    const tubeRadius = Math.max(thickness * 0.01, 0.005);
+    const tubeGeometry = new THREE.TubeGeometry(curve, 2, tubeRadius, 8, false);
+    
+    thickEdges.push(
+      <mesh key={`edge-${i}`} geometry={tubeGeometry}>
+        <meshBasicMaterial />
+      </mesh>
+    );
+  }
+  
+  return thickEdges;
+};
+
 interface CircumscribedCylinderProps {
   params: GeometryParams;
   options: VisualizationOptions;
@@ -23,9 +47,9 @@ export default function CircumscribedCylinder({ params, options, style }: Circum
     // Criar wireframe customizado com número controlado de geratrizes
     const createCylinderWireframe = () => {
       const lines: THREE.Vector3[] = [];
-      const numGeneratrices = style.cylinderGeneratrices || 8;
+      const numGeneratrices = Math.min(style.cylinderGeneratrices || 8, 8); // Usar o valor do slider
       
-      // Círculo superior (sempre circular)
+      // Círculo superior (64 segmentos para manter circular)
       const topSegments = 64;
       for (let i = 0; i < topSegments; i++) {
         const angle1 = (i * 2 * Math.PI) / topSegments;
@@ -78,12 +102,12 @@ export default function CircumscribedCylinder({ params, options, style }: Circum
           </mesh>
         )}
         
-        {/* Edges */}
+        {/* Edges - Wireframe customizado com geratrizes controladas */}
         {options.circumscribedCylinderShowEdges && (
           <lineSegments geometry={edges}>
             <lineBasicMaterial 
-              color={style.circumscribedCylinderColor || style.circumscribedShapeColor || "#ff6600"} 
-              linewidth={2} 
+              color={style.circumscribedEdgeColor || style.circumscribedCylinderColor || style.circumscribedShapeColor || "#ff6600"}
+              linewidth={style.circumscribedEdgeThickness || 2}
             />
           </lineSegments>
         )}

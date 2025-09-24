@@ -15,8 +15,18 @@ import { ThemeToggle } from './ThemeToggle';
 import EquationRenderer from './EquationRenderer';
 import ImageDownloadMenu from './ImageDownloadMenu';
 import { ConstructionType } from './geometry/GeometricConstructions';
+import { ActiveToolProvider, useActiveTool } from '@/context/ActiveToolContext';
+import { LanguageProvider, useLanguage } from '@/context/LanguageContext';
+import ToolBar from '@/components/ui/ToolBar';
+import StatusBar from '@/components/ui/StatusBar';
+import { LanguageToggle } from './LanguageToggle';
+import DrawingOverlayWrapper from './DrawingOverlayWrapper';
+import { DrawingStroke } from './DrawingTablet';
 
-export default function SpaceSculptor() {
+// Componente interno que usa o contexto de ferramenta ativa
+function SpaceSculptorContent() {
+  const { activeTool } = useActiveTool();
+  const { t } = useLanguage();
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
   const [activeTab, setActiveTab] = useState('geometry');
@@ -36,30 +46,6 @@ export default function SpaceSculptor() {
   const [geometryHistoryIndex, setGeometryHistoryIndex] = useState(-1);
   const [canUndoGeometry, setCanUndoGeometry] = useState(false);
   const [canRedoGeometry, setCanRedoGeometry] = useState(false);
-  
-  // Remove unused equations state since we're now using Fabric.js
-  // const [equations, setEquations] = useState<Equation[]>([]);
-
-  // Remove unused equation handlers
-  // const handleRemoveEquation = useCallback((id: string) => {
-  //   setEquations(prev => prev.filter(eq => eq.id !== id));
-  // }, []);
-
-  // const handleMoveEquation = useCallback((id: string, position: { x: number; y: number }) => {
-  //   setEquations(prev => prev.map(eq => 
-  //     eq.id === id ? { ...eq, position } : eq
-  //   ));
-  // }, []);
-
-  const [params, setParams] = useState<GeometryParams>({
-    type: 'prism' as GeometryType,
-    height: 4,
-    radius: 2,
-    sideLength: 2,
-    baseEdgeLength: 2,
-    numSides: 5,
-    isEquilateral: false
-  });
 
   const [options, setOptions] = useState<VisualizationOptions>({
     showEdges: true,
@@ -136,8 +122,8 @@ export default function SpaceSculptor() {
     showUnfolded: false,
     // Definição de planos por 3 pontos
     showPlaneDefinition: false,
-      // Construções geométricas
-      showGeometricConstructions: true
+    // Construções geométricas
+    showGeometricConstructions: true
   });
 
   const [style, setStyle] = useState<StyleOptions>({
@@ -180,6 +166,8 @@ export default function SpaceSculptor() {
     inscribedEdgeColor: '#00ff88',
     circumscribedEdgeColor: '#00aaff',
     meridianSectionColor: '#ff6600',
+    // Opacidade da seção meridiana
+    meridianSectionOpacity: 0.5,
     cylinderGeneratrices: 8,
     coneGeneratrices: 8,
     selectedVerticesForMeridian: [],
@@ -208,7 +196,44 @@ export default function SpaceSculptor() {
     inscribedCircleThickness: 1.0,
     circumscribedCircleThickness: 1.0,
     lateralApothemThickness: 1.0,
-    baseApothemThickness: 1.0
+    baseApothemThickness: 1.0,
+    // Cores para apótemas
+    baseApothemColor: '#00ffff',
+    lateralApothemColor: '#ff0000',
+    // Modo ativo de seleção
+    activeVertexMode: 'none' as const,
+    // Conexões entre vértices
+    connections: [],
+    // Espessura dos segmentos
+    segmentThickness: 1.0,
+    // Espessura das arestas
+    edgeThickness: 1,
+    // Cor dos segmentos
+    segmentColor: '#00ff00'
+  });
+  
+  // Remove unused equations state since we're now using Fabric.js
+  // const [equations, setEquations] = useState<Equation[]>([]);
+
+  // Remove unused equation handlers
+  // const handleRemoveEquation = useCallback((id: string) => {
+  //   setEquations(prev => prev.filter(eq => eq.id !== id));
+  // }, []);
+
+  // const handleMoveEquation = useCallback((id: string, position: { x: number; y: number }) => {
+  //   setEquations(prev => prev.map(eq => 
+  //     eq.id === id ? { ...eq, position } : eq
+  //   ));
+  // }, []);
+
+  const [params, setParams] = useState<GeometryParams>({
+    type: 'prism' as GeometryType,
+    height: 4,
+    radius: 2,
+    sideLength: 2,
+    baseEdgeLength: 2,
+    numSides: 5,
+    isEquilateral: false
   });
 
   const [drawingOptions, setDrawingOptions] = useState({
@@ -302,6 +327,7 @@ export default function SpaceSculptor() {
         selectedVerticesForConstruction: [],
         constructionType: null,
         constructions: [],
+        connections: [], // Limpar conexões ao mudar de sólido
       }));
     }
 
@@ -487,6 +513,24 @@ export default function SpaceSculptor() {
 
   // Sistema de seleção de elementos para deletar
   const [selectedElements, setSelectedElements] = useState<{type: 'plane' | 'construction', id: string}[]>([]);
+  
+  // Estado da mesa digitalizadora
+  const [isTabletActive, setIsTabletActive] = useState(false);
+  const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
+  
+  // Configurações atuais da mesa digitalizadora
+  const [tabletStyle, setTabletStyle] = useState({
+    color: '#ffffff',
+    thickness: 13,
+    opacity: 1,
+    pressure: false, // Desativar variação de pressão
+    smoothing: 0.5
+  });
+  const [tabletTool, setTabletTool] = useState({
+    type: 'pen' as const,
+    name: 'Caneta',
+    icon: null
+  });
 
   // Função para deletar elemento selecionado
   const handleDeleteSelected = useCallback(() => {
@@ -506,6 +550,15 @@ export default function SpaceSculptor() {
     setSelectedElements([]);
     toast.success('Elementos deletados');
   }, [selectedElements]);
+
+  // Handlers para mesa digitalizadora
+  const handleTabletStyleChange = useCallback((newStyle: any) => {
+    setTabletStyle(prev => ({ ...prev, ...newStyle }));
+  }, []);
+
+  const handleTabletToolChange = useCallback((newTool: any) => {
+    setTabletTool(prev => ({ ...prev, ...newTool }));
+  }, []);
 
   // Event listener para a tecla Delete
   useEffect(() => {
@@ -628,7 +681,6 @@ export default function SpaceSculptor() {
 
   // Handler para planos - preserva planos existentes sempre
   const handlePlaneVertexSelect = useCallback((vertexIndex: number) => {
-    if (!options.showPlaneDefinition) return;
     
     const current = style.selectedVerticesForPlane || [];
     
@@ -641,11 +693,8 @@ export default function SpaceSculptor() {
       return;
     }
 
-    // Verificar se já atingiu o limite de planos durante seleção
-    if (style.planes.length >= 5 && current.length === 0) {
-      toast.error('Limite máximo de 5 planos atingido!');
-      return;
-    }
+    // Verificar se já atingiu o limite de planos apenas ao tentar criar
+    // Permitir seleção de vértices sempre
 
     const newSelection = [...current, vertexIndex];
     
@@ -659,7 +708,7 @@ export default function SpaceSculptor() {
     console.log('Vértice selecionado:', vertexIndex);
     console.log('Seleção atual:', newSelection);
     console.log('Planos existentes:', style.planes.length);
-  }, [options.showPlaneDefinition, style.selectedVerticesForPlane, style.planes.length]);
+  }, [style.selectedVerticesForPlane, style.planes.length]);
 
   // Handler para limpar construções
   const handleClearConstructions = useCallback(() => {
@@ -679,6 +728,47 @@ export default function SpaceSculptor() {
       selectedVerticesForPlane: []
     }));
     toast.success('Todos os planos removidos');
+  }, []);
+
+  // Funções para ativar modos de seleção
+  const activateMeridianMode = useCallback(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeVertexMode: 'meridian'
+    }));
+    toast.info('🔶 Modo Seção Meridiana ativado');
+  }, []);
+
+  const activatePlaneMode = useCallback(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeVertexMode: 'plane'
+    }));
+    toast.info('📐 Modo Definição de Planos ativado');
+  }, []);
+
+  const activateConnectionMode = useCallback(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeVertexMode: 'connection'
+    }));
+    toast.info('🔗 Modo Conexão de Vértices ativado');
+  }, []);
+
+  const activateConstructionMode = useCallback(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeVertexMode: 'construction'
+    }));
+    toast.info('📏 Modo Construções Geométricas ativado');
+  }, []);
+
+  const deactivateAllModes = useCallback(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeVertexMode: 'none'
+    }));
+    toast.info('🔘 Todos os modos desativados');
   }, []);
 
   const handleRemoveEquation = useCallback((id: string) => {
@@ -728,86 +818,96 @@ export default function SpaceSculptor() {
   }, [isDrawingMode, handleUndo, handleRedo, handleToggleDrawing, canUndoGeometry, canRedoGeometry, handleUndoGeometry, handleRedoGeometry]);
 
   return (
-    <div className="min-h-screen bg-gradient-nebula text-foreground">
-      <header className="border-b border-border/30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-cosmic bg-clip-text text-transparent">
-              GeoTeach
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Visualizador Interativo de Geometria Espacial com Anotações
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <ImageDownloadMenu 
-              onExport={handleExportImage}
-            />
-            <Button
-              variant={options.isFrozen ? "default" : "outline"} 
-              size="sm" 
-              onClick={options.isFrozen ? handleUnfreezeView : handleFreezeView}
-            >
-              {options.isFrozen ? (
-                <>
-                  <Unlock className="w-4 h-4 mr-2" />
-                  Descongelar Vista
-                </>
-              ) : (
-                <>
-                  <Camera className="w-4 h-4 mr-2" />
-                  Congelar Vista
-                </>
-              )}
-            </Button>
+    <div className="h-screen bg-gradient-nebula text-foreground flex flex-col">
+      {/* Header com controles no lado direito */}
+      <header className="border-b border-border/30 bg-background/95 backdrop-blur flex items-center justify-between px-6 py-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-cosmic bg-clip-text text-transparent">
+            GeoTeach
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Visualizador Interativo de Geometria Espacial
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <ImageDownloadMenu 
+            onExport={handleExportImage}
+          />
+          <Button
+            variant={options.isFrozen ? "default" : "outline"} 
+            size="sm" 
+            onClick={options.isFrozen ? handleUnfreezeView : handleFreezeView}
+          >
+            {options.isFrozen ? (
+              <>
+                <Unlock className="w-4 h-4 mr-2" />
+{t('button.unfreeze_view')}
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4 mr-2" />
+{t('button.freeze_view')}
+              </>
+            )}
+          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
       </header>
-    
-      <main className="flex h-[calc(100vh-80px)]">
-        <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-[calc(100vh-80px)] overflow-y-auto">
+      
+      <div className="flex flex-1 min-h-0">
+        <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-full overflow-y-auto">
           <ControlPanel
             params={params}
             options={options}
             style={style}
             properties={properties}
-        onParamsChange={updateParams}
-        onOptionsChange={setOptions}
-        onStyleChange={setStyle}
+            onParamsChange={updateParams}
+            onOptionsChange={setOptions}
+            onStyleChange={setStyle}
             onResetView={handleResetView}
             onExportImage={handleExportImage}
             onVertexSelect={(vertexIndex) => {
-              if ((params.type === 'prism' || params.type === 'cube' || params.type === 'tetrahedron' || params.type === 'pyramid' || params.type === 'cylinder' || params.type === 'cone') && options.showMeridianSection && options.showVertexSelection) {
-                const current = style.selectedVerticesForMeridian;
-                if (current.length < 2) {
-                  setStyle({
-                    ...style,
-                    selectedVerticesForMeridian: [...current, vertexIndex]
-                  });
-                } else {
-                  // Reset and start new selection
-                  setStyle({
-                    ...style,
-                    selectedVerticesForMeridian: [vertexIndex]
-                  });
-                }
-              }
+              // Esta função agora é apenas para compatibilidade
+              // A seleção real é feita pelos handlers específicos em GeometryCanvas
+              console.log('Vertex selected (legacy handler):', vertexIndex);
             }}
+            // Estado da mesa digitalizadora
+            isTabletActive={isTabletActive}
+            onTabletToggle={setIsTabletActive}
+            drawingStrokes={drawingStrokes}
+            onDrawingChange={setDrawingStrokes}
+            // Configurações da mesa digitalizadora
+            tabletStyle={tabletStyle}
+            tabletTool={tabletTool}
+            onTabletStyleChange={handleTabletStyleChange}
+            onTabletToolChange={handleTabletToolChange}
           />
         </aside>
       
-        <section className="flex-1 flex flex-col min-w-0">
+        <section className="flex-1 flex flex-col min-w-0 min-h-0">
+          {/* ToolBar */}
+          <div className="border-b border-border/30 bg-background/50 backdrop-blur">
+            <ToolBar 
+              showCrossSection={options.showCrossSection}
+              showMeridianSection={options.showMeridianSection}
+              onToggleCrossSection={() => setOptions({...options, showCrossSection: !options.showCrossSection})}
+              onToggleMeridianSection={() => setOptions({...options, showMeridianSection: !options.showMeridianSection})}
+            />
+          </div>
+          
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <div className="border-b border-border/30 bg-background/50 backdrop-blur p-2 flex items-center justify-between">
+            <div className="border-b border-border/30 bg-background/50 backdrop-blur px-4 py-2 flex items-center justify-between">
               <TabsList className="grid grid-cols-2 max-w-md">
                 <TabsTrigger value="geometry" className="flex items-center gap-2">
                   <Shapes className="w-4 h-4" />
-                  Geometria 3D
+                  {t('tabs.geometry')}
                 </TabsTrigger>
                 <TabsTrigger value="drawing" className="flex items-center gap-2">
                   <PenTool className="w-4 h-4" />
-                  Quadro de Anotações
+                  {t('tabs.notes')}
                 </TabsTrigger>
               </TabsList>
               
@@ -841,7 +941,7 @@ export default function SpaceSculptor() {
 
             <TabsContent value="geometry" className="flex-1 m-0 p-0 h-full">
               {/* Enhanced Drawing Toolbar */}
-              <div className="p-3 border-b border-border/30">
+              <div className="p-2 border-b border-border/30">
                 <AdvancedDrawingToolbar
                   isDrawingMode={isDrawingMode}
                   tool={drawingTool}
@@ -883,67 +983,85 @@ export default function SpaceSculptor() {
                     onAnnotationChange={setHasAnnotations}
                   />
                 ) : (
-                  <div ref={geometryCanvasRef} className="w-full h-full relative">
-                     <GeometryCanvas
-                       params={params}
-                       options={options}
-                       style={style}
-                         onVertexSelect={(vertexIndex) => {
-                  // Sistema de seleção sem conflitos - cada modo opera independentemente
-                  
-                  // Construções geométricas (sempre funciona quando ativo)
-                  if (options.showGeometricConstructions && style.constructionType) {
-                    handleConstructionVertexSelect(vertexIndex);
-                  }
-                  
-                  // Definição de planos (sempre funciona quando ativo, não interfere com outros)
-                  if (options.showPlaneDefinition) {
-                    handlePlaneVertexSelect(vertexIndex);
-                  }
-                  
-                  // Seção meridiana de prismas, cubos e tetraedros
-                  if ((params.type === 'prism' || params.type === 'cube' || params.type === 'tetrahedron' || params.type === 'pyramid' || params.type === 'cylinder' || params.type === 'cone') && options.showMeridianSection && options.showVertexSelection) {
-                    const current = style.selectedVerticesForMeridian;
-                    if (current.length < 2) {
-                      setStyle({
-                        ...style,
-                        selectedVerticesForMeridian: [...current, vertexIndex]
-                      });
-                      toast.success(`🔶 Vértice ${vertexIndex} selecionado para seção meridiana (${current.length + 1}/2)`);
-                    } else {
-                      setStyle({
-                        ...style,
-                        selectedVerticesForMeridian: [vertexIndex]
-                      });
-                      toast.success(`🔶 Nova seleção iniciada - Vértice ${vertexIndex} selecionado (1/2)`);
+                  <DrawingOverlayWrapper
+                    isTabletActive={isTabletActive}
+                    drawingStrokes={drawingStrokes}
+                    onDrawingChange={setDrawingStrokes}
+                    currentStyle={tabletStyle}
+                    currentTool={tabletTool}
+                    className="w-full h-full"
+                  >
+                    <div ref={geometryCanvasRef} className="w-full h-full relative flex-1 min-h-0">
+                       <GeometryCanvas
+                         params={params}
+                         options={options}
+                         style={style}
+                           onVertexSelect={(vertexIndex) => {
+                    // Sistema de seleção baseado em modo ativo - cada funcionalidade opera independentemente
+                    
+                    switch (style.activeVertexMode) {
+                      case 'construction':
+                        if (style.constructionType) {
+                          handleConstructionVertexSelect(vertexIndex);
+                        }
+                        break;
+                        
+                      case 'plane':
+                        handlePlaneVertexSelect(vertexIndex);
+                        break;
+                        
+                      case 'meridian':
+                        if ((params.type === 'prism' || params.type === 'cube' || params.type === 'tetrahedron' || params.type === 'pyramid' || params.type === 'cylinder' || params.type === 'cone')) {
+                          const current = style.selectedVerticesForMeridian || [];
+                          if (current.length < 2) {
+                            setStyle(prev => ({
+                              ...prev,
+                              selectedVerticesForMeridian: [...current, vertexIndex]
+                            }));
+                            toast.success(`🔶 Vértice ${vertexIndex} selecionado para seção meridiana (${current.length + 1}/2)`);
+                          } else {
+                            setStyle(prev => ({
+                              ...prev,
+                              selectedVerticesForMeridian: [vertexIndex]
+                            }));
+                            toast.success(`🔶 Nova seleção iniciada - Vértice ${vertexIndex} selecionado (1/2)`);
+                          }
+                        }
+                        break;
+                        
+                      case 'connection':
+                        if (['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type)) {
+                          const current = style.selectedVerticesForGeneral || [];
+                          setStyle(prev => ({
+                            ...prev,
+                            selectedVerticesForGeneral: [...current, vertexIndex]
+                          }));
+                          toast.success(`🔸 Vértice ${vertexIndex} conectado (total: ${current.length + 1})`);
+                        }
+                        break;
+                        
+                      case 'none':
+                      default:
+                        toast.info('Selecione um modo de trabalho primeiro');
+                        break;
                     }
-                  }
-                  
-                  // Conexão geral de vértices (não interfere com planos)
-                  if (options.showVertexConnector && ['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type)) {
-                    const current = style.selectedVerticesForGeneral;
-                    setStyle(prev => ({
-                      ...prev,
-                      selectedVerticesForGeneral: [...current, vertexIndex]
-                    }));
-                    toast.success(`🔸 Vértice ${vertexIndex} conectado (total: ${current.length + 1})`);
-                  }
-                }}
-                       onStyleChange={(key, value) => {
-                         setStyle(prev => ({ ...prev, [key]: value }));
-                       }}
-                     />
-                    {/* Drawing Overlay with Fabric.js */}
-                    <FabricDrawingCanvas
-                      ref={drawingOverlayRef}
-                      isEnabled={isDrawingMode}
-                      tool={drawingTool}
-                      strokeColor={drawingStrokeColor}
-                      strokeWidth={drawingStrokeWidth}
-                      opacity={drawingOpacity}
-                      onHistoryChange={handleHistoryChange}
-                    />
-                  </div>
+                  }}
+                         onStyleChange={(key, value) => {
+                           setStyle(prev => ({ ...prev, [key]: value }));
+                         }}
+                       />
+                      {/* Drawing Overlay with Fabric.js */}
+                      <FabricDrawingCanvas
+                        ref={drawingOverlayRef}
+                        isEnabled={isDrawingMode}
+                        tool={drawingTool}
+                        strokeColor={drawingStrokeColor}
+                        strokeWidth={drawingStrokeWidth}
+                        opacity={drawingOpacity}
+                        onHistoryChange={handleHistoryChange}
+                      />
+                    </div>
+                  </DrawingOverlayWrapper>
                 )}
               </div>
             </TabsContent>
@@ -969,7 +1087,24 @@ export default function SpaceSculptor() {
             </TabsContent>
           </Tabs>
         </section>
-      </main>
+        </div>
+      
+      {/* StatusBar */}
+      <StatusBar 
+        showCrossSection={options.showCrossSection}
+        showMeridianSection={options.showMeridianSection}
+      />
     </div>
+  );
+}
+
+// Componente principal que fornece o contexto
+export default function SpaceSculptor() {
+  return (
+    <LanguageProvider>
+      <ActiveToolProvider>
+        <SpaceSculptorContent />
+      </ActiveToolProvider>
+    </LanguageProvider>
   );
 }

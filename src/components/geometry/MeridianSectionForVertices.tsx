@@ -17,7 +17,8 @@ export function MeridianSectionForVertices({
   selectedVertices, 
   vertices 
 }: MeridianSectionForVerticesProps) {
-  // Só mostra o plano quando exatamente 2 vértices estão selecionados
+  // Seção meridiana permanece visível independente da ferramenta ativa
+  // Só some se não tiver 2 vértices selecionados ou geometria não suportada
   if (selectedVertices.length !== 2 || !['cube', 'prism', 'pyramid', 'cylinder', 'cone'].includes(params.type)) {
     return null;
   }

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { useLanguage } from '@/context/LanguageContext';
 import { OrbitControls, Grid, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { GeometryParams, VisualizationOptions, StyleOptions } from '@/types/geometry';
@@ -19,10 +20,12 @@ import InscribedShapes from './geometry/InscribedShapes';
 import CircumscribedShapes from './geometry/CircumscribedShapes';
 import SphericalSegments from './geometry/SphericalSegments';
 import { VertexConnector } from './geometry/VertexConnector';
+import { SimpleVertexConnector } from './geometry/SimpleVertexConnector';
 import { Unfolded } from './geometry/Unfolded';
 import PlaneDefinition from './geometry/PlaneDefinition';
 import GeometricConstructions from './geometry/GeometricConstructions';
 import AutoRotatingGroup from './geometry/AutoRotatingGroup';
+import { getInscribedVertices, getCircumscribedVertices } from '@/lib/inscribed-circumscribed-vertices';
 
 interface GeometryMeshProps {
   params: GeometryParams;
@@ -33,6 +36,7 @@ interface GeometryMeshProps {
 }
 
 function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }: GeometryMeshProps) {
+  const { t } = useLanguage();
   const meshRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
 
@@ -245,7 +249,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
       {/* Wireframe */}
       {options.showEdges && (
         <lineSegments ref={edgesRef} geometry={edges}>
-          <lineBasicMaterial color={style.edgeColor} linewidth={1} />
+          <lineBasicMaterial color={style.edgeColor} linewidth={style.edgeThickness || 1} />
         </lineSegments>
       )}
 
@@ -256,7 +260,130 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
       {options.showVertices && params.type === 'tetrahedron' && (
         <TetrahedronVertices params={params} />
       )}
-      {options.showVertices && params.type !== 'cylinder' && params.type !== 'cube' && params.type !== 'tetrahedron' && (
+      {options.showVertices && params.type === 'octahedron' && (
+        <OctahedronVertices 
+          params={params} 
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => {
+            console.log('=== CLIQUE NO VÉRTICE DO OCTAEDRO ===', vertexIndex);
+            
+            const currentSelection = style.selectedVerticesForGeneral || [];
+            if (!onStyleChange) return;
+            
+            // Se já está selecionado, remover
+            if (currentSelection.includes(vertexIndex)) {
+              console.log('Removendo vértice da seleção');
+              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
+              return;
+            }
+            
+            // Adicionar à seleção
+            const newSelection = [...currentSelection, vertexIndex];
+            console.log('Nova seleção:', newSelection);
+            onStyleChange('selectedVerticesForGeneral', newSelection);
+            
+            // Se temos 2 vértices, criar conexão
+            if (newSelection.length === 2) {
+              console.log('CRIANDO CONEXÃO NO OCTAEDRO!');
+              const newConnection = {
+                id: `connection-${Date.now()}`,
+                type: 'segmento-reta',
+                vertices: [...newSelection],
+                color: style.segmentColor || '#00ff00'
+              };
+              
+              const currentConnections = style.connections || [];
+              onStyleChange('connections', [...currentConnections, newConnection]);
+              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+              
+              // toast.success('Conexão criada!');
+            }
+          }}
+        />
+      )}
+      {options.showVertices && params.type === 'dodecahedron' && (
+        <DodecahedronVertices 
+          params={params} 
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => {
+            console.log('=== CLIQUE NO VÉRTICE DO DODECAEDRO ===', vertexIndex);
+            
+            const currentSelection = style.selectedVerticesForGeneral || [];
+            if (!onStyleChange) return;
+            
+            // Se já está selecionado, remover
+            if (currentSelection.includes(vertexIndex)) {
+              console.log('Removendo vértice da seleção');
+              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
+              return;
+            }
+            
+            // Adicionar à seleção
+            const newSelection = [...currentSelection, vertexIndex];
+            console.log('Nova seleção:', newSelection);
+            onStyleChange('selectedVerticesForGeneral', newSelection);
+            
+            // Se temos 2 vértices, criar conexão
+            if (newSelection.length === 2) {
+              console.log('CRIANDO CONEXÃO NO DODECAEDRO!');
+              const newConnection = {
+                id: `connection-${Date.now()}`,
+                type: 'segmento-reta',
+                vertices: [...newSelection],
+                color: style.segmentColor || '#00ff00'
+              };
+              
+              const currentConnections = style.connections || [];
+              onStyleChange('connections', [...currentConnections, newConnection]);
+              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+              
+              // toast.success('Conexão criada!');
+            }
+          }}
+        />
+      )}
+      {options.showVertices && params.type === 'icosahedron' && (
+        <IcosahedronVertices 
+          params={params} 
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => {
+            console.log('=== CLIQUE NO VÉRTICE DO ICOSAEDRO ===', vertexIndex);
+            
+            const currentSelection = style.selectedVerticesForGeneral || [];
+            if (!onStyleChange) return;
+            
+            // Se já está selecionado, remover
+            if (currentSelection.includes(vertexIndex)) {
+              console.log('Removendo vértice da seleção');
+              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
+              return;
+            }
+            
+            // Adicionar à seleção
+            const newSelection = [...currentSelection, vertexIndex];
+            console.log('Nova seleção:', newSelection);
+            onStyleChange('selectedVerticesForGeneral', newSelection);
+            
+            // Se temos 2 vértices, criar conexão
+            if (newSelection.length === 2) {
+              console.log('CRIANDO CONEXÃO NO ICOSAEDRO!');
+              const newConnection = {
+                id: `connection-${Date.now()}`,
+                type: 'segmento-reta',
+                vertices: [...newSelection],
+                color: style.segmentColor || '#00ff00'
+              };
+              
+              const currentConnections = style.connections || [];
+              onStyleChange('connections', [...currentConnections, newConnection]);
+              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+              
+              // toast.success('Conexão criada!');
+            }
+          }}
+        />
+      )}
+      {options.showVertices && params.type !== 'cylinder' && params.type !== 'cube' && params.type !== 'tetrahedron' && params.type !== 'octahedron' && params.type !== 'dodecahedron' && params.type !== 'icosahedron' && (
         <VertexPoints geometry={geometry} geometryType={params.type} />
       )}
 
@@ -277,6 +404,11 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         params={params}
         showBaseApothem={options.showBaseApothem}
         showLateralApothem={options.showLateralApothem}
+        baseApothemColor={style.baseApothemColor || "#00ffff"}
+        lateralApothemColor={style.lateralApothemColor || "#ff0000"}
+        lineWidth={style.lateralApothemThickness || 1}
+        dashSize={0.1}
+        gapSize={0.05}
       />
       
       {/* Tetrahedron Apothems */}
@@ -383,52 +515,109 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         style={style}
       />
 
-      {/* Conectores de Vértices Gerais - excluir para tetraedro */}
-      {options.showVertexConnector && params.type !== 'tetrahedron' && (
-        <VertexConnector
+      {/* Segmentos Criados - SEMPRE VISÍVEIS */}
+      {(() => {
+        console.log('=== SEGMENTOS SEMPRE VISÍVEIS DEBUG ===');
+        console.log('style.connections:', style.connections);
+        console.log('Array.isArray(style.connections):', Array.isArray(style.connections));
+        console.log('style.connections.length:', style.connections?.length);
+        console.log('activeVertexMode:', style.activeVertexMode);
+        return Array.isArray(style.connections) && style.connections.length > 0;
+      })() && (
+        <SimpleVertexConnector
           params={params}
-          showVertexConnections={true}
-          selectedVertices={style.selectedVerticesForGeneral || []}
-          onVertexSelect={(vertexIndex, position) => {
-            const currentSelection = style.selectedVerticesForGeneral || [];
-            if (!onStyleChange) return;
-            
-            // Se é uma intersecção (tem posição), armazenar a posição
-            if (position) {
-              const currentIntersections = style.intersectionPositions || [];
-              if (!currentIntersections.some(pos => 
-                Math.abs(pos.x - position.x) < 0.001 && 
-                Math.abs(pos.y - position.y) < 0.001 && 
-                Math.abs(pos.z - position.z) < 0.001
-              )) {
-                onStyleChange('intersectionPositions', [...currentIntersections, position]);
-              }
-            }
-            
-            // Permitir reutilização de vértices conectados - simplesmente adicionar
-            onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
+          selectedVertices={[]}
+          connections={style.connections || []}
+          edgeColor={style.segmentColor || '#00ff00'}
+          lineWidth={style.segmentThickness || 1.0}
+          onVertexSelect={() => {}} // Não faz nada, apenas renderiza
+          onClearConnections={() => {}}
+          onDeleteConnection={(connectionId) => {
+            console.log('Deletando conexão:', connectionId);
+            const updatedConnections = style.connections?.filter(c => c.id !== connectionId) || [];
+            onStyleChange('connections', updatedConnections);
+            toast.success('Segmento removido!');
           }}
-          edgeColor={style.edgeColor}
-          vertexColor="#ffff00" // Amarelo para conexão geral
-          selectedVertexColor="#ffd700" // Dourado quando selecionado
-          connectionType="general"
-          lineWidth={style.rotationSpeed}
-          onClearSelection={() => {
-            if (!onStyleChange) return;
-            onStyleChange('selectedVerticesForGeneral', []);
-            onStyleChange('intersectionPositions', []);
-          }}
-          vertexPositions={style.intersectionPositions || []}
         />
       )}
 
-      {/* Seleção de Vértices para Seção Meridiana - CUBOS, PRISMAS, TETRAEDROS, PIRÂMIDES, CILINDROS E CONES */}
-      {['cube', 'prism', 'tetrahedron', 'pyramid', 'cylinder', 'cone'].includes(params.type) && options.showMeridianSection && options.showVertexSelection && (
+      {/* Conectores de Vértices - SISTEMA SIMPLIFICADO - APENAS NO MODO CONNECTION */}
+      {options.showVertexConnector && style.activeVertexMode === 'connection' && (
+        <SimpleVertexConnector
+          params={params}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          connections={style.connections || []}
+          edgeColor={style.segmentColor || '#00ff00'}
+          lineWidth={style.segmentThickness || 1.0}
+          inscribedVertices={getInscribedVertices(params, options)}
+          circumscribedVertices={getCircumscribedVertices(params, options)}
+          onVertexSelect={(vertexIndex) => {
+            console.log('=== CLIQUE NO VÉRTICE ===', vertexIndex);
+            
+            const currentSelection = style.selectedVerticesForGeneral || [];
+            if (!onStyleChange) return;
+            
+            // Se já está selecionado, remover
+            if (currentSelection.includes(vertexIndex)) {
+              console.log('Removendo vértice da seleção');
+              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
+              return;
+            }
+            
+            // Adicionar à seleção
+            const newSelection = [...currentSelection, vertexIndex];
+            console.log('Nova seleção:', newSelection);
+            onStyleChange('selectedVerticesForGeneral', newSelection);
+            
+            // Se temos 2 vértices, criar conexão
+            if (newSelection.length === 2) {
+              console.log('CRIANDO CONEXÃO!');
+              const newConnection = {
+                id: `connection-${Date.now()}`,
+                type: 'segmento-reta',
+                vertices: [...newSelection],
+                color: style.segmentColor || '#00ff00'
+              };
+              
+              const currentConnections = style.connections || [];
+              onStyleChange('connections', [...currentConnections, newConnection]);
+              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+              
+              toast.success('Conexão criada!');
+            }
+          }}
+          onClearConnections={() => {
+            onStyleChange('connections', []);
+            onStyleChange('selectedVerticesForGeneral', []);
+          }}
+          onDeleteConnection={(connectionId) => {
+            console.log('Deletando conexão:', connectionId);
+            const updatedConnections = style.connections?.filter(c => c.id !== connectionId) || [];
+            onStyleChange('connections', updatedConnections);
+            toast.success('Segmento removido!');
+          }}
+        />
+      )}
+
+      {/* Seleção de Vértices para Seção Meridiana - APENAS NO MODO MERIDIAN */}
+      {['cube', 'prism', 'tetrahedron', 'pyramid', 'cylinder', 'cone'].includes(params.type) && 
+       options.showMeridianSection && 
+       style.activeVertexMode === 'meridian' && (
         <VertexConnector
           params={params}
-          showVertexConnections={true}
-          selectedVertices={style.selectedVerticesForMeridian}
-          onVertexSelect={onVertexSelect}
+          showVertexConnections={options.showMeridianSection}
+          selectedVertices={style.selectedVerticesForMeridian || []}
+          onVertexSelect={(vertexIndex) => {
+            if (!onStyleChange) return;
+            
+            const current = style.selectedVerticesForMeridian || [];
+            if (current.length < 2) {
+              onStyleChange('selectedVerticesForMeridian', [...current, vertexIndex]);
+            } else {
+              // Reset and start new selection
+              onStyleChange('selectedVerticesForMeridian', [vertexIndex]);
+            }
+          }}
           edgeColor={style.meridianSectionColor}
           vertexColor="#ff8c00" // Laranja para seção meridiana
           selectedVertexColor="#ff4500" // Vermelho-laranja quando selecionado
@@ -440,13 +629,28 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         />
       )}
 
-      {/* Seleção de Vértices para Seção Meridiana em Prismas - APENAS quando explicitamente solicitado */}
-      {params.type === 'prism' && options.showMeridianSection && options.showVertexSelection && options.showVertexConnector && (
+      {/* Seleção de Vértices para Seção Meridiana em Prismas - APENAS quando explicitamente solicitado E NO MODO MERIDIAN */}
+      {params.type === 'prism' && 
+       options.showMeridianSection && 
+       options.showVertexSelection && 
+       options.showVertexConnector && 
+       style.activeVertexMode === 'meridian' && (
         <VertexConnector
           params={params}
           showVertexConnections={true}
           selectedVertices={style.selectedVerticesForMeridian}
-          onVertexSelect={onVertexSelect}
+          onVertexSelect={(vertexIndex) => {
+            // Handler específico para seção meridiana em prismas - não interfere com outras seleções
+            if (!onStyleChange) return;
+            
+            const current = style.selectedVerticesForMeridian || [];
+            if (current.length < 2) {
+              onStyleChange('selectedVerticesForMeridian', [...current, vertexIndex]);
+            } else {
+              // Reset and start new selection
+              onStyleChange('selectedVerticesForMeridian', [vertexIndex]);
+            }
+          }}
           edgeColor={style.meridianSectionColor}
           vertexColor="#ffff00"
           selectedVertexColor={style.meridianSectionColor}
@@ -458,8 +662,51 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         />
       )}
 
-      {/* Definição de Planos por 3 Vértices - excluir para tetraedro */}
-      {options.showPlaneDefinition && params.type !== 'tetrahedron' && (
+      {/* Planos Criados - SEMPRE VISÍVEIS - INDEPENDENTE DO MODO */}
+      {(() => {
+        console.log('=== PLANOS CRIADOS DEBUG ===');
+        console.log('showPlaneDefinition:', options.showPlaneDefinition);
+        console.log('params.type:', params.type);
+        console.log('style.planes:', style.planes);
+        console.log('style.planes.length:', style.planes?.length);
+        console.log('activeVertexMode:', style.activeVertexMode);
+        console.log('Should render planes:', params.type !== 'tetrahedron' && 
+                   style.planes && 
+                   style.planes.length > 0);
+        return params.type !== 'tetrahedron' && 
+               style.planes && 
+               style.planes.length > 0;
+      })() && (
+        <PlaneDefinition
+          params={params}
+          style={style}
+          isEquilateral={options.isEquilateral}
+          selectedVertices={[]} // Não mostrar seleção quando apenas renderizando
+          selectedPositions={[]}
+          showPlane={false} // Não mostrar plano de seleção
+          showSelectionInstructions={false} // Não mostrar instruções
+          showNormalVector={false} // Não mostrar vetor normal
+          showVerticesAlways={false} // Não mostrar vértices clicáveis
+          planes={style.planes}
+          onVertexSelect={() => {}} // Não fazer nada
+          onClearSelection={() => {}}
+          onCreatePlane={() => {}}
+        />
+      )}
+
+      {/* Definição de Planos por 3 Vértices - APENAS NO MODO PLANE */}
+      {(() => {
+        console.log('=== PLANE INTERACTION DEBUG ===');
+        console.log('showPlaneDefinition:', options.showPlaneDefinition);
+        console.log('params.type:', params.type);
+        console.log('activeVertexMode:', style.activeVertexMode);
+        console.log('Should show plane interaction:', options.showPlaneDefinition && 
+                   params.type !== 'tetrahedron' && 
+                   style.activeVertexMode === 'plane');
+        return options.showPlaneDefinition && 
+               params.type !== 'tetrahedron' && 
+               style.activeVertexMode === 'plane';
+      })() && (
         <PlaneDefinition
           params={params}
           style={style}
@@ -469,23 +716,49 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           showPlane={style.selectedVerticesForPlane.length >= 3}
           showSelectionInstructions={true}
           showNormalVector={true}
-          planes={style.planes}
+          showVerticesAlways={true}
+          planes={[]} // Não mostrar planos criados aqui (já renderizados acima)
           onVertexSelect={(vertexIndex, position) => {
-            if (!onStyleChange) return;
+            console.log('=== PLANE VERTEX SELECT DEBUG ===');
+            console.log('Vertex clicked:', vertexIndex);
+            console.log('Position:', position);
+            console.log('Active mode:', style.activeVertexMode);
+            console.log('Should process:', style.activeVertexMode === 'plane');
+            
+            // Apenas processar se o modo de planos estiver ativo
+            if (style.activeVertexMode !== 'plane') {
+              console.log('Not in plane mode, ignoring click');
+              return;
+            }
+            
+            // Handler específico para criação de planos - não interfere com outras seleções
+            if (!onStyleChange) {
+              console.log('No onStyleChange function available');
+              return;
+            }
             
             const currentSelection = style.selectedVerticesForPlane || [];
+            console.log('Current selection:', currentSelection);
+            console.log('Planes count:', style.planes.length);
             
             // Verificar limite de planos
             if (style.planes.length >= 5 && currentSelection.length === 0) {
+              console.log('Plane limit reached, ignoring selection');
               return; // Não permitir nova seleção se já há 5 planos
             }
             
             if (currentSelection.includes(vertexIndex)) {
               // Remove vertex if already selected
+              console.log('Removing vertex from selection');
               onStyleChange('selectedVerticesForPlane', currentSelection.filter(i => i !== vertexIndex));
             } else if (currentSelection.length < 3) {
               // Adicionar o vértice se não estiver na lista e ainda não temos 3
-              onStyleChange('selectedVerticesForPlane', [...currentSelection, vertexIndex]);
+              console.log('Adding vertex to selection');
+              const newSelection = [...currentSelection, vertexIndex];
+              console.log('New selection:', newSelection);
+              onStyleChange('selectedVerticesForPlane', newSelection);
+            } else {
+              console.log('Selection limit reached (3 vertices)');
             }
           }}
           onClearSelection={() => {
@@ -503,19 +776,22 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
             console.log('Seleção atual:', currentSelection);
             
             if (currentSelection.length >= 3 && currentPlanes.length < 5) {
+              // Criar novo plano com nome único
+              const planeNumber = currentPlanes.length + 1;
               const newPlane = {
-                id: `plane-${Date.now()}`,
-                name: `Plano ${currentPlanes.length + 1}`,
-                vertices: currentSelection.slice(0, 3),
+                id: `plane-${Date.now()}-${planeNumber}`,
+                name: `Plano ${planeNumber}`,
+                vertices: [...currentSelection],
                 color: style.planeColor,
                 opacity: style.planeOpacity
               };
               
-              console.log('Novo plano:', newPlane);
+              console.log('Novo plano criado:', newPlane);
               
               // Garantir que preservamos os planos existentes
               const updatedPlanes = [...currentPlanes, newPlane];
               console.log('Lista final de planos:', updatedPlanes);
+              console.log('Total de planos após criação:', updatedPlanes.length);
               
               // Usar uma única atualização de estado para evitar conflitos
               onStyleChange('planes', updatedPlanes);
@@ -526,7 +802,11 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
               }, 100);
               
               // Feedback visual
-              toast.success(`${newPlane.name} criado com sucesso!`);
+              toast.success(`${newPlane.name} criado com sucesso! (${updatedPlanes.length}/5 planos)`);
+            } else if (currentSelection.length < 3) {
+              toast.error('Selecione pelo menos 3 vértices para criar um plano');
+            } else if (currentPlanes.length >= 5) {
+              toast.error('Limite máximo de 5 planos atingido');
             }
           }}
         />
@@ -542,6 +822,9 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           showConstruction={true}
           constructions={style.constructions}
           onVertexSelect={(vertexIndex, position) => {
+            // Apenas processar se o modo de construções estiver ativo
+            if (style.activeVertexMode !== 'construction') return;
+            
             if (!onStyleChange) return;
             
             const current = style.selectedVerticesForConstruction || [];
@@ -578,7 +861,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           anchorX="center"
           anchorY="bottom"
         >
-          {getGeometryName(params.type)}
+          {getGeometryName(params.type, t)}
         </Text>
       )}
     </AutoRotatingGroup>
@@ -678,6 +961,202 @@ function TetrahedronVertices({ params }: { params: GeometryParams }) {
           <meshBasicMaterial color="#ffff00" />
         </mesh>
       ))}
+    </group>
+  );
+}
+
+// Componente específico para vértices do octaedro
+function OctahedronVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  const { sideLength = 2 } = params;
+  const a = sideLength;
+  
+  // Usar exatamente as mesmas coordenadas da função createOctahedronGeometry
+  const d = a / Math.sqrt(2);
+  
+  const vertices = [
+    new THREE.Vector3(d, d, 0),    // 0: +X
+    new THREE.Vector3(-d, d, 0),   // 1: -X
+    new THREE.Vector3(0, d + d, 0), // 2: +Y (superior)
+    new THREE.Vector3(0, 0, 0),     // 3: -Y (inferior)
+    new THREE.Vector3(0, d, d),     // 4: +Z
+    new THREE.Vector3(0, d, -d)     // 5: -Z
+  ];
+
+  return (
+    <group>
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do octaedro`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.08]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#ffd700" : "#ffff00"}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Componente específico para vértices do dodecaedro
+function DodecahedronVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  const { sideLength = 2 } = params;
+  const radius = sideLength * (Math.sqrt(3) * (1 + Math.sqrt(5))) / 4;
+  const geometry = new THREE.DodecahedronGeometry(radius);
+  geometry.translate(0, radius, 0);
+  
+  const uniqueVertices = new Map<string, THREE.Vector3>();
+  const positions = geometry.attributes.position.array;
+  
+  for (let i = 0; i < positions.length; i += 3) {
+    const vertex = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]);
+    const key = `${vertex.x.toFixed(4)},${vertex.y.toFixed(4)},${vertex.z.toFixed(4)}`;
+    if (!uniqueVertices.has(key)) {
+      uniqueVertices.set(key, vertex);
+    }
+  }
+  
+  const vertices = Array.from(uniqueVertices.values());
+
+  return (
+    <group>
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do dodecaedro`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.08]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#ffd700" : "#ffff00"}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Função centralizada para gerar vértices do icosaedro
+function getIcosahedronVertices(sideLength: number): THREE.Vector3[] {
+  const phi = (1 + Math.sqrt(5)) / 2; // Número áureo
+  const radius = (sideLength * phi) / (2 * Math.sin(Math.PI / 5));
+  
+  // Usar vértices manuais para garantir consistência
+  const scale = radius / Math.sqrt(phi * phi + 1);
+  
+  const vertices = [
+    [0, 1, phi], [0, 1, -phi], [0, -1, phi], [0, -1, -phi],
+    [1, phi, 0], [1, -phi, 0], [-1, phi, 0], [-1, -phi, 0],
+    [phi, 0, 1], [phi, 0, -1], [-phi, 0, 1], [-phi, 0, -1]
+  ];
+  
+  return vertices.map(([x, y, z]) => 
+    new THREE.Vector3(x * scale, y * scale + radius, z * scale)
+  );
+}
+
+// Componente específico para vértices do icosaedro
+function IcosahedronVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  const { sideLength = 2 } = params;
+  const vertices = getIcosahedronVertices(sideLength);
+
+  return (
+    <group>
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do icosaedro`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.08]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#ffd700" : "#ffff00"}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
@@ -909,18 +1388,18 @@ function getCameraTarget(params: GeometryParams): [number, number, number] {
   return [0, height / 2, 0];
 }
 
-function getGeometryName(type: string): string {
+function getGeometryName(type: string, t: (key: string) => string): string {
   const names = {
-    pyramid: 'Pirâmide',
-    cylinder: 'Cilindro',
-    cone: 'Cone',
-    cube: 'Cubo',
-    sphere: 'Esfera',
-    prism: 'Prisma',
-    tetrahedron: 'Tetraedro',
-    octahedron: 'Octaedro',
-    dodecahedron: 'Dodecaedro',
-    icosahedron: 'Icosaedro'
+    pyramid: t('geometry.pyramid'),
+    cylinder: t('geometry.cylinder'),
+    cone: t('geometry.cone'),
+    cube: t('geometry.cube'),
+    sphere: t('geometry.sphere'),
+    prism: t('geometry.prism'),
+    tetrahedron: t('geometry.tetrahedron'),
+    octahedron: t('geometry.octahedron'),
+    dodecahedron: t('geometry.dodecahedron'),
+    icosahedron: t('geometry.icosahedron')
   };
   return names[type as keyof typeof names] || type;
 }
@@ -938,8 +1417,8 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
     <div className="w-full h-full relative">
         <Canvas 
           camera={{ 
-            position: [8, 6, 8], 
-            fov: 50,
+            position: [6, 4, 6], 
+            fov: 60,
             near: 0.01,
             far: 1000
           }}
@@ -962,16 +1441,16 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
           onCreated={({ gl, camera }) => {
             gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             gl.outputColorSpace = 'srgb';
-            // Configurar câmera inicial fixa
-            camera.position.set(8, 6, 8);
-            camera.lookAt(0, 2, 0);
+            // Configurar câmera inicial para mostrar o sólido completo em tamanho maior
+            camera.position.set(6, 4, 6);
+            camera.lookAt(0, 1, 0);
             camera.updateProjectionMatrix();
           }}
         >
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={0.6} />
         <directionalLight 
-          position={[10, 10, 5]} 
-          intensity={1}
+          position={[8, 8, 4]} 
+          intensity={1.2}
           castShadow={options.showShadow}
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -981,7 +1460,7 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
         />
-        <pointLight position={[-10, -10, -5]} intensity={0.3} />
+        <pointLight position={[-8, -8, -4]} intensity={0.4} />
         
         <GeometryMesh 
           params={params}
@@ -1000,7 +1479,7 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
           maxDistance={params.type === 'tetrahedron' ? 20 : 50}
           enableDamping={true}
           dampingFactor={0.05}
-          target={params.type === 'tetrahedron' ? [0, 1, 0] : [0, 2, 0]}
+          target={[0, 1, 0]}
           maxPolarAngle={Math.PI * 0.95}
           minPolarAngle={Math.PI * 0.05}
           zoomSpeed={1}
@@ -1021,12 +1500,12 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
         
         {options.showGrid && (
           <Grid 
-            args={[30, 30]}
-            position={[0, -0.2, 0]}
-            cellColor="#444"
-            sectionColor="#666"
-            fadeDistance={15}
-            fadeStrength={2}
+            args={[20, 20]}
+            position={[0, 0, 0]}
+            cellColor="#555"
+            sectionColor="#777"
+            fadeDistance={12}
+            fadeStrength={1.5}
             infiniteGrid={false}
           />
         )}

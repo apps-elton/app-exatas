@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -120,15 +121,16 @@ export default function AdvancedDrawingToolbar({
   constructionsCount = 0,
   planesCount = 0
 }: AdvancedDrawingToolbarProps) {
+  const { t } = useLanguage();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const getToolName = (toolType: ToolType): string => {
     switch (toolType) {
-      case 'select': return 'Seleção';
-      case 'pen': return 'Caneta';
-      case 'eraser': return 'Borracha';
-      case 'text': return 'Texto';
-      default: return 'Ferramenta';
+      case 'select': return t('tool.select');
+      case 'pen': return t('tool.pen');
+      case 'eraser': return t('tool.eraser');
+      case 'text': return t('tool.text');
+      default: return t('tool.unknown');
     }
   };
 
@@ -149,8 +151,8 @@ export default function AdvancedDrawingToolbar({
   };
 
   return (
-    <Card className="p-3 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">
-      <div className="flex items-center gap-3 flex-wrap">
+    <Card className="p-2 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">
+      <div className="flex items-center gap-2 flex-wrap">
         {/* Drawing Mode Toggle */}
         <Button
           variant={isDrawingMode ? "default" : "outline"}
@@ -164,10 +166,10 @@ export default function AdvancedDrawingToolbar({
         >
           {isDrawingMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           <PenTool className="w-4 h-4" />
-          {isDrawingMode ? 'Desativar Desenho' : 'Ativar Desenho'}
+{isDrawingMode ? t('button.deactivate') : t('drawing.activate_drawing')}
         </Button>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Tools */}
         <div className="flex items-center gap-2">
@@ -209,7 +211,7 @@ export default function AdvancedDrawingToolbar({
           </Button>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Color Picker - Hide for select tool */}
         {tool !== 'select' && (
@@ -237,7 +239,7 @@ export default function AdvancedDrawingToolbar({
               </div>
             </div>
 
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-6" />
           </>
         )}
 
@@ -319,7 +321,7 @@ export default function AdvancedDrawingToolbar({
         {/* Opacity - Hide for eraser and select */}
         {tool !== 'eraser' && tool !== 'select' && (
           <>
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-3 min-w-[120px]">
               <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">
                 Opacidade: {Math.round(opacity * 100)}%
@@ -337,7 +339,7 @@ export default function AdvancedDrawingToolbar({
           </>
         )}
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -398,7 +400,7 @@ export default function AdvancedDrawingToolbar({
         {/* Construções Geométricas */}
         {onToggleConstructions && (
           <>
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-2">
               <Button
                 variant={showGeometricConstructions ? "default" : "outline"}
@@ -412,7 +414,7 @@ export default function AdvancedDrawingToolbar({
                 }`}
               >
                 <Compass className="w-4 h-4" />
-                {showGeometricConstructions ? 'Desativar' : 'Construções'}
+{showGeometricConstructions ? t('button.deactivate') : t('drawing.constructions')}
               </Button>
 
               {/* Botões rápidos de construção */}

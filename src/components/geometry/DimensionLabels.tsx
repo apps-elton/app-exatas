@@ -1,5 +1,6 @@
 import { Text } from '@react-three/drei';
 import { GeometryParams } from '@/types/geometry';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface DimensionLabelsProps {
   params: GeometryParams;
@@ -7,6 +8,7 @@ interface DimensionLabelsProps {
 }
 
 export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps) {
+  const { t } = useLanguage();
   if (!showDimensions) return null;
 
   const height = params.height || 4;
@@ -39,7 +41,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Base: {baseEdgeLength.toFixed(1)}
+{t('params.base_edge')}: {baseEdgeLength.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.3, 0]}
@@ -48,7 +50,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Altura: {height.toFixed(1)}
+{t('params.height')}: {height.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.6, 0]}
@@ -57,7 +59,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Lados: {params.numSides}
+{t('params.sides')}: {params.numSides}
           </Text>
         </group>
       )}
@@ -72,7 +74,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Base: {baseEdgeLength.toFixed(1)}
+{t('params.base_edge')}: {baseEdgeLength.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.3, 0]}
@@ -81,7 +83,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Altura: {height.toFixed(1)}
+{t('params.height')}: {height.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.6, 0]}
@@ -90,7 +92,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Lados: {params.numSides}
+{t('params.sides')}: {params.numSides}
           </Text>
         </group>
       )}
@@ -144,7 +146,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Raio: {radius.toFixed(1)}
+{t('params.radius')}: {radius.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.3, 0]}
@@ -153,7 +155,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Altura: {height.toFixed(1)}
+{t('params.height')}: {height.toFixed(1)}
           </Text>
         </group>
       )}
@@ -168,7 +170,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Raio: {radius.toFixed(1)}
+{t('params.radius')}: {radius.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.3, 0]}
@@ -177,7 +179,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Altura: {height.toFixed(1)}
+{t('params.height')}: {height.toFixed(1)}
           </Text>
           <Text
             position={[0, -0.6, 0]}
@@ -201,7 +203,7 @@ export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps
             anchorX="left"
             anchorY="middle"
           >
-            Raio: {radius.toFixed(1)}
+{t('params.radius')}: {radius.toFixed(1)}
           </Text>
         </group>
       )}
