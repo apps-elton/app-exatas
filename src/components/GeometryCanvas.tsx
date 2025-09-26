@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useLanguage } from '@/context/LanguageContext';
 import { OrbitControls, Grid, Text } from '@react-three/drei';
@@ -26,6 +26,13 @@ import PlaneDefinition from './geometry/PlaneDefinition';
 import GeometricConstructions from './geometry/GeometricConstructions';
 import AutoRotatingGroup from './geometry/AutoRotatingGroup';
 import { getInscribedVertices, getCircumscribedVertices } from '@/lib/inscribed-circumscribed-vertices';
+import RevolutionSolids from './geometry/RevolutionSolids';
+import ArchimedeanSolids from './geometry/ArchimedeanSolids';
+import FrustumSolids from './geometry/FrustumSolids';
+import MidpointTool from './geometry/MidpointTool';
+import MeasurementTool from './geometry/MeasurementTool';
+import AlignmentTool from './geometry/AlignmentTool';
+import PerpendicularTool from './geometry/PerpendicularTool';
 
 interface GeometryMeshProps {
   params: GeometryParams;
@@ -39,6 +46,143 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
   const { t } = useLanguage();
   const meshRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
+
+  // Função para obter pontos médios do estilo
+  const getMidpoints = (): THREE.Vector3[] => {
+    const midpoints = (style as any).midpoints || [];
+    console.log('getMidpoints chamada, retornando:', midpoints.length, 'pontos médios');
+    return midpoints;
+  };
+
+  // Função centralizada para lidar com seleção de vértices (incluindo pontos médios)
+  const handleVertexSelection = (vertexIndex: number, geometryType: string) => {
+    const startTime = performance.now();
+    console.log(`=== CLIQUE NO VÉRTICE ${geometryType.toUpperCase()} ===`, vertexIndex);
+    console.log('Parâmetros atuais:', params);
+    console.log('Ferramenta ativa:', options.activeTool);
+    console.log('Seleção atual:', style.selectedVerticesForGeneral);
+    console.log('Tipo de geometria:', geometryType);
+    
+    // Verificar se é um ponto médio baseado no número de vértices da geometria
+    const getBaseVertexCount = (): number => {
+      switch (params.type) {
+        case 'cube': return 8;
+        case 'tetrahedron': return 4;
+        case 'octahedron': return 6;
+        case 'dodecahedron': return 20;
+        case 'icosahedron': return 12;
+        case 'cylinder': return 16;
+        case 'cone': return 9;
+        case 'prism': {
+          const numSides = params.numSides || 5;
+          return numSides * 2;
+        }
+        case 'pyramid': {
+          const numSides = params.numSides || 5;
+          return numSides + 1;
+        }
+        default: return 8;
+      }
+    };
+    
+    const baseVertexCount = getBaseVertexCount();
+    const isMidpoint = vertexIndex >= baseVertexCount;
+    console.log('É ponto médio:', isMidpoint);
+    console.log('Base vertex count:', baseVertexCount);
+    console.log('Vertex index:', vertexIndex);
+    console.log('Midpoints disponíveis:', getMidpoints().length);
+    
+    // Verificar se alguma ferramenta geométrica está ativa
+    if (options.activeTool === 'vertex-connector') {
+      console.log('=== FERRAMENTA CONECTAR VÉRTICES ATIVA ===');
+      const currentSelection = style.selectedVerticesForGeneral || [];
+      if (!onStyleChange) return;
+      
+      console.log('Clique em vértice para conectar:', vertexIndex);
+      console.log('É ponto médio:', isMidpoint);
+      
+      // Se já está selecionado, remover
+      if (currentSelection.includes(vertexIndex)) {
+        console.log('Removendo vértice da seleção');
+        onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
+        return;
+      }
+      
+      // Adicionar à seleção
+      const newSelection = [...currentSelection, vertexIndex];
+      console.log('Nova seleção:', newSelection);
+      onStyleChange('selectedVerticesForGeneral', newSelection);
+      
+      // Se temos 2 vértices, criar conexão
+      if (newSelection.length === 2) {
+        console.log('CRIANDO CONEXÃO!');
+        const newConnection = {
+          id: `connection-${Date.now()}`,
+          type: 'segmento-reta',
+          vertices: [...newSelection],
+          color: style.segmentColor || '#00ff00'
+        };
+        
+        const currentConnections = style.connections || [];
+        onStyleChange('connections', [...currentConnections, newConnection]);
+        onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+        
+        // toast.success('Conexão criada!');
+      }
+    } else if (options.activeTool === 'midpoint') {
+      console.log('=== FERRAMENTA PONTO MÉDIO ATIVA ===');
+      const currentSelection = style.selectedVerticesForGeneral || [];
+      console.log('Seleção atual antes:', currentSelection);
+      console.log('Vértice clicado:', vertexIndex);
+      console.log('É ponto médio:', isMidpoint);
+      console.log('Base vertex count:', baseVertexCount);
+      console.log('Midpoints disponíveis:', getMidpoints().length);
+      
+      // Verificar se o vértice já está selecionado
+      if (currentSelection.includes(vertexIndex)) {
+        console.log('Vértice já está selecionado, removendo da seleção');
+        const newSelection = currentSelection.filter(v => v !== vertexIndex);
+        console.log('Nova seleção após remoção:', newSelection);
+        onStyleChange('selectedVerticesForGeneral', newSelection);
+      } else {
+        // Adicionar novo vértice à seleção
+        const newSelection = [...currentSelection, vertexIndex];
+        console.log('Adicionando vértice à seleção:', newSelection);
+        onStyleChange('selectedVerticesForGeneral', newSelection);
+        
+        // Se temos 2 vértices, mostrar feedback
+        if (newSelection.length === 2) {
+          console.log('✅ DOIS VÉRTICES SELECIONADOS! Ponto médio será criado automaticamente.');
+        }
+      }
+      
+      const endTime = performance.now();
+      console.log(`handleVertexSelection executado em ${(endTime - startTime).toFixed(2)}ms`);
+    } else if (options.activeTool === 'measure') {
+      console.log('Ferramenta medição ativa');
+      const currentSelection = style.selectedVerticesForGeneral || [];
+      onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
+    } else if (options.activeTool === 'align') {
+      console.log('Ferramenta alinhamento ativa');
+      const currentSelection = style.selectedVerticesForGeneral || [];
+      onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
+    } else if (options.activeTool === 'perpendicular') {
+      console.log('Ferramenta perpendicular ativa');
+      const currentSelection = style.selectedVerticesForGeneral || [];
+      onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
+    } else {
+      // Handler genérico para pontos médios quando nenhuma ferramenta específica está ativa
+      console.log('=== HANDLER GENÉRICO PARA PONTOS MÉDIOS ===');
+      console.log('Ferramenta ativa:', options.activeTool);
+      console.log('É ponto médio:', isMidpoint);
+      
+      if (isMidpoint && onStyleChange) {
+        const currentSelection = style.selectedVerticesForGeneral || [];
+        console.log('Adicionando ponto médio à seleção genérica');
+        onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
+      }
+    }
+  };
 
   // Rotação é gerenciada pelo AutoRotatingGroup
 
@@ -95,6 +239,19 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         return createDodecahedronGeometry(params);
       case 'icosahedron':
         return createIcosahedronGeometry(params);
+      case 'revolution-solids':
+        // Para sólidos de revolução, não renderizar mesh principal
+        // O componente RevolutionSolids cuidará da geometria completa
+        return new THREE.BufferGeometry(); // Geometria vazia
+      case 'archimedean-solids':
+        // Para sólidos arquimedianos, não renderizar mesh principal
+        // O componente ArchimedeanSolids cuidará da geometria completa
+        return new THREE.BufferGeometry(); // Geometria vazia
+      case 'cone-frustum':
+      case 'pyramid-frustum':
+        // Para troncos, não renderizar mesh principal
+        // O componente FrustumSolids cuidará da geometria completa
+        return new THREE.BufferGeometry(); // Geometria vazia
       default:
         return new THREE.BoxGeometry(1, 1, 1);
     }
@@ -104,6 +261,11 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
   
   // Criar wireframe personalizado para diferentes geometrias
   const getWireframeGeometry = () => {
+    // Para sólidos de revolução, arquimedianos e troncos, não criar wireframe (será criado pelos componentes específicos)
+    if (params.type === 'revolution-solids' || params.type === 'archimedean-solids' || params.type === 'cone-frustum' || params.type === 'pyramid-frustum') {
+      return new THREE.BufferGeometry();
+    }
+    
     if (params.type === 'sphere') {
       // Criar linhas de meridiano e paralelo controláveis para efeito de globo
       const radius = params.radius || 2;
@@ -227,7 +389,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
   return (
     <AutoRotatingGroup options={options} style={style}>
       {/* Main mesh */}
-      {options.fillFaces && (
+      {options.fillFaces && params.type !== 'revolution-solids' && params.type !== 'archimedean-solids' && params.type !== 'cone-frustum' && params.type !== 'pyramid-frustum' && (
         <mesh ref={meshRef} geometry={geometry}>
           <meshStandardMaterial 
             color={style.faceColor}
@@ -236,6 +398,75 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
             side={THREE.DoubleSide}
           />
         </mesh>
+      )}
+      
+      {/* Sólidos de revolução */}
+      {params.type === 'revolution-solids' && (
+        <RevolutionSolids 
+          params={params}
+          options={options}
+          style={style}
+          onVertexSelect={onVertexSelect}
+          onStyleChange={onStyleChange}
+        />
+      )}
+
+      {/* Sólidos Arquimedianos */}
+      {params.type === 'archimedean-solids' && (
+        <ArchimedeanSolids 
+          params={params}
+          options={options}
+          style={style}
+          onVertexSelect={onVertexSelect}
+          onStyleChange={onStyleChange}
+        />
+      )}
+
+      {/* Troncos (Frustum) */}
+      {(params.type === 'cone-frustum' || params.type === 'pyramid-frustum') && (
+        <FrustumSolids 
+          params={params}
+          options={options}
+          style={style}
+          onVertexSelect={onVertexSelect}
+          onStyleChange={onStyleChange}
+        />
+      )}
+
+      {/* Ferramentas Geométricas */}
+      {/* MidpointTool sempre renderizado para manter os pontos médios visíveis */}
+      <MidpointTool 
+        params={params}
+        style={style}
+        onStyleChange={onStyleChange}
+        onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'ponto-médio')}
+      />
+
+      {options.activeTool === 'measure' && (
+        <MeasurementTool 
+          params={params}
+          style={style}
+          onStyleChange={onStyleChange}
+          onVertexSelect={onVertexSelect}
+        />
+      )}
+
+      {options.activeTool === 'align' && (
+        <AlignmentTool 
+          params={params}
+          style={style}
+          onStyleChange={onStyleChange}
+          onVertexSelect={onVertexSelect}
+        />
+      )}
+
+      {options.activeTool === 'perpendicular' && (
+        <PerpendicularTool 
+          params={params}
+          style={style}
+          onStyleChange={onStyleChange}
+          onVertexSelect={onVertexSelect}
+        />
       )}
       
       {/* Shadow receiver */}
@@ -247,7 +478,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
       )}
       
       {/* Wireframe */}
-      {options.showEdges && (
+      {options.showEdges && params.type !== 'revolution-solids' && params.type !== 'archimedean-solids' && params.type !== 'cone-frustum' && params.type !== 'pyramid-frustum' && (
         <lineSegments ref={edgesRef} geometry={edges}>
           <lineBasicMaterial color={style.edgeColor} linewidth={style.edgeThickness || 1} />
         </lineSegments>
@@ -255,136 +486,62 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
 
       {/* Vertices */}
       {options.showVertices && params.type === 'cube' && (
-        <CubeVertices geometry={geometry} params={params} />
+        <CubeVertices 
+          geometry={geometry} 
+          params={params}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'cubo')}
+        />
       )}
       {options.showVertices && params.type === 'tetrahedron' && (
-        <TetrahedronVertices params={params} />
+        <TetrahedronVertices 
+          params={params}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'tetraedro')}
+        />
       )}
       {options.showVertices && params.type === 'octahedron' && (
         <OctahedronVertices 
           params={params} 
           selectedVertices={style.selectedVerticesForGeneral || []}
-          onVertexSelect={(vertexIndex) => {
-            console.log('=== CLIQUE NO VÉRTICE DO OCTAEDRO ===', vertexIndex);
-            
-            const currentSelection = style.selectedVerticesForGeneral || [];
-            if (!onStyleChange) return;
-            
-            // Se já está selecionado, remover
-            if (currentSelection.includes(vertexIndex)) {
-              console.log('Removendo vértice da seleção');
-              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
-              return;
-            }
-            
-            // Adicionar à seleção
-            const newSelection = [...currentSelection, vertexIndex];
-            console.log('Nova seleção:', newSelection);
-            onStyleChange('selectedVerticesForGeneral', newSelection);
-            
-            // Se temos 2 vértices, criar conexão
-            if (newSelection.length === 2) {
-              console.log('CRIANDO CONEXÃO NO OCTAEDRO!');
-              const newConnection = {
-                id: `connection-${Date.now()}`,
-                type: 'segmento-reta',
-                vertices: [...newSelection],
-                color: style.segmentColor || '#00ff00'
-              };
-              
-              const currentConnections = style.connections || [];
-              onStyleChange('connections', [...currentConnections, newConnection]);
-              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
-              
-              // toast.success('Conexão criada!');
-            }
-          }}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'octaedro')}
         />
       )}
       {options.showVertices && params.type === 'dodecahedron' && (
         <DodecahedronVertices 
           params={params} 
           selectedVertices={style.selectedVerticesForGeneral || []}
-          onVertexSelect={(vertexIndex) => {
-            console.log('=== CLIQUE NO VÉRTICE DO DODECAEDRO ===', vertexIndex);
-            
-            const currentSelection = style.selectedVerticesForGeneral || [];
-            if (!onStyleChange) return;
-            
-            // Se já está selecionado, remover
-            if (currentSelection.includes(vertexIndex)) {
-              console.log('Removendo vértice da seleção');
-              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
-              return;
-            }
-            
-            // Adicionar à seleção
-            const newSelection = [...currentSelection, vertexIndex];
-            console.log('Nova seleção:', newSelection);
-            onStyleChange('selectedVerticesForGeneral', newSelection);
-            
-            // Se temos 2 vértices, criar conexão
-            if (newSelection.length === 2) {
-              console.log('CRIANDO CONEXÃO NO DODECAEDRO!');
-              const newConnection = {
-                id: `connection-${Date.now()}`,
-                type: 'segmento-reta',
-                vertices: [...newSelection],
-                color: style.segmentColor || '#00ff00'
-              };
-              
-              const currentConnections = style.connections || [];
-              onStyleChange('connections', [...currentConnections, newConnection]);
-              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
-              
-              // toast.success('Conexão criada!');
-            }
-          }}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'dodecaedro')}
         />
       )}
       {options.showVertices && params.type === 'icosahedron' && (
         <IcosahedronVertices 
           params={params} 
           selectedVertices={style.selectedVerticesForGeneral || []}
-          onVertexSelect={(vertexIndex) => {
-            console.log('=== CLIQUE NO VÉRTICE DO ICOSAEDRO ===', vertexIndex);
-            
-            const currentSelection = style.selectedVerticesForGeneral || [];
-            if (!onStyleChange) return;
-            
-            // Se já está selecionado, remover
-            if (currentSelection.includes(vertexIndex)) {
-              console.log('Removendo vértice da seleção');
-              onStyleChange('selectedVerticesForGeneral', currentSelection.filter(i => i !== vertexIndex));
-              return;
-            }
-            
-            // Adicionar à seleção
-            const newSelection = [...currentSelection, vertexIndex];
-            console.log('Nova seleção:', newSelection);
-            onStyleChange('selectedVerticesForGeneral', newSelection);
-            
-            // Se temos 2 vértices, criar conexão
-            if (newSelection.length === 2) {
-              console.log('CRIANDO CONEXÃO NO ICOSAEDRO!');
-              const newConnection = {
-                id: `connection-${Date.now()}`,
-                type: 'segmento-reta',
-                vertices: [...newSelection],
-                color: style.segmentColor || '#00ff00'
-              };
-              
-              const currentConnections = style.connections || [];
-              onStyleChange('connections', [...currentConnections, newConnection]);
-              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
-              
-              // toast.success('Conexão criada!');
-            }
-          }}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'icosaedro')}
         />
       )}
-      {options.showVertices && params.type !== 'cylinder' && params.type !== 'cube' && params.type !== 'tetrahedron' && params.type !== 'octahedron' && params.type !== 'dodecahedron' && params.type !== 'icosahedron' && (
-        <VertexPoints geometry={geometry} geometryType={params.type} />
+      {options.showVertices && params.type === 'cylinder' && (
+        <CylinderVertices 
+          params={params}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'cilindro')}
+        />
+      )}
+      {options.showVertices && params.type === 'cone' && (
+        <ConeVertices 
+          params={params}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'cone')}
+        />
+      )}
+      {options.showVertices && params.type !== 'cube' && params.type !== 'tetrahedron' && params.type !== 'octahedron' && params.type !== 'dodecahedron' && params.type !== 'icosahedron' && params.type !== 'cylinder' && params.type !== 'cone' && params.type !== 'revolution-solids' && params.type !== 'archimedean-solids' && params.type !== 'cone-frustum' && params.type !== 'pyramid-frustum' && (
+        <VertexPoints 
+          geometry={geometry} 
+          geometryType={params.type}
+          selectedVertices={style.selectedVerticesForGeneral || []}
+          onVertexSelect={(vertexIndex) => handleVertexSelection(vertexIndex, 'genérico')}
+        />
       )}
 
       {/* Measurement lines */}
@@ -530,6 +687,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           connections={style.connections || []}
           edgeColor={style.segmentColor || '#00ff00'}
           lineWidth={style.segmentThickness || 1.0}
+          midpoints={getMidpoints()}
           onVertexSelect={() => {}} // Não faz nada, apenas renderiza
           onClearConnections={() => {}}
           onDeleteConnection={(connectionId) => {
@@ -551,11 +709,39 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           lineWidth={style.segmentThickness || 1.0}
           inscribedVertices={getInscribedVertices(params, options)}
           circumscribedVertices={getCircumscribedVertices(params, options)}
+          midpoints={getMidpoints()}
           onVertexSelect={(vertexIndex) => {
-            console.log('=== CLIQUE NO VÉRTICE ===', vertexIndex);
+            console.log('=== CLIQUE NO VÉRTICE NO SIMPLE VERTEX CONNECTOR ===', vertexIndex);
             
             const currentSelection = style.selectedVerticesForGeneral || [];
             if (!onStyleChange) return;
+            
+            // Verificar se é um ponto médio
+            const getBaseVertexCount = (): number => {
+              switch (params.type) {
+                case 'cube': return 8;
+                case 'tetrahedron': return 4;
+                case 'octahedron': return 6;
+                case 'dodecahedron': return 20;
+                case 'icosahedron': return 12;
+                case 'cylinder': return 16;
+                case 'cone': return 9;
+                case 'prism': {
+                  const numSides = params.numSides || 5;
+                  return numSides * 2;
+                }
+                case 'pyramid': {
+                  const numSides = params.numSides || 5;
+                  return numSides + 1;
+                }
+                default: return 8;
+              }
+            };
+            
+            const baseVertexCount = getBaseVertexCount();
+            const isMidpoint = vertexIndex >= baseVertexCount;
+            console.log('É ponto médio no SimpleVertexConnector:', isMidpoint);
+            console.log('Base vertex count:', baseVertexCount);
             
             // Se já está selecionado, remover
             if (currentSelection.includes(vertexIndex)) {
@@ -607,6 +793,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           params={params}
           showVertexConnections={options.showMeridianSection}
           selectedVertices={style.selectedVerticesForMeridian || []}
+          midpoints={getMidpoints()}
           onVertexSelect={(vertexIndex) => {
             if (!onStyleChange) return;
             
@@ -639,6 +826,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           params={params}
           showVertexConnections={true}
           selectedVertices={style.selectedVerticesForMeridian}
+          midpoints={getMidpoints()}
           onVertexSelect={(vertexIndex) => {
             // Handler específico para seção meridiana em prismas - não interfere com outras seleções
             if (!onStyleChange) return;
@@ -687,6 +875,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           showSelectionInstructions={false} // Não mostrar instruções
           showNormalVector={false} // Não mostrar vetor normal
           showVerticesAlways={false} // Não mostrar vértices clicáveis
+          midpoints={getMidpoints()}
           planes={style.planes}
           onVertexSelect={() => {}} // Não fazer nada
           onClearSelection={() => {}}
@@ -717,6 +906,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           showSelectionInstructions={true}
           showNormalVector={true}
           showVerticesAlways={true}
+          midpoints={getMidpoints()}
           planes={[]} // Não mostrar planos criados aqui (já renderizados acima)
           onVertexSelect={(vertexIndex, position) => {
             console.log('=== PLANE VERTEX SELECT DEBUG ===');
@@ -725,9 +915,9 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
             console.log('Active mode:', style.activeVertexMode);
             console.log('Should process:', style.activeVertexMode === 'plane');
             
-            // Apenas processar se o modo de planos estiver ativo
+            // Verificar se estamos no modo de criação de planos
             if (style.activeVertexMode !== 'plane') {
-              console.log('Not in plane mode, ignoring click');
+              console.log('Not in plane mode, current mode:', style.activeVertexMode);
               return;
             }
             
@@ -740,6 +930,40 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
             const currentSelection = style.selectedVerticesForPlane || [];
             console.log('Current selection:', currentSelection);
             console.log('Planes count:', style.planes.length);
+            
+            // Verificar se é um ponto médio
+            const getBaseVertexCount = (): number => {
+              switch (params.type) {
+                case 'cube': return 8;
+                case 'tetrahedron': return 4;
+                case 'octahedron': return 6;
+                case 'dodecahedron': return 20;
+                case 'icosahedron': return 12;
+                case 'cylinder': return 16;
+                case 'cone': return 9;
+                case 'prism': {
+                  const numSides = params.numSides || 5;
+                  return numSides * 2;
+                }
+                case 'pyramid': {
+                  const numSides = params.numSides || 5;
+                  return numSides + 1;
+                }
+                default: return 8;
+              }
+            };
+            
+            const baseVertexCount = getBaseVertexCount();
+            const isMidpoint = vertexIndex >= baseVertexCount;
+            console.log('É ponto médio para plano:', isMidpoint);
+            console.log('Base vertex count:', baseVertexCount);
+            console.log('Vertex index:', vertexIndex);
+            
+            if (isMidpoint) {
+              console.log('🎯 PROCESSANDO SELEÇÃO DE PONTO MÉDIO PARA PLANO!');
+              console.log('Índice do ponto médio:', vertexIndex);
+              console.log('Posição do ponto médio:', position);
+            }
             
             // Verificar limite de planos
             if (style.planes.length >= 5 && currentSelection.length === 0) {
@@ -756,6 +980,7 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
               console.log('Adding vertex to selection');
               const newSelection = [...currentSelection, vertexIndex];
               console.log('New selection:', newSelection);
+              console.log('Is midpoint being added:', isMidpoint);
               onStyleChange('selectedVerticesForPlane', newSelection);
             } else {
               console.log('Selection limit reached (3 vertices)');
@@ -822,8 +1047,8 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
           showConstruction={true}
           constructions={style.constructions}
           onVertexSelect={(vertexIndex, position) => {
-            // Apenas processar se o modo de construções estiver ativo
-            if (style.activeVertexMode !== 'construction') return;
+            // Permitir interação com ferramentas geométricas independentemente do modo
+            if (style.activeVertexMode !== 'construction' && options.activeTool === 'none') return;
             
             if (!onStyleChange) return;
             
@@ -868,15 +1093,30 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
   );
 }
 
-function VertexPoints({ geometry, geometryType }: { geometry: THREE.BufferGeometry; geometryType: string }) {
+function VertexPoints({ 
+  geometry, 
+  geometryType, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  geometry: THREE.BufferGeometry; 
+  geometryType: string;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  // Verificar se a geometria tem atributos válidos
+  if (!geometry.attributes.position || !geometry.attributes.position.array) {
+    return null;
+  }
+  
   const positions = geometry.attributes.position.array;
   const vertices: THREE.Vector3[] = [];
   
   // Limit vertices shown based on geometry type
   const getVertexLimit = (type: string): number => {
     switch (type) {
-      case 'cylinder': return 24; // Only show base vertices
-      case 'cone': return 17; // Base vertices + apex
+      case 'cylinder': return 16; // 8 vertices top + 8 vertices bottom
+      case 'cone': return 8; // Only base vertices (8 points)
       case 'sphere': return 32; // Limited vertices for sphere
       case 'cube': return 8; // Only corner vertices
       default: return positions.length / 3; // All vertices for other shapes
@@ -892,18 +1132,53 @@ function VertexPoints({ geometry, geometryType }: { geometry: THREE.BufferGeomet
 
   return (
     <group>
-      {vertices.map((vertex, index) => (
-        <mesh key={index} position={vertex}>
-          <sphereGeometry args={[0.05]} />
-          <meshBasicMaterial color="#00ffff" />
-        </mesh>
-      ))}
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do ${geometryType}`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#4ecdc4" : "#00ffff"}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
 
 // Componente específico para vértices do cubo
-function CubeVertices({ geometry, params }: { geometry: THREE.BufferGeometry; params?: GeometryParams }) {
+function CubeVertices({ 
+  geometry, 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  geometry: THREE.BufferGeometry; 
+  params?: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
   const sideLength = params?.sideLength || 2;
   const half = sideLength / 2;
   
@@ -922,18 +1197,51 @@ function CubeVertices({ geometry, params }: { geometry: THREE.BufferGeometry; pa
 
   return (
     <group>
-      {vertices.map((vertex, index) => (
-        <mesh key={index} position={vertex}>
-          <sphereGeometry args={[0.08]} />
-          <meshBasicMaterial color="#00ffff" />
-        </mesh>
-      ))}
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do cubo`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#4ecdc4" : "#00ffff"}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
 
 // Componente específico para vértices do tetraedro
-function TetrahedronVertices({ params }: { params: GeometryParams }) {
+function TetrahedronVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
   const { sideLength = 2 } = params;
   const a = sideLength;
   
@@ -955,12 +1263,37 @@ function TetrahedronVertices({ params }: { params: GeometryParams }) {
 
   return (
     <group>
-      {vertices.map((vertex, index) => (
-        <mesh key={index} position={vertex}>
-          <sphereGeometry args={[0.08]} />
-          <meshBasicMaterial color="#ffff00" />
-        </mesh>
-      ))}
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do tetraedro`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#4ecdc4" : "#ffff00"}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
@@ -1014,11 +1347,11 @@ function OctahedronVertices({
             }}
             renderOrder={4}
           >
-            <sphereGeometry args={[0.08]} />
+            <sphereGeometry args={[0.05]} />
             <meshBasicMaterial 
-              color={isSelected ? "#ffd700" : "#ffff00"}
+              color={isSelected ? "#4ecdc4" : "#ffff00"}
               transparent
-              opacity={0.9}
+              opacity={0.8}
             />
           </mesh>
         );
@@ -1079,11 +1412,11 @@ function DodecahedronVertices({
             }}
             renderOrder={4}
           >
-            <sphereGeometry args={[0.08]} />
+            <sphereGeometry args={[0.05]} />
             <meshBasicMaterial 
-              color={isSelected ? "#ffd700" : "#ffff00"}
+              color={isSelected ? "#4ecdc4" : "#ffff00"}
               transparent
-              opacity={0.9}
+              opacity={0.8}
             />
           </mesh>
         );
@@ -1148,11 +1481,11 @@ function IcosahedronVertices({
             }}
             renderOrder={4}
           >
-            <sphereGeometry args={[0.08]} />
+            <sphereGeometry args={[0.05]} />
             <meshBasicMaterial 
-              color={isSelected ? "#ffd700" : "#ffff00"}
+              color={isSelected ? "#4ecdc4" : "#ffff00"}
               transparent
-              opacity={0.9}
+              opacity={0.8}
             />
           </mesh>
         );
@@ -1161,6 +1494,140 @@ function IcosahedronVertices({
   );
 }
 
+// Componente específico para vértices do cilindro
+function CylinderVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  const { radius = 2, height = 4 } = params;
+  
+  const vertices: THREE.Vector3[] = [];
+  
+  // Base inferior (8 vértices)
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * 2 * Math.PI) / 8;
+    vertices.push(new THREE.Vector3(
+      radius * Math.cos(angle),
+      0,
+      radius * Math.sin(angle)
+    ));
+  }
+  
+  // Base superior (8 vértices)
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * 2 * Math.PI) / 8;
+    vertices.push(new THREE.Vector3(
+      radius * Math.cos(angle),
+      height,
+      radius * Math.sin(angle)
+    ));
+  }
+
+  return (
+    <group>
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do cilindro`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#4ecdc4" : "#00ffff"}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+// Componente específico para vértices do cone
+function ConeVertices({ 
+  params, 
+  selectedVertices = [], 
+  onVertexSelect 
+}: { 
+  params: GeometryParams;
+  selectedVertices?: number[];
+  onVertexSelect?: (index: number) => void;
+}) {
+  const { radius = 2, height = 4 } = params;
+  
+  const vertices: THREE.Vector3[] = [];
+  
+  // Base circular (8 vértices)
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * 2 * Math.PI) / 8;
+    vertices.push(new THREE.Vector3(
+      radius * Math.cos(angle),
+      0,
+      radius * Math.sin(angle)
+    ));
+  }
+  
+  // Ápice
+  vertices.push(new THREE.Vector3(0, height, 0));
+
+  return (
+    <group>
+      {vertices.map((vertex, index) => {
+        const isSelected = selectedVertices.includes(index);
+        
+        return (
+          <mesh 
+            key={index} 
+            position={vertex}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(`Clique no vértice ${index} do cone`);
+              onVertexSelect?.(index);
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'pointer';
+            }}
+            onPointerOut={(e) => {
+              e.stopPropagation();
+              document.body.style.cursor = 'default';
+            }}
+            renderOrder={4}
+          >
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial 
+              color={isSelected ? "#4ecdc4" : "#ffff00"}
+              transparent
+              opacity={0.8}
+            />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
 
 function createPyramidGeometry(params: GeometryParams): THREE.BufferGeometry {
   const { height = 4, baseEdgeLength = 2, numSides = 5 } = params;
@@ -1412,9 +1879,166 @@ interface GeometryCanvasProps {
   onStyleChange?: (key: keyof StyleOptions, value: any) => void;
 }
 
-export default function GeometryCanvas({ params, options, style, onVertexSelect, onStyleChange }: GeometryCanvasProps) {
+// Componente de controles personalizado para gerenciar navegação
+function CustomOrbitControls({ 
+  options, 
+  onNavigationModeChange,
+  onResetView,
+  onControlsRef
+}: { 
+  options: VisualizationOptions; 
+  onNavigationModeChange?: (isNavigating: boolean) => void;
+  onResetView?: () => void;
+  onControlsRef?: (ref: any) => void;
+}) {
+  const controlsRef = useRef<any>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [lastMouseButton, setLastMouseButton] = useState<number | null>(null);
+  const [showResetButton, setShowResetButton] = useState(false);
+
+  useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    // Passar a referência dos controles para o componente pai
+    onControlsRef?.(controls);
+
+    const handleStart = (event: any) => {
+      const mouseButton = event.button;
+      setLastMouseButton(mouseButton);
+      
+      // Se for botão direito (pan), ativar modo de navegação
+      if (mouseButton === 2) { // Botão direito
+        console.log('🖱️ Botão direito detectado! Mostrando botão de reset...');
+        setIsNavigating(true);
+        setShowResetButton(true);
+        onNavigationModeChange?.(true);
+      }
+    };
+
+    const handleEnd = () => {
+      // Se estava navegando com botão direito, desativar após um delay
+      if (isNavigating && lastMouseButton === 2) {
+        setTimeout(() => {
+          setIsNavigating(false);
+          onNavigationModeChange?.(false);
+        }, 100);
+        
+        // Esconder o botão de reset após 5 segundos se não foi clicado
+        setTimeout(() => {
+          setShowResetButton(false);
+        }, 5000);
+      }
+      setLastMouseButton(null);
+    };
+
+    controls.addEventListener('start', handleStart);
+    controls.addEventListener('end', handleEnd);
+
+    return () => {
+      controls.removeEventListener('start', handleStart);
+      controls.removeEventListener('end', handleEnd);
+    };
+  }, [isNavigating, lastMouseButton, onNavigationModeChange, onControlsRef]);
+
+  const handleResetView = () => {
+    console.log('🎯 Botão de reset clicado!');
+    if (controlsRef.current) {
+      // Resetar para posição original
+      controlsRef.current.reset();
+      setShowResetButton(false);
+      setIsNavigating(false);
+      onNavigationModeChange?.(false);
+      onResetView?.();
+    }
+  };
+
   return (
-    <div className="w-full h-full relative">
+    <OrbitControls 
+      ref={controlsRef}
+      enablePan={true}
+      enableZoom={true}
+      enableRotate={true}
+      autoRotate={false}
+      minDistance={1}
+      maxDistance={50}
+      enableDamping={true}
+      dampingFactor={0.05}
+      target={[0, 1, 0]}
+      maxPolarAngle={Math.PI * 0.95}
+      minPolarAngle={Math.PI * 0.05}
+      zoomSpeed={1}
+      rotateSpeed={0.5}
+      panSpeed={1.5}
+      mouseButtons={{
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN
+      }}
+      touches={{
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+      }}
+      screenSpacePanning={false}
+      makeDefault={false}
+    />
+  );
+}
+
+export default function GeometryCanvas({ params, options, style, onVertexSelect, onStyleChange }: GeometryCanvasProps) {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [showResetButton, setShowResetButton] = useState(false);
+  const [controlsRef, setControlsRef] = useState<any>(null);
+
+  const handleNavigationModeChange = (navigating: boolean) => {
+    setIsNavigating(navigating);
+    if (navigating) {
+      setShowResetButton(true);
+      // Esconder o botão após 5 segundos
+      setTimeout(() => {
+        setShowResetButton(false);
+      }, 5000);
+    }
+  };
+
+  const handleResetView = () => {
+    console.log('🎯 Botão de reset clicado!');
+    if (controlsRef) {
+      console.log('🔄 Resetando controles...');
+      controlsRef.reset();
+    } else {
+      console.log('❌ Controles não encontrados');
+    }
+    setShowResetButton(false);
+    setIsNavigating(false);
+  };
+
+  const handleControlsRef = (ref: any) => {
+    setControlsRef(ref);
+  };
+
+  return (
+    <div 
+      className="w-full h-full relative"
+      style={{ 
+        cursor: isNavigating ? 'grabbing' : (options.activeTool === 'pan' ? 'grab' : 'default')
+      }}
+      onMouseDown={isNavigating ? (e) => {
+        e.currentTarget.style.cursor = 'grabbing';
+      } : (options.activeTool === 'pan' ? (e) => {
+        e.currentTarget.style.cursor = 'grabbing';
+      } : undefined)}
+      onMouseUp={isNavigating ? (e) => {
+        e.currentTarget.style.cursor = 'default';
+      } : (options.activeTool === 'pan' ? (e) => {
+        e.currentTarget.style.cursor = 'grab';
+      } : undefined)}
+      onMouseLeave={isNavigating ? (e) => {
+        e.currentTarget.style.cursor = 'default';
+      } : (options.activeTool === 'pan' ? (e) => {
+        e.currentTarget.style.cursor = 'grab';
+      } : undefined)}
+    >
         <Canvas 
           camera={{ 
             position: [6, 4, 6], 
@@ -1470,46 +2094,63 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
           onStyleChange={onStyleChange}
         />
         
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          autoRotate={false}
-          minDistance={params.type === 'tetrahedron' ? 0.5 : 1}
-          maxDistance={params.type === 'tetrahedron' ? 20 : 50}
-          enableDamping={true}
-          dampingFactor={0.05}
-          target={[0, 1, 0]}
-          maxPolarAngle={Math.PI * 0.95}
-          minPolarAngle={Math.PI * 0.05}
-          zoomSpeed={1}
-          rotateSpeed={0.5}
-          panSpeed={0.8}
-          mouseButtons={{
-            LEFT: THREE.MOUSE.ROTATE,
-            MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN
-          }}
-          touches={{
-            ONE: THREE.TOUCH.ROTATE,
-            TWO: THREE.TOUCH.DOLLY_PAN
-          }}
-          screenSpacePanning={false}
-          makeDefault={false}
+        <CustomOrbitControls 
+          options={options}
+          onNavigationModeChange={handleNavigationModeChange}
+          onResetView={handleResetView}
+          onControlsRef={handleControlsRef}
         />
         
         {options.showGrid && (
           <Grid 
-            args={[20, 20]}
+            args={[10, 10]}
             position={[0, 0, 0]}
-            cellColor="#555"
-            sectionColor="#777"
-            fadeDistance={12}
-            fadeStrength={1.5}
+            cellColor="#333"
+            sectionColor="#444"
+            fadeDistance={8}
+            fadeStrength={2}
             infiniteGrid={false}
           />
         )}
       </Canvas>
+      
+      {/* Botão de Reset que aparece durante navegação - TESTE: sempre visível */}
+      {(showResetButton || true) && (
+        <div 
+          className="reset-view-button"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            zIndex: 1000,
+            background: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            border: '2px solid #3b82f6',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            transition: 'all 0.2s ease'
+          }}
+          onClick={handleResetView}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.9)';
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.animation = 'none';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.animation = 'pulse-glow 2s infinite';
+          }}
+        >
+          🎯 Centralizar Vista
+        </div>
+      )}
+      
     </div>
   );
 }
+

@@ -20,6 +20,8 @@ interface SimpleVertexConnectorProps {
   // Vértices adicionais de sólidos inscritos e circunscritos
   inscribedVertices?: THREE.Vector3[];
   circumscribedVertices?: THREE.Vector3[];
+  // Pontos médios para incluir como vértices
+  midpoints?: THREE.Vector3[];
 }
 
 export function SimpleVertexConnector({
@@ -32,7 +34,8 @@ export function SimpleVertexConnector({
   edgeColor = '#00ff00',
   lineWidth = 4,
   inscribedVertices = [],
-  circumscribedVertices = []
+  circumscribedVertices = [],
+  midpoints = []
 }: SimpleVertexConnectorProps) {
   
   const vertices = useMemo(() => {
@@ -259,15 +262,16 @@ export function SimpleVertexConnector({
         console.warn('Tipo de geometria não suportado:', params.type);
     }
     
-    // Adicionar vértices de sólidos inscritos e circunscritos
+    // Adicionar vértices de sólidos inscritos, circunscritos e pontos médios
     const allVertices = [
       ...vertexList,
       ...inscribedVertices,
-      ...circumscribedVertices
+      ...circumscribedVertices,
+      ...midpoints
     ];
     
     return allVertices;
-  }, [params, inscribedVertices, circumscribedVertices]);
+  }, [params, inscribedVertices, circumscribedVertices, midpoints]);
 
   const renderVertices = () => {
     return vertices.map((vertex, index) => {
@@ -292,18 +296,6 @@ export function SimpleVertexConnector({
             />
           </mesh>
           
-          {isSelected && (
-            <Text
-              position={[vertex.x, vertex.y + 0.3, vertex.z]}
-              fontSize={0.2}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-              renderOrder={11}
-            >
-              {selectedVertices.indexOf(index) + 1}
-            </Text>
-          )}
         </group>
       );
     });

@@ -8,6 +8,14 @@ interface DrawingOverlayWrapperProps {
   onDrawingChange: (strokes: DrawingStroke[]) => void;
   currentStyle?: DrawingStyle;
   currentTool?: DrawingTool;
+  activeTool?: string;
+  textSettings?: {
+    active: boolean;
+    color: string;
+    size: number;
+    fontFamily: string;
+  };
+  onTextChange?: (key: string, value: any) => void;
   children: React.ReactNode;
   className?: string;
 }
@@ -18,6 +26,9 @@ export default function DrawingOverlayWrapper({
   onDrawingChange,
   currentStyle,
   currentTool,
+  activeTool,
+  textSettings,
+  onTextChange,
   children,
   className = ''
 }: DrawingOverlayWrapperProps) {
@@ -30,6 +41,9 @@ export default function DrawingOverlayWrapper({
         onDrawingChange={onDrawingChange}
         currentStyle={currentStyle}
         currentTool={currentTool}
+        activeTool={activeTool}
+        textSettings={textSettings}
+        onTextChange={onTextChange}
       />
     </div>
   );

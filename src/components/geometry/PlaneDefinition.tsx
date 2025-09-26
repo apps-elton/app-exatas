@@ -19,10 +19,11 @@ interface PlaneDefinitionProps {
   onElementSelect?: (elements: {type: 'plane' | 'construction', id: string}[]) => void;
   isEquilateral?: boolean;
   showVerticesAlways?: boolean; // Nova prop para sempre mostrar vértices
+  midpoints?: THREE.Vector3[]; // Pontos médios para incluir como vértices
 }
 
 // Função para obter as posições dos vértices
-function getVertexPositions(params: GeometryParams, style: StyleOptions, isEquilateral?: boolean): THREE.Vector3[] {
+function getVertexPositions(params: GeometryParams, style: StyleOptions, isEquilateral?: boolean, midpoints?: THREE.Vector3[]): THREE.Vector3[] {
   const vertices: THREE.Vector3[] = [];
   
   switch (params.type) {
@@ -186,6 +187,53 @@ function getVertexPositions(params: GeometryParams, style: StyleOptions, isEquil
       break;
   }
   
+  // Adicionar pontos médios à lista de vértices na posição correta
+  if (midpoints) {
+    // Calcular o número base de vértices para determinar onde inserir os pontos médios
+    const getBaseVertexCount = (): number => {
+      switch (params.type) {
+        case 'cube': return 8;
+        case 'tetrahedron': return 4;
+        case 'octahedron': return 6;
+        case 'dodecahedron': return 20;
+        case 'icosahedron': return 12;
+        case 'cylinder': return 16;
+        case 'cone': return 9;
+        case 'prism': {
+          const numSides = params.numSides || 5;
+          return numSides * 2;
+        }
+        case 'pyramid': {
+          const numSides = params.numSides || 5;
+          return numSides + 1;
+        }
+        default: return 8;
+      }
+    };
+    
+    const baseVertexCount = getBaseVertexCount();
+    console.log('=== PLANE DEFINITION MIDPOINTS DEBUG ===');
+    console.log('Base vertex count:', baseVertexCount);
+    console.log('Midpoints count:', midpoints.length);
+    console.log('Vertices before midpoints:', vertices.length);
+    
+    // Inserir pontos médios na posição correta (após os vértices base)
+    midpoints.forEach((midpoint, index) => {
+      const finalIndex = baseVertexCount + index;
+      console.log(`Midpoint ${index} inserted at index ${finalIndex}`);
+      
+      // Garantir que o array tenha o tamanho suficiente
+      while (vertices.length <= finalIndex) {
+        vertices.push(new THREE.Vector3(0, 0, 0)); // Placeholder
+      }
+      
+      vertices[finalIndex] = midpoint;
+    });
+    
+    console.log('Vertices after midpoints:', vertices.length);
+    console.log('Final vertices array:', vertices.map((v, i) => `[${i}]: ${v.x.toFixed(2)}, ${v.y.toFixed(2)}, ${v.z.toFixed(2)}`));
+  }
+  
   return vertices;
 }
 
@@ -228,9 +276,10 @@ export function PlaneDefinition({
   selectedElements = [],
   onElementSelect,
   isEquilateral,
-  showVerticesAlways = true // Por padrão sempre mostra
+  showVerticesAlways = true, // Por padrão sempre mostra
+  midpoints = [] // Pontos médios para incluir como vértices
 }: PlaneDefinitionProps) {
-  const vertexPositions = useMemo(() => getVertexPositions(params, style, isEquilateral), [params, style, isEquilateral]);
+  const vertexPositions = useMemo(() => getVertexPositions(params, style, isEquilateral, midpoints), [params, style, isEquilateral, midpoints]);
   
   const selectedPoints = useMemo(() => {
     const points: THREE.Vector3[] = [];
@@ -263,6 +312,44 @@ export function PlaneDefinition({
   }, [planeData]);
 
   const handleVertexClick = (vertexIndex: number) => {
+    console.log('=== PLANE DEFINITION VERTEX CLICK ===');
+    console.log('Vertex index:', vertexIndex);
+    console.log('Position:', vertexPositions[vertexIndex]);
+    console.log('onVertexSelect available:', !!onVertexSelect);
+    
+    // Verificar se é um ponto médio
+    const getBaseVertexCount = (): number => {
+      switch (params.type) {
+        case 'cube': return 8;
+        case 'tetrahedron': return 4;
+        case 'octahedron': return 6;
+        case 'dodecahedron': return 20;
+        case 'icosahedron': return 12;
+        case 'cylinder': return 16;
+        case 'cone': return 9;
+        case 'prism': {
+          const numSides = params.numSides || 5;
+          return numSides * 2;
+        }
+        case 'pyramid': {
+          const numSides = params.numSides || 5;
+          return numSides + 1;
+        }
+        default: return 8;
+      }
+    };
+    
+    const baseVertexCount = getBaseVertexCount();
+    const isMidpoint = vertexIndex >= baseVertexCount;
+    
+    if (isMidpoint) {
+      console.log('🎯 CLIQUE EM PONTO MÉDIO DETECTADO!');
+      console.log('Índice do ponto médio:', vertexIndex);
+      console.log('Base vertex count:', baseVertexCount);
+      console.log('Posição do ponto médio:', vertexPositions[vertexIndex]);
+      console.log('onVertexSelect disponível:', !!onVertexSelect);
+    }
+    
     if (onVertexSelect) {
       onVertexSelect(vertexIndex, vertexPositions[vertexIndex]);
     }
@@ -286,15 +373,75 @@ export function PlaneDefinition({
         console.log('vertexPositions.length:', vertexPositions.length);
         console.log('Should render vertices:', showVerticesAlways && vertexPositions.length > 0);
         return showVerticesAlways && vertexPositions.length > 0;
-      })() && vertexPositions.map((position, index) => (
+      })() && vertexPositions.map((position, index) => {
+        // Verificar se é um ponto médio
+        const getBaseVertexCount = (): number => {
+          switch (params.type) {
+            case 'cube': return 8;
+            case 'tetrahedron': return 4;
+            case 'octahedron': return 6;
+            case 'dodecahedron': return 20;
+            case 'icosahedron': return 12;
+            case 'cylinder': return 16;
+            case 'cone': return 9;
+            case 'prism': {
+              const numSides = params.numSides || 5;
+              return numSides * 2;
+            }
+            case 'pyramid': {
+              const numSides = params.numSides || 5;
+              return numSides + 1;
+            }
+            default: return 8;
+          }
+        };
+        
+        const baseVertexCount = getBaseVertexCount();
+        const isMidpoint = index >= baseVertexCount;
+        
+        console.log(`=== RENDERING VERTEX ${index} ===`);
+        console.log('Position:', position);
+        console.log('Is midpoint:', isMidpoint);
+        console.log('Base vertex count:', baseVertexCount);
+        
+        if (isMidpoint) {
+          console.log('🎯 RENDERIZANDO PONTO MÉDIO NO PLANE DEFINITION!');
+          console.log('Índice do ponto médio:', index);
+          console.log('Posição do ponto médio:', position);
+        }
+        
+        return (
         <mesh
           key={`vertex-${index}`}
           position={position}
           onClick={(e) => {
             e.stopPropagation();
+            console.log('=== VERTEX MESH CLICK ===');
+            console.log('Vertex index:', index);
+            console.log('Position:', position);
+            console.log('Is midpoint:', isMidpoint);
+            console.log('Base vertex count:', baseVertexCount);
+            if (isMidpoint) {
+              console.log('🎯 CLIQUE EM PONTO MÉDIO NO PLANE DEFINITION!');
+              console.log('Índice do ponto médio clicado:', index);
+              console.log('Posição do ponto médio clicado:', position);
+            }
             handleVertexClick(index);
           }}
-          renderOrder={1} // Renderizar por último para ficar na frente
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            console.log('=== VERTEX MESH POINTER DOWN ===');
+            console.log('Vertex index:', index);
+          }}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = 'default';
+          }}
+          renderOrder={10} // Renderizar por último para ficar na frente
         >
           <sphereGeometry args={[0.08]} />
           <meshBasicMaterial 
@@ -307,7 +454,8 @@ export function PlaneDefinition({
             opacity={0.9}
           />
         </mesh>
-      ))}
+        );
+      })}
       
       {/* Renderizar planos existentes */}
       {(() => {
@@ -388,7 +536,7 @@ export function PlaneDefinition({
       {selectedVertices.length > 0 && selectedPoints.map((point, index) => (
         <group key={`selected-point-${index}`} position={point}>
           <mesh renderOrder={2}>
-            <sphereGeometry args={[0.12]} />
+            <sphereGeometry args={[0.08]} />
             <meshBasicMaterial color="#ff0000" />
           </mesh>
           <Text

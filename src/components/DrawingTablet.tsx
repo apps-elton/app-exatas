@@ -16,15 +16,12 @@ import {
   Redo, 
   Trash2,
   MousePointer,
-  Type,
   Ruler
 } from 'lucide-react';
-import TabletPressureIndicator from './TabletPressureIndicator';
-import TabletAdvancedSettings from './TabletAdvancedSettings';
-import { TabletSettings } from '@/types/tablet';
+// Removed unused imports
 
 export interface DrawingTool {
-  type: 'pen' | 'pencil' | 'marker' | 'eraser' | 'text' | 'ruler' | 'select' | 'area-select';
+  type: 'pen' | 'pencil' | 'marker' | 'eraser' | 'ruler' | 'select' | 'area-select';
   name: string;
   icon: React.ReactNode;
 }
@@ -64,14 +61,11 @@ interface DrawingTabletProps {
 }
 
 const DRAWING_TOOLS: DrawingTool[] = [
-  { type: 'select', name: 'Seleção', icon: <MousePointer className="w-4 h-4" /> },
   { type: 'pen', name: 'Caneta', icon: <Pen className="w-4 h-4" /> },
   { type: 'pencil', name: 'Lápis', icon: <Pen className="w-4 h-4" /> },
   { type: 'marker', name: 'Marcador', icon: <Pen className="w-4 h-4" /> },
   { type: 'eraser', name: 'Borracha', icon: <Eraser className="w-4 h-4" /> },
-  { type: 'text', name: 'Texto', icon: <Type className="w-4 h-4" /> },
-  { type: 'ruler', name: 'Régua', icon: <Ruler className="w-4 h-4" /> },
-  { type: 'area-select', name: 'Seleção de Área', icon: <MousePointer className="w-4 h-4" /> }
+  { type: 'ruler', name: 'Régua', icon: <Ruler className="w-4 h-4" /> }
 ];
 
 const PEN_TYPES = [
@@ -121,7 +115,7 @@ export default function DrawingTablet({
   
   const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(currentStyle || {
     color: '#ffffff',
-    thickness: 13,
+    thickness: 8,
     opacity: 1,
     pressure: false, // Desativar variação de pressão
     smoothing: 0.5
@@ -135,21 +129,25 @@ export default function DrawingTablet({
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [currentPressure, setCurrentPressure] = useState(0);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
-  const [tabletSettings, setTabletSettings] = useState<TabletSettings>({
+  const [tabletSettings, setTabletSettings] = useState({
     pressureSensitivity: 1,
     smoothingLevel: 0.5,
     autoSave: true,
     tabletMode: 'pen'
   });
   const [isEraserMode, setIsEraserMode] = useState(false);
-  const [textInput, setTextInput] = useState('');
-  const [showTextInput, setShowTextInput] = useState(false);
   
   // Estados para seleção de área
   const [isAreaSelecting, setIsAreaSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState<{x: number, y: number} | null>(null);
   const [selectionEnd, setSelectionEnd] = useState<{x: number, y: number} | null>(null);
   const [selectedStrokes, setSelectedStrokes] = useState<string[]>([]);
+
+  // Estados para desenho assistido (Samsung Notes style)
+  const [assistedDrawing, setAssistedDrawing] = useState(true);
+  const [strokeStartTime, setStrokeStartTime] = useState<number | null>(null);
+  const [isHolding, setIsHolding] = useState(false);
+  const [holdTimer, setHoldTimer] = useState<NodeJS.Timeout | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,23 +210,6 @@ export default function DrawingTablet({
       return;
     }
 
-    // Modo texto
-    if (activeTool.type === 'text') {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      if (textInput.trim()) {
-        addText(textInput, x, y);
-      } else {
-        setShowTextInput(true);
-      }
-      return;
-    }
-
     // Modo seleção
     if (activeTool.type === 'select') return;
 
@@ -241,6 +222,7 @@ export default function DrawingTablet({
     const pressure = event.pressure || 0.5;
 
     setCurrentPressure(pressure);
+    setStrokeStartTime(Date.now());
 
     const newStroke: DrawingStroke = {
       id: `stroke-${Date.now()}-${Math.random()}`,
@@ -257,7 +239,19 @@ export default function DrawingTablet({
 
     setCurrentStroke(newStroke);
     setIsDrawing(true);
-  }, [isActive, activeTool, drawingStyle, isEraserMode, strokes, onDrawingChange]);
+
+    // Desenho assistido: timer para "segurar para endireitar"
+    if (assistedDrawing) {
+      const timer = setTimeout(() => {
+        if (isDrawing && currentStroke && currentStroke.points.length > 1) {
+          setIsHolding(true);
+          console.log('🎯 Segure para endireitar a linha!');
+        }
+      }, 1500); // 1.5 segundos como no Samsung Notes
+      
+      setHoldTimer(timer);
+    }
+  }, [isActive, activeTool, drawingStyle, isEraserMode, strokes, onDrawingChange, assistedDrawing, isDrawing, currentStroke]);
 
   const draw = useCallback((event: React.PointerEvent) => {
     if (!isDrawing || !currentStroke || !canvasRef.current) return;
@@ -289,8 +283,30 @@ export default function DrawingTablet({
   const stopDrawing = useCallback(() => {
     if (!isDrawing || !currentStroke) return;
 
+    // Desenho assistido: verificar se deve endireitar a linha
+    let finalStroke = currentStroke;
+    
+    if (assistedDrawing && currentStroke.points.length > 2) {
+      const startPoint = currentStroke.points[0];
+      const endPoint = currentStroke.points[currentStroke.points.length - 1];
+      
+      // Calcular se é uma linha aproximadamente reta
+      const isStraightLine = isApproximatelyStraightLine(currentStroke.points);
+      
+      if (isStraightLine) {
+        // Substituir todos os pontos por uma linha reta
+        finalStroke = {
+          ...currentStroke,
+          points: [startPoint, endPoint],
+          isStraightened: true
+        } as any;
+        
+        console.log('🎯 Linha endireitada automaticamente!');
+      }
+    }
+
     setStrokes(prev => {
-      const newStrokes = [...prev, currentStroke];
+      const newStrokes = [...prev, finalStroke];
       setHistory(prev => [...prev.slice(0, historyIndex + 1), newStrokes]);
       setHistoryIndex(prev => prev + 1);
       onDrawingChange?.(newStrokes);
@@ -299,7 +315,43 @@ export default function DrawingTablet({
 
     setCurrentStroke(null);
     setIsDrawing(false);
-  }, [isDrawing, currentStroke, historyIndex, onDrawingChange]);
+    setStrokeStartTime(null);
+    setIsHolding(false);
+    
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      setHoldTimer(null);
+    }
+  }, [isDrawing, currentStroke, historyIndex, onDrawingChange, assistedDrawing, holdTimer]);
+
+  // Função para verificar se os pontos formam uma linha aproximadamente reta
+  const isApproximatelyStraightLine = useCallback((points: DrawingPoint[]) => {
+    if (points.length < 3) return false;
+    
+    const startPoint = points[0];
+    const endPoint = points[points.length - 1];
+    
+    // Calcular a distância total da linha reta
+    const straightDistance = Math.sqrt(
+      Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2)
+    );
+    
+    if (straightDistance < 20) return false; // Linha muito curta
+    
+    // Calcular a distância total percorrida pelos pontos
+    let totalDistance = 0;
+    for (let i = 1; i < points.length; i++) {
+      const dx = points[i].x - points[i-1].x;
+      const dy = points[i].y - points[i-1].y;
+      totalDistance += Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    // Se a distância percorrida é muito maior que a linha reta, não é uma linha reta
+    const ratio = totalDistance / straightDistance;
+    
+    // Se a razão for menor que 1.3, é aproximadamente uma linha reta
+    return ratio < 1.3;
+  }, []);
 
   const drawStroke = useCallback((stroke: DrawingStroke) => {
     const canvas = canvasRef.current;
@@ -311,7 +363,7 @@ export default function DrawingTablet({
     ctx.save();
     ctx.globalAlpha = stroke.style.opacity;
 
-    if (stroke.tool.type === 'text' && (stroke as any).text) {
+    if ((stroke as any).text) {
       // Desenhar texto
       let textColor = stroke.style.color;
       if (textColor === '#ffffff' || textColor === '#FFFFFF' || textColor === 'white') {
@@ -368,20 +420,6 @@ export default function DrawingTablet({
     ctx.restore();
   }, []);
 
-  const clearCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setStrokes([]);
-    setHistory([]);
-    setHistoryIndex(-1);
-    onDrawingChange?.([]);
-  }, [onDrawingChange]);
-
   const redrawCanvas = useCallback((strokesToDraw: DrawingStroke[]) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -392,6 +430,22 @@ export default function DrawingTablet({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     strokesToDraw.forEach(stroke => drawStroke(stroke));
   }, [drawStroke]);
+
+  const clearCanvas = useCallback(() => {
+    console.log('clearCanvas called');
+    
+    // Limpar todos os estados locais
+    setStrokes([]);
+    setHistory([]);
+    setHistoryIndex(-1);
+    setCurrentStroke(null);
+    setIsDrawing(false);
+    console.log('Local states cleared');
+    
+    // Notificar o componente pai (DrawingOverlay3D) para limpar o canvas real
+    onDrawingChange?.([]);
+    console.log('Parent notified with empty array - this should clear the real canvas');
+  }, [onDrawingChange]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -486,25 +540,7 @@ export default function DrawingTablet({
     }
   }, [drawingStyle, isActive, redrawCanvas, strokes, currentStroke]);
 
-  // Adicionar texto
-  const addText = useCallback((text: string, x: number, y: number) => {
-    if (!text.trim()) return;
-
-    const textStroke: DrawingStroke = {
-      id: `text-${Date.now()}-${Math.random()}`,
-      tool: { type: 'text', name: 'Texto', icon: null },
-      style: { ...drawingStyle },
-      points: [{ x, y, pressure: 1, timestamp: Date.now() }],
-      timestamp: Date.now(),
-      text: text
-    } as any;
-
-    const newStrokes = [...strokes, textStroke];
-    setStrokes(newStrokes);
-    onDrawingChange?.(newStrokes);
-    setShowTextInput(false);
-    setTextInput('');
-  }, [drawingStyle, strokes, onDrawingChange]);
+  // Função addText removida - delegada para DrawingOverlay3D
 
   // Alternar modo borracha
   const toggleEraserMode = useCallback(() => {
@@ -569,18 +605,9 @@ export default function DrawingTablet({
               <Eraser className="w-4 h-4" />
               <span className="text-xs">Borracha</span>
             </Button>
-            <Button
-              variant={activeTool.type === 'text' ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleToolChange({ type: 'text', name: 'Texto', icon: null })}
-              className="h-10 flex flex-col items-center gap-1 p-1"
-            >
-              <Type className="w-4 h-4" />
-              <span className="text-xs">Texto</span>
-            </Button>
           </div>
 
-          {/* Cores Essenciais */}
+          {/* Cores Essenciais - Mostrar sempre */}
           <div className="grid grid-cols-6 gap-1">
             {COLORS.slice(0, 6).map((color) => (
               <button
@@ -597,10 +624,10 @@ export default function DrawingTablet({
             ))}
           </div>
 
-          {/* Espessura */}
+          {/* Espessura - Mostrar sempre */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span>Espessura</span>
+              <span>{activeTool.type === 'select' ? 'Tamanho do Texto' : 'Espessura'}</span>
               <span>{drawingStyle.thickness}px</span>
             </div>
             <Slider
@@ -610,6 +637,21 @@ export default function DrawingTablet({
               max={20}
               step={0.5}
               className="w-full"
+            />
+          </div>
+
+          {/* Input de Texto removido - delegado para DrawingOverlay3D */}
+
+          {/* Desenho Assistido */}
+          <div className="flex items-center justify-between p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-400 font-medium">Desenho Assistido</span>
+            </div>
+            <Switch
+              checked={assistedDrawing}
+              onCheckedChange={setAssistedDrawing}
+              className="scale-75"
             />
           </div>
 

@@ -1,3 +1,6 @@
+/* Excalidraw Font */
+@import url('https://fonts.googleapis.com/css2?family=Virgil:wght@400&display=swap');
+
 @import './styles/equations.css';
 
 @tailwind base;
@@ -216,5 +219,22 @@
     stroke: hsl(var(--geometry-measurement));
     stroke-dasharray: 5,5;
     stroke-width: 2;
+  }
+
+  /* Reset view button animation */
+  .reset-view-button {
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+    0% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0.7); 
+    }
+    70% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(59, 130, 246, 0); 
+    }
+    100% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0); 
+    }
   }
 }

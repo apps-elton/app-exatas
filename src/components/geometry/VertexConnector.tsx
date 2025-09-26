@@ -23,6 +23,7 @@ interface VertexConnectorProps {
     vertices: number[];
     color: string;
   }>;
+  midpoints?: THREE.Vector3[]; // Novo: pontos médios para incluir como vértices
 }
 
 export function VertexConnector({ 
@@ -39,7 +40,8 @@ export function VertexConnector({
   vertexPositions = [],
   showVerticesOnly = false,
   hideVertices = false,
-  connections = []
+  connections = [],
+  midpoints = []
 }: VertexConnectorProps) {
   const [intersectionPoints, setIntersectionPoints] = useState<THREE.Vector3[]>([]);
   const [persistentIntersections, setPersistentIntersections] = useState<THREE.Vector3[]>([]);
@@ -56,11 +58,6 @@ export function VertexConnector({
   if (!supportedGeometries.includes(params.type)) return null;
 
   const getVertices = (): THREE.Vector3[] => {
-    // Se já temos posições fornecidas, usar essas
-    if (vertexPositions && vertexPositions.length > 0) {
-      return vertexPositions;
-    }
-    
     const vertices: THREE.Vector3[] = [];
     
     switch (params.type) {
@@ -219,6 +216,9 @@ export function VertexConnector({
         break;
       }
     }
+    
+    // Adicionar pontos médios à lista de vértices
+    vertices.push(...midpoints);
     
     return vertices;
   };
@@ -457,26 +457,13 @@ export function VertexConnector({
             }}
             renderOrder={4}
           >
-            <sphereGeometry args={[0.12]} />
+            <sphereGeometry args={[0.08]} />
             <meshBasicMaterial 
               color={isSelected ? selectedVertexColor : vertexColor}
               transparent
               opacity={0.9}
             />
           </mesh>
-          {/* Mostrar índice do vértice quando selecionado */}
-          {isSelected && (
-            <Text
-              position={[vertex.x, vertex.y + 0.2, vertex.z]}
-              fontSize={0.15}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-              renderOrder={5}
-            >
-              {(selectedVertices.indexOf(index) + 1).toString()}
-            </Text>
-          )}
         </group>
       );
     });
@@ -501,18 +488,6 @@ export function VertexConnector({
               opacity={0.9}
             />
           </mesh>
-          {selectedVertices.includes(globalIndex) && (
-            <Text
-              position={[intersection.x, intersection.y + 0.2, intersection.z]}
-              fontSize={0.15}
-              color="#ffffff"
-              anchorX="center"
-              anchorY="middle"
-              renderOrder={5}
-            >
-              {(selectedVertices.indexOf(globalIndex) + 1).toString()}
-            </Text>
-          )}
         </group>
       );
     });

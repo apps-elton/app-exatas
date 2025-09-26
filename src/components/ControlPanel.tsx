@@ -11,13 +11,15 @@ import { Separator } from '@/components/ui/separator';
 import { GeometryParams, GeometryType, VisualizationOptions, StyleOptions } from '@/types/geometry';
 import { GeometryProperties } from '@/types/geometry';
 import { formatNumber } from '@/lib/geometry-calculations';
-import { RotateCcw, Download, Play, Pause } from 'lucide-react';
+import { RotateCcw, Download, Play, Pause, Hand } from 'lucide-react';
 import { GeometryCalculations } from './GeometryCalculations';
 import MultiplePlanesManager from './MultiplePlanesManager';
 import { toast } from 'sonner';
 import ImageDownloadMenu from './ImageDownloadMenu';
 import DrawingTablet, { DrawingStroke, DrawingStyle, DrawingTool } from './DrawingTablet';
 import DrawingOverlay3D from './DrawingOverlay3D';
+import RevolutionManager from './geometry/RevolutionManager';
+import ArchimedeanManager from './geometry/ArchimedeanManager';
 
 interface ControlPanelProps {
   params: GeometryParams;
@@ -196,7 +198,11 @@ export default function ControlPanel({
     { value: 'tetrahedron', label: t('geometry.tetrahedron_4_faces') },
     { value: 'octahedron', label: t('geometry.octahedron_8_faces') },
     { value: 'dodecahedron', label: t('geometry.dodecahedron_12_faces') },
-    { value: 'icosahedron', label: t('geometry.icosahedron_20_faces') }
+    { value: 'icosahedron', label: t('geometry.icosahedron_20_faces') },
+    { value: 'revolution-solids', label: 'Sólidos de Revolução' },
+    { value: 'archimedean-solids', label: 'Sólidos Arquimedianos' },
+    { value: 'cone-frustum', label: 'Tronco de Cone' },
+    { value: 'pyramid-frustum', label: 'Tronco de Pirâmide' }
   ];
 
   const colors = [
@@ -235,6 +241,310 @@ export default function ControlPanel({
           </div>
         </CardContent>
       </Card>
+
+      {/* Sólidos de Revolução - Interface específica */}
+      {params.type === 'revolution-solids' && (
+        <RevolutionManager 
+          params={params}
+          onParamsChange={onParamsChange}
+        />
+      )}
+
+      {/* Sólidos Arquimedianos - Interface específica */}
+      {params.type === 'archimedean-solids' && (
+        <ArchimedeanManager 
+          params={params}
+          onParamsChange={onParamsChange}
+        />
+      )}
+
+      {/* Troncos - Interface específica */}
+      {(params.type === 'cone-frustum' || params.type === 'pyramid-frustum') && (
+        <Card className="control-section">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg text-primary">Controles do Tronco</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Altura do Corte */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Altura do Corte: {((params.frustumCutHeight || 0.5) * 100).toFixed(0)}%
+              </Label>
+              <Slider
+                value={[params.frustumCutHeight || 0.5]}
+                onValueChange={([value]) => onParamsChange({ ...params, frustumCutHeight: value })}
+                min={0.1}
+                max={0.9}
+                step={0.05}
+                className="w-full"
+              />
+            </div>
+
+
+            {/* Raio do Cone/Pirâmide */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Raio da Base: {(params.radius || 2).toFixed(1)}
+              </Label>
+              <Slider
+                value={[params.radius || 2]}
+                onValueChange={([value]) => onParamsChange({ ...params, radius: value })}
+                min={0.5}
+                max={5}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+            {/* Altura Total */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Altura Total: {(params.height || 4).toFixed(1)}
+              </Label>
+              <Slider
+                value={[params.height || 4]}
+                onValueChange={([value]) => onParamsChange({ ...params, height: value })}
+                min={1}
+                max={8}
+                step={0.1}
+                className="w-full"
+              />
+            </div>
+
+
+
+            {/* Número de Lados da Base (apenas para pirâmide) */}
+            {params.type === 'pyramid-frustum' && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Lados da Base: {params.frustumBaseSides || 4}
+                </Label>
+                <Slider
+                  value={[params.frustumBaseSides || 4]}
+                  onValueChange={([value]) => onParamsChange({ ...params, frustumBaseSides: Math.round(value) })}
+                  min={3}
+                  max={12}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            )}
+
+
+            {/* Cores Individuais */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Cor da Parte Inferior</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={params.frustumBottomColor || '#3b82f6'}
+                    onChange={(e) => onParamsChange({ ...params, frustumBottomColor: e.target.value })}
+                    className="w-8 h-8 rounded border border-gray-300"
+                  />
+                  <span className="text-xs text-gray-500">
+                    {params.frustumBottomColor || '#3b82f6'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Cor da Parte Superior</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={params.frustumTopColor || '#ef4444'}
+                    onChange={(e) => onParamsChange({ ...params, frustumTopColor: e.target.value })}
+                    className="w-8 h-8 rounded border border-gray-300"
+                  />
+                  <span className="text-xs text-gray-500">
+                    {params.frustumTopColor || '#ef4444'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Opacidades Individuais */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Opacidade da Parte Inferior: {((params.frustumBottomOpacity || 0.8) * 100).toFixed(0)}%
+                </Label>
+                <Slider
+                  value={[params.frustumBottomOpacity || 0.8]}
+                  onValueChange={([value]) => onParamsChange({ ...params, frustumBottomOpacity: value })}
+                  min={0.1}
+                  max={1.0}
+                  step={0.05}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Opacidade da Parte Superior: {((params.frustumTopOpacity || 0.8) * 100).toFixed(0)}%
+                </Label>
+                <Slider
+                  value={[params.frustumTopOpacity || 0.8]}
+                  onValueChange={([value]) => onParamsChange({ ...params, frustumTopOpacity: value })}
+                  min={0.1}
+                  max={1.0}
+                  step={0.05}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Alturas Individuais */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Altura da Parte Inferior: {(params.frustumBottomHeight || (params.height * (1 - (params.frustumCutHeight || 0.5)))).toFixed(1)}
+                </Label>
+                <Slider
+                  value={[params.frustumBottomHeight || (params.height * (1 - (params.frustumCutHeight || 0.5)))]}
+                  onValueChange={([value]) => onParamsChange({ ...params, frustumBottomHeight: value })}
+                  min={0.5}
+                  max={params.height * 0.9}
+                  step={0.1}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  Altura da Parte Superior: {(params.frustumTopHeight || (params.height * (params.frustumCutHeight || 0.5))).toFixed(1)}
+                </Label>
+                <Slider
+                  value={[params.frustumTopHeight || (params.height * (params.frustumCutHeight || 0.5))]}
+                  onValueChange={([value]) => onParamsChange({ ...params, frustumTopHeight: value })}
+                  min={0.5}
+                  max={params.height * 0.9}
+                  step={0.1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Controles de Visibilidade e Movimento */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Parte Superior Visível</Label>
+                <Switch
+                  checked={params.frustumTopVisible !== false}
+                  onCheckedChange={(checked) => onParamsChange({ ...params, frustumTopVisible: checked })}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Parte Superior Móvel</Label>
+                <Switch
+                  checked={params.frustumTopMovable !== false}
+                  onCheckedChange={(checked) => onParamsChange({ ...params, frustumTopMovable: checked })}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Partes Separáveis</Label>
+                <Switch
+                  checked={params.frustumSeparable !== false}
+                  onCheckedChange={(checked) => onParamsChange({ ...params, frustumSeparable: checked })}
+                />
+              </div>
+            </div>
+
+            {/* Botão de Rotação */}
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onParamsChange({ ...params, frustumRotating: !params.frustumRotating })}
+                className="w-full"
+              >
+                {params.frustumRotating ? 'Parar Rotação' : 'Iniciar Rotação'}
+              </Button>
+            </div>
+
+            {/* Segmentos de Altura */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Mostrar Segmentos de Altura</Label>
+                <Switch
+                  checked={params.frustumShowHeightSegments || false}
+                  onCheckedChange={(checked) => onParamsChange({ ...params, frustumShowHeightSegments: checked })}
+                />
+              </div>
+
+              {params.frustumShowHeightSegments && (
+                <>
+                  {/* Cor do Segmento do Tronco */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Cor do Segmento do Tronco</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={params.frustumBottomSegmentColor || '#ffff00'}
+                        onChange={(e) => onParamsChange({ ...params, frustumBottomSegmentColor: e.target.value })}
+                        className="w-8 h-8 rounded border border-gray-300"
+                      />
+                      <span className="text-xs text-gray-500">
+                        {params.frustumBottomSegmentColor || '#ffff00'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Cor do Segmento da Parte Superior */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Cor do Segmento da Parte Superior</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={params.frustumTopSegmentColor || '#ff00ff'}
+                        onChange={(e) => onParamsChange({ ...params, frustumTopSegmentColor: e.target.value })}
+                        className="w-8 h-8 rounded border border-gray-300"
+                      />
+                      <span className="text-xs text-gray-500">
+                        {params.frustumTopSegmentColor || '#ff00ff'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Espessura do Segmento do Tronco */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Espessura do Segmento do Tronco: {((params.frustumBottomSegmentThickness || 0.02) * 100).toFixed(1)}cm
+                    </Label>
+                    <Slider
+                      value={[params.frustumBottomSegmentThickness || 0.02]}
+                      onValueChange={([value]) => onParamsChange({ ...params, frustumBottomSegmentThickness: value })}
+                      min={0.01}
+                      max={0.1}
+                      step={0.005}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Espessura do Segmento da Parte Superior */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">
+                      Espessura do Segmento da Parte Superior: {((params.frustumTopSegmentThickness || 0.02) * 100).toFixed(1)}cm
+                    </Label>
+                    <Slider
+                      value={[params.frustumTopSegmentThickness || 0.02]}
+                      onValueChange={([value]) => onParamsChange({ ...params, frustumTopSegmentThickness: value })}
+                      min={0.01}
+                      max={0.1}
+                      step={0.005}
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
 
       {/* Parameters */}
       <Card className="control-section">
@@ -324,6 +634,7 @@ export default function ControlPanel({
               </div>
             </>
           )}
+
         </CardContent>
       </Card>
 
@@ -1989,6 +2300,15 @@ export default function ControlPanel({
         </CardHeader>
         <CardContent className="space-y-3">
           <Button
+            variant={options.activeTool === 'pan' ? "default" : "outline"}
+            onClick={() => onOptionsChange({ ...options, activeTool: options.activeTool === 'pan' ? 'none' : 'pan' })}
+            className="w-full"
+          >
+            <Hand className="w-4 h-4 mr-2" />
+            {options.activeTool === 'pan' ? 'Navegação Melhorada' : 'Navegação Normal'}
+          </Button>
+
+          <Button
             variant={options.autoRotate ? "default" : "outline"}
             onClick={() => handleOptionChange('autoRotate', !options.autoRotate)}
             className="w-full"
@@ -2070,17 +2390,7 @@ export default function ControlPanel({
       {/* Seção de Cálculos Geométricos */}
       <GeometryCalculations params={params} />
 
-      {/* Mesa Digitalizadora */}
-      <DrawingTablet
-        isActive={isTabletActive}
-        onToggle={() => onTabletToggle?.(!isTabletActive)}
-        onDrawingChange={onDrawingChange}
-        currentStyle={tabletStyle}
-        currentTool={tabletTool}
-        onStyleChange={onTabletStyleChange}
-        onToolChange={onTabletToolChange}
-        className="control-section"
-      />
+      {/* Mesa Digitalizadora - Movida para a barra superior */}
 
     </div>
   );

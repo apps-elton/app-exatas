@@ -10,7 +10,11 @@ export type GeometryType =
   | 'tetrahedron'
   | 'octahedron'
   | 'dodecahedron' 
-  | 'icosahedron';
+  | 'icosahedron'
+  | 'revolution-solids'
+  | 'archimedean-solids'
+  | 'cone-frustum'
+  | 'pyramid-frustum';
 
 export interface GeometryProperties {
   baseArea?: number;
@@ -33,6 +37,57 @@ export interface GeometryParams {
   baseEdgeLength?: number;
   numSides?: number;
   isEquilateral?: boolean;
+  // Parâmetros para sólidos de revolução
+  revolutionType?: 'triangle' | 'rectangle' | 'semicircle' | 'trapezoid';
+  revolutionAxis?: 'x' | 'y' | 'z';
+  revolutionSpeed?: number;
+  showRevolutionPath?: boolean;
+  show2DShape?: boolean;
+  revolutionProgress?: number; // 0 a 1 - progresso da revolução
+  isAnimating?: boolean; // Estado da animação
+  revolution2DColor?: string; // Cor da forma 2D
+  revolution2DOpacity?: number; // Opacidade da forma 2D
+  revolution3DColor?: string; // Cor do sólido 3D
+  revolution3DOpacity?: number; // Opacidade do sólido 3D
+  show3DSolid?: boolean; // Mostrar sólido 3D
+  // Parâmetros específicos para formas
+  triangleBase?: number;
+  triangleHeight?: number;
+  rectangleWidth?: number;
+  rectangleHeight?: number;
+  semicircleRadius?: number;
+  trapezoidTopBase?: number;
+  trapezoidBottomBase?: number;
+  trapezoidHeight?: number;
+  // Parâmetros para sólidos arquimedianos
+  archimedeanType?: 'truncated-tetrahedron' | 'cuboctahedron' | 'truncated-cube' | 'truncated-octahedron' | 'rhombicuboctahedron' | 'icosidodecahedron' | 'truncated-dodecahedron' | 'truncated-icosahedron' | 'snub-cube' | 'snub-dodecahedron';
+  archimedeanSize?: number;
+  archimedeanOpacity?: number;
+  archimedeanWireframe?: boolean;
+  archimedeanColor?: string;
+  archimedeanEdgeColor?: string;
+  // Parâmetros para troncos
+  frustumCutHeight?: number; // Altura do corte (0% a 90% da altura total)
+  frustumBaseSides?: number; // Número de lados da base da pirâmide (3-12)
+  frustumSeparable?: boolean; // Se as partes podem ser separadas
+  frustumTopVisible?: boolean; // Se a parte superior cortada é visível
+  frustumTopMovable?: boolean; // Se a parte superior pode ser movida
+  frustumRotating?: boolean; // Se o tronco está rotacionando
+  // Cores individuais para cada parte
+  frustumBottomColor?: string; // Cor da parte inferior
+  frustumTopColor?: string; // Cor da parte superior
+  // Opacidades individuais
+  frustumBottomOpacity?: number; // Opacidade da parte inferior
+  frustumTopOpacity?: number; // Opacidade da parte superior
+  // Alturas individuais
+  frustumBottomHeight?: number; // Altura da parte inferior
+  frustumTopHeight?: number; // Altura da parte superior
+  // Segmentos de altura
+  frustumShowHeightSegments?: boolean; // Mostrar segmentos de altura
+  frustumBottomSegmentColor?: string; // Cor do segmento do tronco
+  frustumTopSegmentColor?: string; // Cor do segmento da parte superior
+  frustumBottomSegmentThickness?: number; // Espessura do segmento do tronco
+  frustumTopSegmentThickness?: number; // Espessura do segmento da parte superior
 }
 
 export interface VisualizationOptions {
@@ -58,7 +113,7 @@ export interface VisualizationOptions {
   showShadow: boolean;
   isFrozen: boolean;
   // Ferramenta ativa para evitar conflitos entre modos
-  activeTool?: 'none' | 'cross-section' | 'meridian-section' | 'vertex-connector' | 'plane-definition' | 'construction';
+  activeTool?: 'none' | 'cross-section' | 'meridian-section' | 'vertex-connector' | 'plane-definition' | 'construction' | 'pan' | 'midpoint' | 'perpendicular' | 'parallel' | 'angle' | 'measure' | 'align' | 'independent-text' | 'text-select';
   // Formas inscritas e circunscritas
   showInscribedSphere: boolean;
   showCircumscribedSphere: boolean;

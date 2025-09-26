@@ -5,11 +5,9 @@ import { useGeometryState } from '@/hooks/useGeometryState';
 import GeometryCanvas from './GeometryCanvas';
 import ControlPanel from './ControlPanel';
 import { FabricDrawingCanvas, FabricDrawingCanvasRef } from './FabricDrawingCanvas';
-import AdvancedDrawingToolbar from './AdvancedDrawingToolbar';
 import { FrozenCanvas } from './FrozenCanvas';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shapes, PenTool, Camera, Unlock, Download, Undo2, Redo2 } from 'lucide-react';
+import { Camera, Unlock, Download, Undo2, Redo2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ThemeToggle } from './ThemeToggle';
 import EquationRenderer from './EquationRenderer';
@@ -22,14 +20,14 @@ import StatusBar from '@/components/ui/StatusBar';
 import { LanguageToggle } from './LanguageToggle';
 import DrawingOverlayWrapper from './DrawingOverlayWrapper';
 import { DrawingStroke } from './DrawingTablet';
+import TopToolbar from './TopToolbar';
 
 // Componente interno que usa o contexto de ferramenta ativa
 function SpaceSculptorContent() {
-  const { activeTool } = useActiveTool();
+  const { activeTool, setActiveTool } = useActiveTool();
   const { t } = useLanguage();
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
-  const [activeTab, setActiveTab] = useState('geometry');
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
   
@@ -209,7 +207,9 @@ function SpaceSculptorContent() {
     // Espessura das arestas
     edgeThickness: 1,
     // Cor dos segmentos
-    segmentColor: '#00ff00'
+    segmentColor: '#00ff00',
+    // Ferramenta ativa (integrada com options.activeTool)
+    activeTool: 'none'
   });
   
   // Remove unused equations state since we're now using Fabric.js
@@ -269,9 +269,9 @@ function SpaceSculptorContent() {
     if (newParams.type !== params.type) {
       setOptions((prev) => ({
         ...prev,
-        // Básico visível
+        // Básico visível - vértices sempre habilitados por padrão
         showEdges: true,
-        showVertices: true,
+        showVertices: true, // Sempre habilitar vértices por padrão em todos os sólidos
         fillFaces: true,
         // Tudo o resto desativado
         showLateralApothem: false,
@@ -401,6 +401,23 @@ function SpaceSculptorContent() {
     }
   }, [params.type]);
 
+  // Sincronizar options.activeTool com style.activeTool
+  useEffect(() => {
+    setStyle(prev => ({
+      ...prev,
+      activeTool: options.activeTool
+    }));
+  }, [options.activeTool]);
+
+  // Sincronizar activeTool do contexto com options.activeTool
+  useEffect(() => {
+    setOptions(prev => ({
+      ...prev,
+      activeTool: activeTool
+    }));
+    console.log('🔄 Sincronizando activeTool do contexto:', activeTool);
+  }, [activeTool]);
+
   const handleExportCombined = useCallback(async (format: 'png' | 'jpg' = 'png', quality: 'hd' | 'medium' | 'low' = 'hd') => {
     if (!geometryCanvasRef.current) return;
     try {
@@ -521,7 +538,7 @@ function SpaceSculptorContent() {
   // Configurações atuais da mesa digitalizadora
   const [tabletStyle, setTabletStyle] = useState({
     color: '#ffffff',
-    thickness: 13,
+    thickness: 3, // Espessura mais realista como Samsung Tab S6 Lite
     opacity: 1,
     pressure: false, // Desativar variação de pressão
     smoothing: 0.5
@@ -531,6 +548,45 @@ function SpaceSculptorContent() {
     name: 'Caneta',
     icon: null
   });
+
+  // Estado independente para ferramentas de texto
+  const [textSettings, setTextSettings] = useState({
+    active: false,
+    color: '#ffffff', // Branco padrão
+    size: 40, // 40px padrão
+    fontFamily: 'Virgil'
+  });
+
+  // Funções para gerenciar configurações de texto
+  const handleTextChange = useCallback((key: string, value: any) => {
+    setTextSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  }, []);
+
+  const handleTextToolToggle = useCallback(() => {
+    const newActive = !textSettings.active;
+    console.log('🎯 handleTextToolToggle chamado - newActive:', newActive);
+    console.log('🎯 textSettings atual:', textSettings);
+    console.log('🎯 activeTool atual:', activeTool);
+    
+    setTextSettings(prev => ({
+      ...prev,
+      active: newActive
+    }));
+    
+    // Se ativando texto, desativar mesa digitalizadora e definir activeTool
+    if (newActive) {
+      setIsTabletActive(false);
+      setActiveTool('independent-text');
+      console.log('🎯 Ativando ferramenta de texto independente - activeTool definido como independent-text');
+      console.log('🎯 activeTool após setActiveTool:', activeTool);
+    } else {
+      setActiveTool('none');
+      console.log('🎯 Desativando ferramenta de texto independente - activeTool definido como none');
+    }
+  }, [textSettings.active, setActiveTool, activeTool]);
 
   // Função para deletar elemento selecionado
   const handleDeleteSelected = useCallback(() => {
@@ -552,13 +608,32 @@ function SpaceSculptorContent() {
   }, [selectedElements]);
 
   // Handlers para mesa digitalizadora
-  const handleTabletStyleChange = useCallback((newStyle: any) => {
-    setTabletStyle(prev => ({ ...prev, ...newStyle }));
+  const handleTabletStyleChange = useCallback((key: string, value: any) => {
+    setTabletStyle(prev => ({ ...prev, [key]: value }));
+    console.log('🎨 Mesa digitalizadora - estilo alterado:', key, value);
   }, []);
 
   const handleTabletToolChange = useCallback((newTool: any) => {
     setTabletTool(prev => ({ ...prev, ...newTool }));
-  }, []);
+    console.log('🖊️ Mesa digitalizadora - ferramenta alterada:', newTool);
+    console.log('🖊️ isTabletActive:', isTabletActive);
+    console.log('🖊️ newTool.type:', newTool.type);
+    
+    // Sincronizar com o contexto ActiveTool quando a mesa digitalizadora estiver ativa
+    if (isTabletActive && newTool.type) {
+      console.log('🖊️ Atualizando activeTool para:', newTool.type);
+      setActiveTool(newTool.type as any);
+    }
+  }, [isTabletActive, setActiveTool]);
+
+  // Sincronizar activeTool quando mesa digitalizadora for ativada
+  useEffect(() => {
+    if (isTabletActive) {
+      setActiveTool(tabletTool.type as any);
+    } else {
+      setActiveTool('none');
+    }
+  }, [isTabletActive, tabletTool.type, setActiveTool]);
 
   // Event listener para a tecla Delete
   useEffect(() => {
@@ -856,6 +931,12 @@ function SpaceSculptorContent() {
           </div>
         </div>
       </header>
+
+      {/* Top Toolbar */}
+      <TopToolbar 
+        options={options}
+        onOptionsChange={setOptions}
+      />
       
       <div className="flex flex-1 min-h-0">
         <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-full overflow-y-auto">
@@ -888,92 +969,186 @@ function SpaceSculptorContent() {
         </aside>
       
         <section className="flex-1 flex flex-col min-w-0 min-h-0">
-          {/* ToolBar */}
+          {/* Barra de Ferramentas Principal - Estrutura Reorganizada */}
           <div className="border-b border-border/30 bg-background/50 backdrop-blur">
-            <ToolBar 
-              showCrossSection={options.showCrossSection}
-              showMeridianSection={options.showMeridianSection}
-              onToggleCrossSection={() => setOptions({...options, showCrossSection: !options.showCrossSection})}
-              onToggleMeridianSection={() => setOptions({...options, showMeridianSection: !options.showMeridianSection})}
-            />
-          </div>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <div className="border-b border-border/30 bg-background/50 backdrop-blur px-4 py-2 flex items-center justify-between">
-              <TabsList className="grid grid-cols-2 max-w-md">
-                <TabsTrigger value="geometry" className="flex items-center gap-2">
-                  <Shapes className="w-4 h-4" />
-                  {t('tabs.geometry')}
-                </TabsTrigger>
-                <TabsTrigger value="drawing" className="flex items-center gap-2">
-                  <PenTool className="w-4 h-4" />
-                  {t('tabs.notes')}
-                </TabsTrigger>
-              </TabsList>
+            <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b">
               
-              {/* Undo/Redo para Geometria quando não está no modo desenho */}
-              {!isDrawingMode && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleUndoGeometry}
-                    disabled={!canUndoGeometry}
-                    title="Desfazer alteração da geometria (Ctrl+Z)"
-                    className="hover:bg-accent/10"
-                  >
-                    <Undo2 className="w-4 h-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRedoGeometry}
-                    disabled={!canRedoGeometry}
-                    title="Refazer alteração da geometria (Ctrl+Y)"
-                    className="hover:bg-accent/10"
-                  >
-                    <Redo2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
 
-            <TabsContent value="geometry" className="flex-1 m-0 p-0 h-full">
-              {/* Enhanced Drawing Toolbar */}
-              <div className="p-2 border-b border-border/30">
-                <AdvancedDrawingToolbar
-                  isDrawingMode={isDrawingMode}
-                  tool={drawingTool}
-                  strokeColor={drawingStrokeColor}
-                  strokeWidth={drawingStrokeWidth}
-                  opacity={drawingOpacity}
-                  canUndo={canUndo}
-                  canRedo={canRedo}
-                  onToggleDrawing={handleToggleDrawing}
-                  onToolChange={setDrawingTool}
-                  onColorChange={setDrawingStrokeColor}
-                  onStrokeWidthChange={setDrawingStrokeWidth}
-                  onOpacityChange={setDrawingOpacity}
-                  onClear={handleClear}
-                  onUndo={handleUndo}
-                  onRedo={handleRedo}
-                  onSave={handleSave}
-                  onExportCombined={handleExportCombined}
-                  onEquationAdd={handleEquationAdd}
-                  // Construções geométricas
-                  showGeometricConstructions={options.showGeometricConstructions}
-                  selectedConstruction={style.constructionType}
-                  selectedVerticesCount={style.selectedVerticesForConstruction.length}
-                  onToggleConstructions={handleToggleConstructions}
-                  onConstructionSelect={handleConstructionSelect}
-                  onClearConstructionSelection={handleClearConstructionSelection}
-                  onClearConstructions={handleClearConstructions}
-                  onClearPlanes={handleClearPlanes}
-                  constructionsCount={style.constructions.length}
-                  planesCount={style.planes.length}
+              {/* 2. Ferramenta de Texto (SEMPRE VISÍVEL) */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleTextToolToggle}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
+                    textSettings.active
+                      ? 'bg-green-500 text-white shadow-lg' 
+                      : 'bg-white/5 text-white/70 border border-white/20'
+                  }`}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 7.82L12 12l5 4.18M12 12H3m4 0V5" />
+                    <rect x="12" y="5" width="9" height="14" rx="2" />
+                  </svg>
+                  <span className="text-sm">Texto</span>
+                </button>
+
+                {/* Controles visíveis apenas quando texto está ativo */}
+                {textSettings.active && (
+                  <>
+                    {/* Botão de Seleção de Texto */}
+                    <button
+                      onClick={() => {
+                        if (activeTool === 'text-select') {
+                          setActiveTool('none'); // Desativar seleção
+                        } else {
+                          setActiveTool('text-select'); // Ativar seleção
+                        }
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
+                        activeTool === 'text-select'
+                          ? 'bg-blue-500 text-white shadow-lg' 
+                          : 'bg-white/5 text-white/70 border border-white/20'
+                      }`}
+                      title={activeTool === 'text-select' ? 'Desativar seleção' : 'Selecionar texto existente'}
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 3h18v18H3z"/>
+                        <path d="M8 8h8M8 12h8M8 16h8"/>
+                      </svg>
+                      <span className="text-sm">Selecionar</span>
+                    </button>
+
+                    {/* Seletor de Cor */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-white/60">Cor:</span>
+                      <div className="flex gap-1">
+                        {['#000000', '#ffffff', '#ff0000', '#0000ff', '#00ff00', '#ffff00'].map(color => (
+                          <button
+                            key={color}
+                            className={`w-6 h-6 rounded-full border-2 transition-all ${
+                              textSettings.color === color 
+                                ? 'border-white ring-2 ring-white/50 scale-110' 
+                                : 'border-gray-600 hover:scale-110'
+                            }`}
+                            style={{ backgroundColor: color }}
+                            onClick={() => handleTextChange('color', color)}
+                            title={`Cor ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Controle de Tamanho do Texto */}
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5">
+                      <span className="text-xs text-white/60">Tamanho:</span>
+                      <input
+                        type="range"
+                        min="20"
+                        max="50"
+                        step="2"
+                        value={textSettings.size}
+                        onChange={(e) => handleTextChange('size', Number(e.target.value))}
+                        className="w-24 h-1"
+                      />
+                      <span className="text-xs text-white/80 w-10">{textSettings.size}pt</span>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Separador */}
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
+
+              {/* 3. Mesa Digitalizadora (Toggle) */}
+              <div className="flex flex-col gap-3">
+                <ToolBar 
+                  isTabletActive={isTabletActive}
+                  onTabletToggle={setIsTabletActive}
+                  tabletStyle={tabletStyle}
+                  tabletTool={tabletTool}
+                  onTabletStyleChange={handleTabletStyleChange}
+                  onTabletToolChange={handleTabletToolChange}
+                  onTabletUndo={() => {
+                    console.log('Undo mesa digitalizadora');
+                  }}
+                  onTabletRedo={() => {
+                    console.log('Redo mesa digitalizadora');
+                  }}
+                  onTabletClear={() => {
+                    setDrawingStrokes([]);
+                    console.log('Limpar mesa digitalizadora');
+                  }}
+                  canTabletUndo={drawingStrokes.length > 0}
+                  canTabletRedo={false}
                 />
               </div>
+
+              {/* Separador */}
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
+
+              {/* 4. Seções de Visualização */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setOptions({...options, showCrossSection: !options.showCrossSection})}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                    options.showCrossSection 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path d="M2 12s3-9 10-9 10 9 10 9-3 9-10 9-10-9-10-9z" />
+                  </svg>
+                  <span>Seção Transversal</span>
+                </button>
+                
+                <button
+                  onClick={() => setOptions({...options, showMeridianSection: !options.showMeridianSection})}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                    options.showMeridianSection 
+                      ? 'bg-cyan-500 text-white' 
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                  <span>Seção Meridiana</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Undo/Redo para Geometria */}
+          <div className="border-b border-border/30 bg-background/50 backdrop-blur px-4 py-2 flex items-center justify-end">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUndoGeometry}
+                disabled={!canUndoGeometry}
+                title="Desfazer alteração da geometria (Ctrl+Z)"
+                className="hover:bg-accent/10"
+              >
+                <Undo2 className="w-4 h-4" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRedoGeometry}
+                disabled={!canRedoGeometry}
+                title="Refazer alteração da geometria (Ctrl+Y)"
+                className="hover:bg-accent/10"
+              >
+                <Redo2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Conteúdo da Geometria */}
+          <div className="flex-1 m-0 p-0 h-full">
 
               <div className="w-full h-full min-h-[calc(100vh-240px)] relative">
                 {options.isFrozen && frozenImage ? (
@@ -987,8 +1162,17 @@ function SpaceSculptorContent() {
                     isTabletActive={isTabletActive}
                     drawingStrokes={drawingStrokes}
                     onDrawingChange={setDrawingStrokes}
-                    currentStyle={tabletStyle}
+                    currentStyle={textSettings.active ? {
+                      color: textSettings.color,
+                      thickness: textSettings.size / 4, // Converter px para thickness
+                      opacity: 1,
+                      pressure: false,
+                      smoothing: 0.5
+                    } : tabletStyle}
                     currentTool={tabletTool}
+                    activeTool={activeTool}
+                    textSettings={textSettings}
+                    onTextChange={handleTextChange}
                     className="w-full h-full"
                   >
                     <div ref={geometryCanvasRef} className="w-full h-full relative flex-1 min-h-0">
@@ -1064,28 +1248,7 @@ function SpaceSculptorContent() {
                   </DrawingOverlayWrapper>
                 )}
               </div>
-            </TabsContent>
-
-            <TabsContent value="drawing" className="flex-1 m-0 flex flex-col">
-              <div className="p-4 text-center text-muted-foreground">
-                <PenTool className="w-12 h-12 mx-auto mb-4 text-primary/50" />
-                <h3 className="text-lg font-semibold mb-2">Modo de Desenho Integrado</h3>
-                <p className="text-sm max-w-md mx-auto mb-4">
-                  Use a aba "Geometria 3D" para desenhar diretamente sobre as figuras geométricas.
-                  Ative o modo de desenho usando a toolbar acima da visualização.
-                </p>
-                <div className="text-xs bg-muted/20 rounded-lg p-4 max-w-sm mx-auto">
-                  <h4 className="font-semibold mb-2">Atalhos de Teclado:</h4>
-                  <div className="space-y-1">
-                    <p><kbd className="bg-muted px-2 py-1 rounded text-xs">Ctrl+E</kbd> - Ativar/Desativar desenho</p>
-                    <p><kbd className="bg-muted px-2 py-1 rounded text-xs">Ctrl+Z</kbd> - Desfazer</p>
-                    <p><kbd className="bg-muted px-2 py-1 rounded text-xs">Ctrl+Y</kbd> - Refazer</p>
-                    <p><kbd className="bg-muted px-2 py-1 rounded text-xs">ESC</kbd> - Sair do modo desenho</p>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+          </div>
         </section>
         </div>
       
