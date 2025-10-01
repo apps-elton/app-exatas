@@ -2,6 +2,8 @@ import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { GeometryParams, VisualizationOptions, StyleOptions, GeometryType } from '@/types/geometry';
 import { GeometryCalculator } from '@/lib/geometry-calculations';
 import { useGeometryState } from '@/hooks/useGeometryState';
+import { useHistory } from '@/hooks/useHistory';
+import { useTabletHistory } from '@/hooks/useTabletHistory';
 import GeometryCanvas from './GeometryCanvas';
 import ControlPanel from './ControlPanel';
 import { FabricDrawingCanvas, FabricDrawingCanvasRef } from './FabricDrawingCanvas';
@@ -21,9 +23,12 @@ import { LanguageToggle } from './LanguageToggle';
 import DrawingOverlayWrapper from './DrawingOverlayWrapper';
 import { DrawingStroke } from './DrawingTablet';
 import TopToolbar from './TopToolbar';
+import AdvancedDrawingTablet from './AdvancedDrawingTablet';
 
 // Componente interno que usa o contexto de ferramenta ativa
 function SpaceSculptorContent() {
+  // Teste de console no componente principal
+  // console.log('🔧 TESTE CONSOLE - SpaceSculptorContent renderizado');
   const { activeTool, setActiveTool } = useActiveTool();
   const { t } = useLanguage();
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
@@ -39,11 +44,285 @@ function SpaceSculptorContent() {
   const [drawingOpacity, setDrawingOpacity] = useState(1);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-  // Sistema de histórico para o sólido 3D (5 operações)
+  const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
+  
+  // Estado da mesa digitalizadora
+  const [isTabletActive, setIsTabletActive] = useState(false);
+  
+  // Estado independente para ferramentas de texto
+  const [textSettings, setTextSettings] = useState({
+    active: false,
+    color: '#ffffff', // Branco padrão
+    size: 40, // 40px padrão
+    fontFamily: 'Virgil'
+  });
+  
+  // Geometry history state
   const [geometryHistory, setGeometryHistory] = useState<GeometryParams[]>([]);
-  const [geometryHistoryIndex, setGeometryHistoryIndex] = useState(-1);
+  const [geometryHistoryIndex, setGeometryHistoryIndex] = useState(0);
   const [canUndoGeometry, setCanUndoGeometry] = useState(false);
   const [canRedoGeometry, setCanRedoGeometry] = useState(false);
+  
+  // Sistema de histórico para ações gerais (últimas 3)
+  const {
+    addToHistory,
+    undo: undoAction,
+    redo: redoAction,
+    canUndo: canUndoAction,
+    canRedo: canRedoAction,
+    clearHistory
+  } = useHistory(3);
+
+  // Sistema de histórico para mesa digitalizadora
+  const {
+    currentStrokes: tabletStrokes,
+    addToHistory: addToTabletHistory,
+    undo: tabletUndo,
+    redo: tabletRedo,
+    canUndo: canTabletUndo,
+    canRedo: canTabletRedo,
+    clearHistory: clearTabletHistory
+  } = useTabletHistory(50);
+
+  // Funções para gerenciar configurações de texto
+  const handleTextChange = useCallback((key: string, value: any) => {
+    setTextSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  }, []);
+
+  const handleTextToolToggle = useCallback(() => {
+    const newActive = !textSettings.active;
+    console.log('🎯 handleTextToolToggle chamado - newActive:', newActive);
+    console.log('🎯 textSettings atual:', textSettings);
+    console.log('🎯 activeTool atual:', activeTool);
+    
+    setTextSettings(prev => ({
+      ...prev,
+      active: newActive
+    }));
+    
+    // Se ativando texto, desativar mesa digitalizadora e definir activeTool
+    if (newActive) {
+      setIsTabletActive(false);
+      setActiveTool('independent-text');
+      console.log('🎯 Ativando ferramenta de texto independente - activeTool definido como independent-text');
+      console.log('🎯 activeTool após setActiveTool:', activeTool);
+    } else {
+      setActiveTool('none');
+      console.log('🎯 Desativando ferramenta de texto - activeTool definido como none');
+    }
+  }, [textSettings.active, setActiveTool, activeTool]);
+
+  // Undo geometry
+  const handleUndoGeometry = useCallback(() => {
+    if (geometryHistoryIndex > 0) {
+      const prevIndex = geometryHistoryIndex - 1;
+      const prevState = geometryHistory[prevIndex];
+      setParams(prevState);
+      setGeometryHistoryIndex(prevIndex);
+      setCanUndoGeometry(prevIndex > 0);
+      setCanRedoGeometry(true);
+      toast.success('Geometria desfeita');
+    }
+  }, [geometryHistory, geometryHistoryIndex]);
+
+  // Redo geometry
+  const handleRedoGeometry = useCallback(() => {
+    if (geometryHistoryIndex < geometryHistory.length - 1) {
+      const nextIndex = geometryHistoryIndex + 1;
+      const nextState = geometryHistory[nextIndex];
+      setParams(nextState);
+      setGeometryHistoryIndex(nextIndex);
+      setCanUndoGeometry(true);
+      setCanRedoGeometry(nextIndex < geometryHistory.length - 1);
+      toast.success('Geometria refeita');
+    }
+  }, [geometryHistory, geometryHistoryIndex]);
+
+  // Atalhos de teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevenir atalhos quando estiver digitando em inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Ctrl+Z - Undo
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        console.log('⌨️ Atalho Ctrl+Z detectado');
+        
+        // Undo na mesa digitalizadora se ativa
+        if (isTabletActive && drawingOverlayRef.current?.undo) {
+          drawingOverlayRef.current.undo();
+          toast.success('Desenho desfeito');
+          return;
+        }
+        
+        // Undo na geometria se possível
+        if (canUndoGeometry) {
+          handleUndoGeometry();
+          toast.success('Geometria desfeita');
+          return;
+        }
+        
+        // Undo geral se disponível
+        if (canUndoAction) {
+          undoAction();
+          toast.success('Ação desfeita');
+        }
+      }
+
+      // Ctrl+Y ou Ctrl+Shift+Z - Redo
+      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        console.log('⌨️ Atalho Ctrl+Y detectado');
+        
+        // Redo na mesa digitalizadora se ativa
+        if (isTabletActive && drawingOverlayRef.current?.redo) {
+          drawingOverlayRef.current.redo();
+          toast.success('Desenho refeito');
+          return;
+        }
+        
+        // Redo na geometria se possível
+        if (canRedoGeometry) {
+          handleRedoGeometry();
+          toast.success('Geometria refeita');
+          return;
+        }
+        
+        // Redo geral se disponível
+        if (canRedoAction) {
+          redoAction();
+          toast.success('Ação refeita');
+        }
+      }
+
+      // Delete - Remover elementos selecionados
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        console.log('⌨️ Atalho Delete detectado');
+        
+        // Limpar mesa digitalizadora se ativa
+        if (isTabletActive && drawingOverlayRef.current?.clear) {
+          drawingOverlayRef.current.clear();
+          toast.success('Mesa digitalizadora limpa');
+          return;
+        }
+        
+        // Limpar geometria se possível
+        if (canUndoGeometry) {
+          setParams({
+            type: 'prism' as GeometryType,
+            height: 4,
+            radius: 2,
+            sideLength: 2,
+            baseEdgeLength: 2,
+            numSides: 5,
+            isEquilateral: false
+          });
+          toast.success('Geometria limpa');
+        }
+      }
+
+      // Atalhos para ferramentas de desenho
+      if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        console.log('⌨️ Atalho P detectado - Ativando mesa digitalizadora');
+        setIsTabletActive(true);
+        setTabletTool({ type: 'pen', name: 'Caneta', icon: null, category: 'drawing' });
+        toast.success('Mesa digitalizadora ativada - Caneta');
+      }
+
+      // Atalhos para ferramentas de texto
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        console.log('⌨️ Atalho T detectado - Ativando ferramenta de texto');
+        handleTextToolToggle();
+        toast.success('Ferramenta de texto ativada');
+      }
+
+      // Atalhos para ferramentas da mesa digitalizadora
+      if (isTabletActive) {
+        switch (e.key.toLowerCase()) {
+          case 'l':
+            e.preventDefault();
+            setTabletTool({ type: 'pencil', name: 'Lápis', icon: null, category: 'drawing' });
+            toast.success('Lápis selecionado');
+            break;
+          case 'm':
+            e.preventDefault();
+            setTabletTool({ type: 'marker', name: 'Marcador', icon: null, category: 'drawing' });
+            toast.success('Marcador selecionado');
+            break;
+          case 'h':
+            e.preventDefault();
+            setTabletTool({ type: 'highlighter', name: 'Marca-texto', icon: null, category: 'drawing' });
+            toast.success('Marca-texto selecionado');
+            break;
+          case 'e':
+            e.preventDefault();
+            setTabletTool({ type: 'eraser', name: 'Borracha', icon: null, category: 'drawing' });
+            toast.success('Borracha selecionada');
+            break;
+          case 'r':
+            e.preventDefault();
+            setTabletTool({ type: 'rectangle', name: 'Retângulo', icon: null, category: 'drawing' });
+            toast.success('Retângulo selecionado');
+            break;
+          case 'q':
+            e.preventDefault();
+            setTabletTool({ type: 'square', name: 'Quadrado', icon: null, category: 'drawing' });
+            toast.success('Quadrado selecionado');
+            break;
+          case 'c':
+            e.preventDefault();
+            setTabletTool({ type: 'circle', name: 'Círculo', icon: null, category: 'drawing' });
+            toast.success('Círculo selecionado');
+            break;
+          case '-':
+            e.preventDefault();
+            setTabletTool({ type: 'line', name: 'Reta', icon: null, category: 'drawing' });
+            toast.success('Reta selecionada');
+            break;
+          case 'a':
+            e.preventDefault();
+            setTabletTool({ type: 'arrow', name: 'Seta', icon: null, category: 'drawing' });
+            toast.success('Seta selecionada');
+            break;
+        }
+      }
+
+      // Escape - Cancelar operações
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        console.log('⌨️ Atalho Escape detectado');
+        
+        // Desativar mesa digitalizadora
+        if (isTabletActive) {
+          setIsTabletActive(false);
+          toast.success('Mesa digitalizadora desativada');
+        }
+        
+        // Desativar ferramenta de texto
+        if (textSettings.active) {
+          setTextSettings(prev => ({ ...prev, active: false }));
+          toast.success('Ferramenta de texto desativada');
+        }
+      }
+    };
+
+    // Adicionar listener
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isTabletActive, canUndoGeometry, canRedoGeometry, canUndoAction, canRedoAction, textSettings.active, handleTextToolToggle, handleUndoGeometry, handleRedoGeometry, undoAction, redoAction]);
 
   const [options, setOptions] = useState<VisualizationOptions>({
     showEdges: true,
@@ -208,8 +487,10 @@ function SpaceSculptorContent() {
     edgeThickness: 1,
     // Cor dos segmentos
     segmentColor: '#00ff00',
-    // Ferramenta ativa (integrada com options.activeTool)
-    activeTool: 'none'
+    // Espessuras das bordas
+    inscribedEdgeThickness: 1.0,
+    circumscribedEdgeThickness: 1.0,
+    // Ferramenta ativa removida - usar options.activeTool
   });
   
   // Remove unused equations state since we're now using Fabric.js
@@ -261,7 +542,7 @@ function SpaceSculptorContent() {
       setCanRedoGeometry(false);
       return newIndex;
     });
-  }, [geometryHistoryIndex]);
+  }, []);
 
   // Função para atualizar params com histórico
   const updateParams = useCallback((newParams: GeometryParams) => {
@@ -331,35 +612,11 @@ function SpaceSculptorContent() {
       }));
     }
 
+    // Adicionar ao histórico antes de fazer a mudança
+    addToHistory('geometry_change', params);
     setParams(newParams);
     saveGeometryState(newParams);
-  }, [saveGeometryState, params.type]);
-
-  // Undo geometry
-  const handleUndoGeometry = useCallback(() => {
-    if (geometryHistoryIndex > 0) {
-      const prevIndex = geometryHistoryIndex - 1;
-      const prevState = geometryHistory[prevIndex];
-      setParams(prevState);
-      setGeometryHistoryIndex(prevIndex);
-      setCanUndoGeometry(prevIndex > 0);
-      setCanRedoGeometry(true);
-      toast.success('Geometria desfeita');
-    }
-  }, [geometryHistory, geometryHistoryIndex]);
-
-  // Redo geometry
-  const handleRedoGeometry = useCallback(() => {
-    if (geometryHistoryIndex < geometryHistory.length - 1) {
-      const nextIndex = geometryHistoryIndex + 1;
-      const nextState = geometryHistory[nextIndex];
-      setParams(nextState);
-      setGeometryHistoryIndex(nextIndex);
-      setCanUndoGeometry(true);
-      setCanRedoGeometry(nextIndex < geometryHistory.length - 1);
-      toast.success('Geometria refeita');
-    }
-  }, [geometryHistory, geometryHistoryIndex]);
+  }, [saveGeometryState, params.type, params, addToHistory]);
 
   // Inicializar histórico com estado inicial
   useEffect(() => {
@@ -376,27 +633,112 @@ function SpaceSculptorContent() {
     toast.success('Vista resetada');
   }, []);
 
+  // Funções de desfazer e refazer
+  const handleUndo = useCallback(() => {
+    if (isDrawingMode) {
+      // Modo desenho - usar undo do canvas
+      if (drawingOverlayRef.current?.undo) {
+        drawingOverlayRef.current.undo();
+      }
+    } else {
+      // Modo geometria - usar sistema de histórico
+      const previousState = undoAction();
+      if (previousState) {
+        // Restaurar estado baseado no tipo de ação
+        switch (previousState.action) {
+          case 'geometry_change':
+            setParams(previousState.data);
+            toast.success('↶ Ação desfeita');
+            break;
+          case 'style_change':
+            setStyle(previousState.data);
+            toast.success('↶ Ação desfeita');
+            break;
+          case 'options_change':
+            setOptions(previousState.data);
+            toast.success('↶ Ação desfeita');
+            break;
+          default:
+            toast.success('↶ Ação desfeita');
+        }
+      }
+    }
+  }, [undoAction, isDrawingMode]);
+
+  const handleRedo = useCallback(() => {
+    if (isDrawingMode) {
+      // Modo desenho - usar redo do canvas
+      if (drawingOverlayRef.current?.redo) {
+        drawingOverlayRef.current.redo();
+      }
+    } else {
+      // Modo geometria - usar sistema de histórico
+      const nextState = redoAction();
+      if (nextState) {
+        // Restaurar estado baseado no tipo de ação
+        switch (nextState.action) {
+          case 'geometry_change':
+            setParams(nextState.data);
+            toast.success('↷ Ação refeita');
+            break;
+          case 'style_change':
+            setStyle(nextState.data);
+            toast.success('↷ Ação refeita');
+            break;
+          case 'options_change':
+            setOptions(nextState.data);
+            toast.success('↷ Ação refeita');
+            break;
+          default:
+            toast.success('↷ Ação refeita');
+        }
+      }
+    }
+  }, [redoAction, isDrawingMode]);
+
   const handleExportImage = useCallback((format: 'png' | 'jpg' = 'png', quality: 'hd' | 'medium' | 'low' = 'hd') => {
     if (geometryCanvasRef.current) {
       const canvas = geometryCanvasRef.current.querySelector('canvas');
       if (canvas) {
-        const qualityMap = { hd: 1.0, medium: 0.8, low: 0.6 };
+        const qualityMap = { hd: 1.0, medium: 0.9, low: 0.8 };
+        const resolutionMap = { hd: 8, medium: 4, low: 2 }; // Multiplicador de resolução ULTRA
         const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
         const extension = format;
         const qualityValue = qualityMap[quality];
+        const resolutionMultiplier = resolutionMap[quality];
+        
+        // Criar canvas em ULTRA alta resolução
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        if (!tempCtx) return;
+        
+        // Definir dimensões em ULTRA alta resolução
+        tempCanvas.width = canvas.width * resolutionMultiplier;
+        tempCanvas.height = canvas.height * resolutionMultiplier;
+        
+        // Configurar contexto para MÁXIMA qualidade
+        tempCtx.imageSmoothingEnabled = true;
+        tempCtx.imageSmoothingQuality = 'high';
+        
+        // Configurar contexto para anti-aliasing máximo
+        tempCtx.textBaseline = 'top';
+        
+        // Desenhar canvas original escalado com interpolação bicúbica
+        tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
         
         // Para PNG, a qualidade sempre é 1.0 (lossless)
         const finalQuality = format === 'png' ? 1.0 : qualityValue;
         
-        const dataURL = canvas.toDataURL(mimeType, finalQuality);
+        const dataURL = tempCanvas.toDataURL(mimeType, finalQuality);
         const link = document.createElement('a');
-        const qualityLabel = quality === 'hd' ? 'HD' : quality === 'medium' ? 'media' : 'baixa';
-        link.download = `geometria-${params.type}-${qualityLabel}-${Date.now()}.${extension}`;
+        const qualityLabel = quality === 'hd' ? 'ULTRA-HD-8K' : quality === 'medium' ? 'HD-4K' : 'HD-2K';
+        const resolution = `${tempCanvas.width}x${tempCanvas.height}`;
+        link.download = `geometria-${params.type}-${qualityLabel}-${resolution}-${Date.now()}.${extension}`;
         link.href = dataURL;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success(`Imagem da geometria exportada em ${format.toUpperCase()} (${qualityLabel})!`);
+        toast.success(`Imagem ULTRA-HD exportada: ${resolution} em ${format.toUpperCase()} (${qualityLabel})!`);
       }
     }
   }, [params.type]);
@@ -435,7 +777,7 @@ function SpaceSculptorContent() {
       // Desenhar a geometria 3D
       ctx.drawImage(geometryCanvas, 0, 0);
 
-      // Desenhar anotações (se existirem)
+      // Desenhar anotações da mesa digitalizadora (se existirem)
       const overlayURL = drawingOverlayRef.current?.save?.();
       if (overlayURL) {
         await new Promise<void>((resolve) => {
@@ -448,27 +790,212 @@ function SpaceSculptorContent() {
         });
       }
 
-      const qualityMap = { hd: 1.0, medium: 0.8, low: 0.6 };
+      // Capturar elementos de texto do Fabric.js (se existirem)
+      const fabricCanvases = geometryCanvasRef.current.querySelectorAll('canvas');
+      fabricCanvases.forEach((fabricCanvas) => {
+        if (fabricCanvas.getContext('2d')) {
+          // Verificar se é um canvas do Fabric.js
+          const fabricDataURL = fabricCanvas.toDataURL('image/png');
+          if (fabricDataURL && fabricDataURL !== 'data:,') {
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+            };
+            img.src = fabricDataURL;
+          }
+        }
+      });
+
+      // Capturar e renderizar elementos de texto do DOM
+      const textElements = geometryCanvasRef.current.querySelectorAll('textarea, input[type="text"], .text-input, [contenteditable="true"], div[style*="position"], span[style*="position"]');
+      console.log('🎨 Elementos de texto encontrados:', textElements.length);
+      
+      textElements.forEach((element: Element, index) => {
+        const htmlElement = element as HTMLElement;
+        console.log(`🎨 Elemento ${index}:`, htmlElement);
+        console.log(`🎨 Display:`, htmlElement.style.display);
+        console.log(`🎨 Offset:`, htmlElement.offsetWidth, htmlElement.offsetHeight);
+        
+        if (htmlElement.style.display !== 'none' && htmlElement.offsetWidth > 0 && htmlElement.offsetHeight > 0) {
+          const rect = htmlElement.getBoundingClientRect();
+          const containerRect = geometryCanvasRef.current!.getBoundingClientRect();
+          const x = rect.left - containerRect.left;
+          const y = rect.top - containerRect.top;
+          
+          console.log(`🎨 Posição do elemento ${index}:`, { x, y });
+          
+          // Obter estilos do elemento
+          const computedStyle = window.getComputedStyle(htmlElement);
+          const fontSize = computedStyle.fontSize || '16px';
+          const fontFamily = computedStyle.fontFamily || 'Arial';
+          const color = computedStyle.color || '#000000';
+          const textContent = htmlElement.textContent || (htmlElement as HTMLInputElement).value || '';
+          
+          console.log(`🎨 Conteúdo do elemento ${index}:`, textContent);
+          console.log(`🎨 Estilos do elemento ${index}:`, { fontSize, fontFamily, color });
+          
+          if (textContent.trim()) {
+            // Configurar contexto para texto
+            ctx.font = `${fontSize} ${fontFamily}`;
+            ctx.fillStyle = color;
+            ctx.textBaseline = 'top';
+            ctx.textAlign = 'left';
+            
+            // Renderizar texto linha por linha
+            const lines = textContent.split('\n');
+            const lineHeight = parseInt(fontSize) * 1.2;
+            
+            lines.forEach((line, lineIndex) => {
+              console.log(`🎨 Renderizando linha ${lineIndex} do elemento ${index}:`, line);
+              ctx.fillText(line, x, y + (lineIndex * lineHeight));
+            });
+          }
+        }
+      });
+
+      // Desenhar traços da mesa digitalizadora 3D (se existirem)
+      if (drawingStrokes.length > 0) {
+        console.log('🎨 Total de strokes para renderizar:', drawingStrokes.length);
+        console.log('🎨 Strokes completos:', drawingStrokes);
+        
+        // Criar canvas temporário para os desenhos da mesa digitalizadora
+        const drawingCanvas = document.createElement('canvas');
+        const drawingCtx = drawingCanvas.getContext('2d');
+        if (drawingCtx) {
+          drawingCanvas.width = tempCanvas.width;
+          drawingCanvas.height = tempCanvas.height;
+          
+          // Renderizar todos os traços da mesa digitalizadora
+          drawingStrokes.forEach((stroke, index) => {
+            console.log(`🎨 Processando stroke ${index}:`, stroke);
+            console.log(`🎨 Stroke ${index} tem texto:`, !!(stroke as any).text);
+            console.log(`🎨 Stroke ${index} texto:`, (stroke as any).text);
+            console.log(`🎨 Stroke ${index} tipo:`, (stroke as any).type);
+            
+            // Verificar se é um stroke de texto
+            if ((stroke as any).text) {
+              console.log(`🎨 Renderizando texto do stroke ${index}:`, (stroke as any).text);
+              // Renderizar texto com fonte Virgil (Excalidraw)
+              drawingCtx.fillStyle = stroke.style.color;
+              
+              // Usar a fonte Virgil (Excalidraw) como no DrawingOverlay3D
+              const fontSize = (stroke as any).fontSize || stroke.style.thickness * 4;
+              drawingCtx.font = `${fontSize}px "Virgil", "Cascadia", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive`;
+              drawingCtx.textBaseline = 'top';
+              drawingCtx.textAlign = 'left';
+              drawingCtx.globalAlpha = stroke.style.opacity;
+              
+              // Adicionar sombra para texto branco (como no DrawingOverlay3D)
+              if (stroke.style.color === '#ffffff' || stroke.style.color === '#FFFFFF') {
+                drawingCtx.shadowColor = '#000000';
+                drawingCtx.shadowBlur = 2;
+                drawingCtx.shadowOffsetX = 1;
+                drawingCtx.shadowOffsetY = 1;
+              }
+              
+              const lines = (stroke as any).text.split('\n');
+              const lineHeight = fontSize * 1.2; // Usar lineHeight consistente
+              
+              lines.forEach((line: string, lineIndex: number) => {
+                console.log(`🎨 Renderizando linha ${lineIndex}:`, line);
+                drawingCtx.fillText(line, stroke.points[0].x, stroke.points[0].y + (lineIndex * lineHeight));
+              });
+              
+              // Resetar sombra
+              drawingCtx.shadowColor = 'transparent';
+              drawingCtx.shadowBlur = 0;
+              drawingCtx.shadowOffsetX = 0;
+              drawingCtx.shadowOffsetY = 0;
+            } else if (stroke.points.length > 0) {
+              // Renderizar traços normais
+              drawingCtx.strokeStyle = stroke.style.color;
+              drawingCtx.lineWidth = stroke.style.thickness;
+              drawingCtx.globalAlpha = stroke.style.opacity;
+              drawingCtx.lineCap = 'round';
+              drawingCtx.lineJoin = 'round';
+              
+              drawingCtx.beginPath();
+              const firstPoint = stroke.points[0];
+              drawingCtx.moveTo(firstPoint.x, firstPoint.y);
+              
+              for (let i = 1; i < stroke.points.length; i++) {
+                const point = stroke.points[i];
+                const prevPoint = stroke.points[i - 1];
+                
+                if (stroke.style.pressure && stroke.points.length > 1) {
+                  const avgPressure = stroke.points.reduce((sum, point) => sum + (point.pressure || 0.5), 0) / stroke.points.length;
+                  const pressureMultiplier = 0.5 + (avgPressure * 1.5);
+                  drawingCtx.lineWidth = stroke.style.thickness * pressureMultiplier;
+                  drawingCtx.globalAlpha = stroke.style.opacity * (0.7 + avgPressure * 0.3);
+                }
+                
+                if (stroke.style.smoothing > 0) {
+                  const smoothing = stroke.style.smoothing;
+                  const dx = point.x - prevPoint.x;
+                  const dy = point.y - prevPoint.y;
+                  const distance = Math.sqrt(dx * dx + dy * dy);
+                  const adaptiveSmoothing = distance > 10 ? smoothing * 0.7 : smoothing;
+                  const cp1x = prevPoint.x + dx * adaptiveSmoothing;
+                  const cp1y = prevPoint.y + dy * adaptiveSmoothing;
+                  const cp2x = point.x - dx * adaptiveSmoothing;
+                  const cp2y = point.y - dy * adaptiveSmoothing;
+                  drawingCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, point.x, point.y);
+                } else {
+                  drawingCtx.lineTo(point.x, point.y);
+                }
+              }
+              drawingCtx.stroke();
+            }
+          });
+          
+          // Desenhar o canvas da mesa digitalizadora no canvas principal
+          ctx.drawImage(drawingCanvas, 0, 0);
+        }
+      }
+
+      // Aplicar multiplicador de resolução ULTRA-HD
+      const qualityMap = { hd: 1.0, medium: 0.9, low: 0.8 };
+      const resolutionMap = { hd: 8, medium: 4, low: 2 }; // Multiplicador de resolução ULTRA
       const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
       const extension = format;
       const qualityValue = qualityMap[quality];
+      const resolutionMultiplier = resolutionMap[quality];
+      
+      // Criar canvas em ULTRA alta resolução
+      const finalCanvas = document.createElement('canvas');
+      const finalCtx = finalCanvas.getContext('2d');
+      if (!finalCtx) return;
+      
+      // Definir dimensões em ULTRA alta resolução
+      finalCanvas.width = tempCanvas.width * resolutionMultiplier;
+      finalCanvas.height = tempCanvas.height * resolutionMultiplier;
+      
+      // Configurar contexto para MÁXIMA qualidade
+      finalCtx.imageSmoothingEnabled = true;
+      finalCtx.imageSmoothingQuality = 'high';
+      finalCtx.textBaseline = 'top';
+      
+      // Desenhar canvas temporário escalado
+      finalCtx.drawImage(tempCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
       
       // Para PNG, a qualidade sempre é 1.0 (lossless)
       const finalQuality = format === 'png' ? 1.0 : qualityValue;
       
-      const dataURL = tempCanvas.toDataURL(mimeType, finalQuality);
+      const dataURL = finalCanvas.toDataURL(mimeType, finalQuality);
       const link = document.createElement('a');
-      const qualityLabel = quality === 'hd' ? 'HD' : quality === 'medium' ? 'media' : 'baixa';
-      link.download = `geometria-completa-${params.type}-${qualityLabel}-${Date.now()}.${extension}`;
+      const qualityLabel = quality === 'hd' ? 'ULTRA-HD-8K' : quality === 'medium' ? 'HD-4K' : 'HD-2K';
+      const resolution = `${finalCanvas.width}x${finalCanvas.height}`;
+      link.download = `geometria-completa-${params.type}-${qualityLabel}-${resolution}-${Date.now()}.${extension}`;
       link.href = dataURL;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success(`Imagem completa exportada em ${format.toUpperCase()} (${qualityLabel})!`);
+      toast.success(`Imagem completa ULTRA-HD exportada: ${resolution} em ${format.toUpperCase()} (${qualityLabel})!`);
     } catch (error) {
+      console.error('Erro ao exportar imagem combinada:', error);
       toast.error('Erro ao exportar imagem combinada');
     }
-  }, [params.type]);
+  }, [params.type, drawingStrokes]);
 
   const handleFreezeView = useCallback(() => {
     if (geometryCanvasRef.current) {
@@ -504,17 +1031,7 @@ function SpaceSculptorContent() {
     }
   }, [isDrawingMode]);
 
-  const handleUndo = useCallback(() => {
-    if (drawingOverlayRef.current?.undo) {
-      drawingOverlayRef.current.undo();
-    }
-  }, []);
 
-  const handleRedo = useCallback(() => {
-    if (drawingOverlayRef.current?.redo) {
-      drawingOverlayRef.current.redo();
-    }
-  }, []);
 
   const handleClear = useCallback(() => {
     if (drawingOverlayRef.current?.clear) {
@@ -531,62 +1048,21 @@ function SpaceSculptorContent() {
   // Sistema de seleção de elementos para deletar
   const [selectedElements, setSelectedElements] = useState<{type: 'plane' | 'construction', id: string}[]>([]);
   
-  // Estado da mesa digitalizadora
-  const [isTabletActive, setIsTabletActive] = useState(false);
-  const [drawingStrokes, setDrawingStrokes] = useState<DrawingStroke[]>([]);
-  
   // Configurações atuais da mesa digitalizadora
   const [tabletStyle, setTabletStyle] = useState({
     color: '#ffffff',
-    thickness: 3, // Espessura mais realista como Samsung Tab S6 Lite
+    thickness: 2,
     opacity: 1,
-    pressure: false, // Desativar variação de pressão
-    smoothing: 0.5
+    pressure: true,
+    smoothing: 0.8, // Suavização alta para eliminar retas
+    fontFamily: 'Poppins' // Fonte padrão
   });
   const [tabletTool, setTabletTool] = useState({
-    type: 'pen' as const,
+    type: 'pen' as any,
     name: 'Caneta',
-    icon: null
+    icon: null,
+    category: 'drawing' as const
   });
-
-  // Estado independente para ferramentas de texto
-  const [textSettings, setTextSettings] = useState({
-    active: false,
-    color: '#ffffff', // Branco padrão
-    size: 40, // 40px padrão
-    fontFamily: 'Virgil'
-  });
-
-  // Funções para gerenciar configurações de texto
-  const handleTextChange = useCallback((key: string, value: any) => {
-    setTextSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }, []);
-
-  const handleTextToolToggle = useCallback(() => {
-    const newActive = !textSettings.active;
-    console.log('🎯 handleTextToolToggle chamado - newActive:', newActive);
-    console.log('🎯 textSettings atual:', textSettings);
-    console.log('🎯 activeTool atual:', activeTool);
-    
-    setTextSettings(prev => ({
-      ...prev,
-      active: newActive
-    }));
-    
-    // Se ativando texto, desativar mesa digitalizadora e definir activeTool
-    if (newActive) {
-      setIsTabletActive(false);
-      setActiveTool('independent-text');
-      console.log('🎯 Ativando ferramenta de texto independente - activeTool definido como independent-text');
-      console.log('🎯 activeTool após setActiveTool:', activeTool);
-    } else {
-      setActiveTool('none');
-      console.log('🎯 Desativando ferramenta de texto independente - activeTool definido como none');
-    }
-  }, [textSettings.active, setActiveTool, activeTool]);
 
   // Função para deletar elemento selecionado
   const handleDeleteSelected = useCallback(() => {
@@ -609,8 +1085,12 @@ function SpaceSculptorContent() {
 
   // Handlers para mesa digitalizadora
   const handleTabletStyleChange = useCallback((key: string, value: any) => {
-    setTabletStyle(prev => ({ ...prev, [key]: value }));
-    console.log('🎨 Mesa digitalizadora - estilo alterado:', key, value);
+    console.log('🎨 handleTabletStyleChange chamado:', key, value);
+    setTabletStyle(prev => {
+      const newStyle = { ...prev, [key]: value };
+      console.log('🎨 Novo estilo:', newStyle);
+      return newStyle;
+    });
   }, []);
 
   const handleTabletToolChange = useCallback((newTool: any) => {
@@ -625,6 +1105,27 @@ function SpaceSculptorContent() {
       setActiveTool(newTool.type as any);
     }
   }, [isTabletActive, setActiveTool]);
+
+  // Handlers para histórico da mesa digitalizadora
+  const handleTabletDrawingChange = useCallback((strokes: any[]) => {
+    setDrawingStrokes(strokes);
+    addToTabletHistory(strokes);
+  }, [addToTabletHistory]);
+
+  const handleTabletUndo = useCallback(() => {
+    const previousStrokes = tabletUndo();
+    setDrawingStrokes(previousStrokes as any);
+  }, [tabletUndo]);
+
+  const handleTabletRedo = useCallback(() => {
+    const nextStrokes = tabletRedo();
+    setDrawingStrokes(nextStrokes as any);
+  }, [tabletRedo]);
+
+  const handleTabletClear = useCallback(() => {
+    setDrawingStrokes([]);
+    clearTabletHistory();
+  }, [clearTabletHistory]);
 
   // Sincronizar activeTool quando mesa digitalizadora for ativada
   useEffect(() => {
@@ -906,7 +1407,7 @@ function SpaceSculptorContent() {
         </div>
         <div className="flex items-center gap-3">
           <ImageDownloadMenu 
-            onExport={handleExportImage}
+            onExport={handleExportCombined}
           />
           <Button
             variant={options.isFrozen ? "default" : "outline"} 
@@ -936,18 +1437,37 @@ function SpaceSculptorContent() {
       <TopToolbar 
         options={options}
         onOptionsChange={setOptions}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={canUndoAction}
+        canRedo={canRedoAction}
+        onStyleChange={(key, value) => {
+          setStyle(prev => ({ ...prev, [key]: value }));
+        }}
+        isTabletActive={isTabletActive}
+        onTabletToggle={setIsTabletActive}
+        tabletStyle={tabletStyle}
+        onTabletStyleChange={(key, value) => {
+          handleTabletStyleChange(key, value);
+        }}
       />
       
-      <div className="flex flex-1 min-h-0">
-        <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-full overflow-y-auto">
+      <div className="flex flex-1 min-h-screen">
+        <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-screen overflow-y-auto">
           <ControlPanel
             params={params}
             options={options}
             style={style}
             properties={properties}
             onParamsChange={updateParams}
-            onOptionsChange={setOptions}
-            onStyleChange={setStyle}
+            onOptionsChange={(newOptions) => {
+              addToHistory('options_change', options);
+              setOptions(newOptions);
+            }}
+            onStyleChange={(newStyle) => {
+              addToHistory('style_change', style);
+              setStyle(newStyle);
+            }}
             onResetView={handleResetView}
             onExportImage={handleExportImage}
             onVertexSelect={(vertexIndex) => {
@@ -963,193 +1483,237 @@ function SpaceSculptorContent() {
             // Configurações da mesa digitalizadora
             tabletStyle={tabletStyle}
             tabletTool={tabletTool}
-            onTabletStyleChange={handleTabletStyleChange}
+            onTabletStyleChange={(style) => {
+              setTabletStyle(prev => ({ ...prev, ...style }));
+            }}
             onTabletToolChange={handleTabletToolChange}
           />
         </aside>
       
         <section className="flex-1 flex flex-col min-w-0 min-h-0">
-          {/* Barra de Ferramentas Principal - Estrutura Reorganizada */}
-          <div className="border-b border-border/30 bg-background/50 backdrop-blur">
-            <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b">
-              
-
-              {/* 2. Ferramenta de Texto (SEMPRE VISÍVEL) */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleTextToolToggle}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
-                    textSettings.active
-                      ? 'bg-green-500 text-white shadow-lg' 
-                      : 'bg-white/5 text-white/70 border border-white/20'
-                  }`}
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 7.82L12 12l5 4.18M12 12H3m4 0V5" />
-                    <rect x="12" y="5" width="9" height="14" rx="2" />
-                  </svg>
-                  <span className="text-sm">Texto</span>
-                </button>
-
-                {/* Controles visíveis apenas quando texto está ativo */}
-                {textSettings.active && (
-                  <>
-                    {/* Botão de Seleção de Texto */}
-                    <button
-                      onClick={() => {
-                        if (activeTool === 'text-select') {
-                          setActiveTool('none'); // Desativar seleção
-                        } else {
-                          setActiveTool('text-select'); // Ativar seleção
-                        }
-                      }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
-                        activeTool === 'text-select'
-                          ? 'bg-blue-500 text-white shadow-lg' 
-                          : 'bg-white/5 text-white/70 border border-white/20'
-                      }`}
-                      title={activeTool === 'text-select' ? 'Desativar seleção' : 'Selecionar texto existente'}
-                    >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 3h18v18H3z"/>
-                        <path d="M8 8h8M8 12h8M8 16h8"/>
-                      </svg>
-                      <span className="text-sm">Selecionar</span>
-                    </button>
-
-                    {/* Seletor de Cor */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/60">Cor:</span>
-                      <div className="flex gap-1">
-                        {['#000000', '#ffffff', '#ff0000', '#0000ff', '#00ff00', '#ffff00'].map(color => (
-                          <button
-                            key={color}
-                            className={`w-6 h-6 rounded-full border-2 transition-all ${
-                              textSettings.color === color 
-                                ? 'border-white ring-2 ring-white/50 scale-110' 
-                                : 'border-gray-600 hover:scale-110'
-                            }`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => handleTextChange('color', color)}
-                            title={`Cor ${color}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Controle de Tamanho do Texto */}
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5">
-                      <span className="text-xs text-white/60">Tamanho:</span>
-                      <input
-                        type="range"
-                        min="20"
-                        max="50"
-                        step="2"
-                        value={textSettings.size}
-                        onChange={(e) => handleTextChange('size', Number(e.target.value))}
-                        className="w-24 h-1"
-                      />
-                      <span className="text-xs text-white/80 w-10">{textSettings.size}pt</span>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Separador */}
-              <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
-
-              {/* 3. Mesa Digitalizadora (Toggle) */}
-              <div className="flex flex-col gap-3">
-                <ToolBar 
-                  isTabletActive={isTabletActive}
-                  onTabletToggle={setIsTabletActive}
-                  tabletStyle={tabletStyle}
-                  tabletTool={tabletTool}
-                  onTabletStyleChange={handleTabletStyleChange}
-                  onTabletToolChange={handleTabletToolChange}
-                  onTabletUndo={() => {
-                    console.log('Undo mesa digitalizadora');
-                  }}
-                  onTabletRedo={() => {
-                    console.log('Redo mesa digitalizadora');
-                  }}
-                  onTabletClear={() => {
-                    setDrawingStrokes([]);
-                    console.log('Limpar mesa digitalizadora');
-                  }}
-                  canTabletUndo={drawingStrokes.length > 0}
-                  canTabletRedo={false}
-                />
-              </div>
-
-              {/* Separador */}
-              <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
-
-              {/* 4. Seções de Visualização */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setOptions({...options, showCrossSection: !options.showCrossSection})}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    options.showCrossSection 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path d="M2 12s3-9 10-9 10 9 10 9-3 9-10 9-10-9-10-9z" />
-                  </svg>
-                  <span>Seção Transversal</span>
-                </button>
+          {/* Barra de Ferramentas Principal */}
+          {(
+            <div className="border-b border-border/30 bg-background/50 backdrop-blur">
+              <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[80px]">
                 
-                <button
-                  onClick={() => setOptions({...options, showMeridianSection: !options.showMeridianSection})}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    options.showMeridianSection 
-                      ? 'bg-cyan-500 text-white' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                  <span>Seção Meridiana</span>
-                </button>
+                {/* 1. Mesa Digitalizadora (Toggle) - Sempre visível */}
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => setIsTabletActive(!isTabletActive)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                      isTabletActive
+                        ? 'bg-green-500 text-white shadow-lg hover:bg-green-600' 
+                        : 'bg-white/10 text-white/80 border border-white/20 hover:bg-white/20'
+                    }`}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                      <path d="M2 17l10 5 10-5"/>
+                      <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <span className="text-sm font-medium">
+                      {isTabletActive ? 'Desativar Mesa' : 'Ativar Mesa'}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Separador */}
+                <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
+
+                {/* 2. Ferramenta de Texto (SEMPRE VISÍVEL) */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleTextToolToggle}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
+                      textSettings.active
+                        ? 'bg-green-500 text-white shadow-lg' 
+                        : 'bg-white/5 text-white/70 border border-white/20'
+                    }`}
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 7.82L12 12l5 4.18M12 12H3m4 0V5" />
+                      <rect x="12" y="5" width="9" height="14" rx="2" />
+                    </svg>
+                    <span className="text-sm">Texto</span>
+                  </button>
+
+                  {/* Controles visíveis apenas quando texto está ativo */}
+                  {textSettings.active && (
+                    <>
+                      {/* Botão de Seleção de Texto */}
+                      <button
+                        onClick={() => {
+                          if (activeTool === 'text-select') {
+                            setActiveTool('none'); // Desativar seleção
+                          } else {
+                            setActiveTool('text-select'); // Ativar seleção
+                          }
+                        }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
+                          activeTool === 'text-select'
+                            ? 'bg-blue-500 text-white shadow-lg' 
+                            : 'bg-white/5 text-white/70 border border-white/20'
+                        }`}
+                        title={activeTool === 'text-select' ? 'Desativar seleção' : 'Selecionar texto existente'}
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 3h18v18H3z"/>
+                          <path d="M8 8h8M8 12h8M8 16h8"/>
+                        </svg>
+                        <span className="text-sm">Selecionar</span>
+                      </button>
+
+                      {/* Seletor de Cor */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-white/60">Cor:</span>
+                        <div className="flex gap-1">
+                          {['#000000', '#ffffff', '#ff0000', '#0000ff', '#00ff00', '#ffff00'].map(color => (
+                            <button
+                              key={color}
+                              className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                textSettings.color === color 
+                                  ? 'border-white ring-2 ring-white/50 scale-110' 
+                                  : 'border-gray-600 hover:scale-110'
+                              }`}
+                              style={{ backgroundColor: color }}
+                              onClick={() => handleTextChange('color', color)}
+                              title={`Cor ${color}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Controle de Tamanho do Texto */}
+                      <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5">
+                        <span className="text-xs text-white/60">Tamanho:</span>
+                        <input
+                          type="range"
+                          min="20"
+                          max="50"
+                          step="2"
+                          value={textSettings.size}
+                          onChange={(e) => handleTextChange('size', Number(e.target.value))}
+                          className="w-24 h-1"
+                        />
+                        <span className="text-xs text-white/80 w-10">{textSettings.size}pt</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
               </div>
             </div>
-          </div>
+          )}
           
-          {/* Undo/Redo para Geometria */}
-          <div className="border-b border-border/30 bg-background/50 backdrop-blur px-4 py-2 flex items-center justify-end">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleUndoGeometry}
-                disabled={!canUndoGeometry}
-                title="Desfazer alteração da geometria (Ctrl+Z)"
-                className="hover:bg-accent/10"
-              >
-                <Undo2 className="w-4 h-4" />
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRedoGeometry}
-                disabled={!canRedoGeometry}
-                title="Refazer alteração da geometria (Ctrl+Y)"
-                className="hover:bg-accent/10"
-              >
-                <Redo2 className="w-4 h-4" />
-              </Button>
+          {/* Undo/Redo para Geometria - Apenas quando mesa NÃO está ativa */}
+          {!isTabletActive && (
+            <div className="border-b border-border/30 bg-background/50 backdrop-blur px-4 py-2 flex items-center justify-end">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUndoGeometry}
+                  disabled={!canUndoGeometry}
+                  title="Desfazer alteração da geometria (Ctrl+Z)"
+                  className="hover:bg-accent/10"
+                >
+                  <Undo2 className="w-4 h-4" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRedoGeometry}
+                  disabled={!canRedoGeometry}
+                  title="Refazer alteração da geometria (Ctrl+Y)"
+                  className="hover:bg-accent/10"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Conteúdo da Geometria */}
-          <div className="flex-1 m-0 p-0 h-full">
+          <div className="flex-1 m-0 p-0 h-full relative">
 
+            {isTabletActive ? (
+              /* Mesa Digitalizadora Avançada com Sólido 3D de Fundo */
+              <div className="w-full h-full relative">
+                {/* Sólido 3D como fundo - SEMPRE VISÍVEL */}
+                <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+                  <div ref={geometryCanvasRef} className="w-full h-full relative flex-1 min-h-0">
+                    <GeometryCanvas
+                      params={params}
+                      options={options}
+                      style={style}
+                      onVertexSelect={(vertexIndex) => {
+                        // Sistema de seleção baseado em modo ativo - cada funcionalidade opera independentemente
+                        
+                        switch (style.activeVertexMode) {
+                          case 'construction':
+                            if (style.constructionType) {
+                              handleConstructionVertexSelect(vertexIndex);
+                            }
+                            break;
+                            
+                          case 'plane':
+                            handlePlaneVertexSelect(vertexIndex);
+                            break;
+                            
+                          case 'meridian':
+                            if ((params.type === 'prism' || params.type === 'cube' || params.type === 'tetrahedron' || params.type === 'pyramid' || params.type === 'cylinder' || params.type === 'cone')) {
+                              const current = style.selectedVerticesForMeridian || [];
+                              if (current.length < 2) {
+                                setStyle(prev => ({
+                                  ...prev,
+                                  selectedVerticesForMeridian: [...current, vertexIndex]
+                                }));
+                                toast.success(`🔶 Vértice ${vertexIndex} selecionado para seção meridiana (${current.length + 1}/2)`);
+                              } else {
+                                setStyle(prev => ({
+                                  ...prev,
+                                  selectedVerticesForMeridian: [vertexIndex]
+                                }));
+                                toast.success(`🔶 Nova seleção iniciada - Vértice ${vertexIndex} selecionado (1/2)`);
+                              }
+                            }
+                            break;
+                            
+                          case 'connection':
+                            if (['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type)) {
+                              const current = style.selectedVerticesForGeneral || [];
+                              setStyle(prev => ({
+                                ...prev,
+                                selectedVerticesForGeneral: [...current, vertexIndex]
+                              }));
+                              toast.success(`🔸 Vértice ${vertexIndex} conectado (total: ${current.length + 1})`);
+                            }
+                            break;
+                            
+                          case 'none':
+                          default:
+                            toast.info('Selecione um modo de trabalho primeiro');
+                            break;
+                        }
+                      }}
+                      onStyleChange={(key, value) => {
+                        setStyle(prev => ({ ...prev, [key]: value }));
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Mesa Digitalizadora por cima do sólido - TRANSPARENTE */}
+                <div className="absolute inset-0 w-full h-full pointer-events-auto z-10">
+                  <AdvancedDrawingTablet 
+                    isActive={isTabletActive}
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            ) : (
+              /* Área 3D Normal */
               <div className="w-full h-full min-h-[calc(100vh-240px)] relative">
                 {options.isFrozen && frozenImage ? (
                   <FrozenCanvas
@@ -1161,7 +1725,7 @@ function SpaceSculptorContent() {
                   <DrawingOverlayWrapper
                     isTabletActive={isTabletActive}
                     drawingStrokes={drawingStrokes}
-                    onDrawingChange={setDrawingStrokes}
+                    onDrawingChange={handleTabletDrawingChange}
                     currentStyle={textSettings.active ? {
                       color: textSettings.color,
                       thickness: textSettings.size / 4, // Converter px para thickness
@@ -1248,6 +1812,7 @@ function SpaceSculptorContent() {
                   </DrawingOverlayWrapper>
                 )}
               </div>
+            )}
           </div>
         </section>
         </div>
@@ -1257,6 +1822,7 @@ function SpaceSculptorContent() {
         showCrossSection={options.showCrossSection}
         showMeridianSection={options.showMeridianSection}
       />
+      
     </div>
   );
 }

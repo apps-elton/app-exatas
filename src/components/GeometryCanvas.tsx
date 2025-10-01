@@ -32,7 +32,6 @@ import FrustumSolids from './geometry/FrustumSolids';
 import MidpointTool from './geometry/MidpointTool';
 import MeasurementTool from './geometry/MeasurementTool';
 import AlignmentTool from './geometry/AlignmentTool';
-import PerpendicularTool from './geometry/PerpendicularTool';
 
 interface GeometryMeshProps {
   params: GeometryParams;
@@ -51,7 +50,59 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
   const getMidpoints = (): THREE.Vector3[] => {
     const midpoints = (style as any).midpoints || [];
     console.log('getMidpoints chamada, retornando:', midpoints.length, 'pontos médios');
+    console.log('Pontos médios disponíveis:', midpoints.map((m, i) => `[${i}]: (${m.x.toFixed(2)}, ${m.y.toFixed(2)}, ${m.z.toFixed(2)})`));
     return midpoints;
+  };
+
+  // Função para obter a posição de um vértice (incluindo pontos médios)
+  const getVertexPosition = (vertexIndex: number): THREE.Vector3 | null => {
+    console.log('=== getVertexPosition no GeometryCanvas ===');
+    console.log('vertexIndex:', vertexIndex);
+    
+    // Verificar se é um ponto médio
+    const getBaseVertexCount = (): number => {
+      switch (params.type) {
+        case 'cube': return 8;
+        case 'tetrahedron': return 4;
+        case 'octahedron': return 6;
+        case 'dodecahedron': return 20;
+        case 'icosahedron': return 12;
+        case 'cylinder': return 16;
+        case 'cone': return 9;
+        case 'prism': {
+          const numSides = params.numSides || 5;
+          return numSides * 2;
+        }
+        case 'pyramid': {
+          const numSides = params.numSides || 5;
+          return numSides + 1;
+        }
+        default: return 8;
+      }
+    };
+    
+    const baseVertexCount = getBaseVertexCount();
+    const isMidpoint = vertexIndex >= baseVertexCount;
+    
+    if (isMidpoint) {
+      const midpointIndex = vertexIndex - baseVertexCount;
+      const midpoints = getMidpoints();
+      console.log('É um ponto médio, índice:', midpointIndex);
+      console.log('Total de pontos médios:', midpoints.length);
+      
+      if (midpointIndex >= 0 && midpointIndex < midpoints.length) {
+        const result = midpoints[midpointIndex];
+        console.log('Posição do ponto médio encontrada:', result);
+        return result;
+      } else {
+        console.log('ERRO: Índice de ponto médio inválido!');
+        return null;
+      }
+    }
+    
+    // Para vértices normais, retornar null (será tratado pelo MidpointTool)
+    console.log('É um vértice normal, delegando para MidpointTool');
+    return null;
   };
 
   // Função centralizada para lidar com seleção de vértices (incluindo pontos médios)
@@ -92,6 +143,13 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
     console.log('Vertex index:', vertexIndex);
     console.log('Midpoints disponíveis:', getMidpoints().length);
     
+    // Verificar se o vértice existe (incluindo pontos médios)
+    const vertexPosition = getVertexPosition(vertexIndex);
+    if (isMidpoint && !vertexPosition) {
+      console.log('ERRO: Ponto médio não encontrado!');
+      return;
+    }
+    
     // Verificar se alguma ferramenta geométrica está ativa
     if (options.activeTool === 'vertex-connector') {
       console.log('=== FERRAMENTA CONECTAR VÉRTICES ATIVA ===');
@@ -125,9 +183,11 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         
         const currentConnections = style.connections || [];
         onStyleChange('connections', [...currentConnections, newConnection]);
-        onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
         
-        // toast.success('Conexão criada!');
+        // Limpar seleção após criar conexão - usuário deve escolher 2 vértices específicos para cada conexão
+        onStyleChange('selectedVerticesForGeneral', []);
+        
+        console.log('Conexão criada! Seleção limpa - clique em 2 vértices específicos para próxima conexão.');
       }
     } else if (options.activeTool === 'midpoint') {
       console.log('=== FERRAMENTA PONTO MÉDIO ATIVA ===');
@@ -164,10 +224,6 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
       onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
     } else if (options.activeTool === 'align') {
       console.log('Ferramenta alinhamento ativa');
-      const currentSelection = style.selectedVerticesForGeneral || [];
-      onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
-    } else if (options.activeTool === 'perpendicular') {
-      console.log('Ferramenta perpendicular ativa');
       const currentSelection = style.selectedVerticesForGeneral || [];
       onStyleChange('selectedVerticesForGeneral', [...currentSelection, vertexIndex]);
     } else {
@@ -460,14 +516,6 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
         />
       )}
 
-      {options.activeTool === 'perpendicular' && (
-        <PerpendicularTool 
-          params={params}
-          style={style}
-          onStyleChange={onStyleChange}
-          onVertexSelect={onVertexSelect}
-        />
-      )}
       
       {/* Shadow receiver */}
       {options.showShadow && (
@@ -767,9 +815,12 @@ function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }:
               
               const currentConnections = style.connections || [];
               onStyleChange('connections', [...currentConnections, newConnection]);
-              onStyleChange('selectedVerticesForGeneral', []); // Limpar seleção
+              
+              // Limpar seleção após criar conexão - usuário deve escolher 2 vértices específicos para cada conexão
+              onStyleChange('selectedVerticesForGeneral', []);
               
               toast.success('Conexão criada!');
+              console.log('Conexão criada! Seleção limpa - clique em 2 vértices específicos para próxima conexão.');
             }
           }}
           onClearConnections={() => {
@@ -2062,19 +2113,21 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
             preserveDrawingBuffer: true,
             failIfMajorPerformanceCaveat: false
           }}
-          onCreated={({ gl, camera }) => {
+          onCreated={({ gl, camera, scene }) => {
             gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             gl.outputColorSpace = 'srgb';
+            // Configurar cor de fundo uniforme
+            scene.background = new THREE.Color(0x1a1a1a);
             // Configurar câmera inicial para mostrar o sólido completo em tamanho maior
             camera.position.set(6, 4, 6);
             camera.lookAt(0, 1, 0);
             camera.updateProjectionMatrix();
           }}
         >
-        <ambientLight intensity={0.6} />
+        <ambientLight intensity={0.8} />
         <directionalLight 
           position={[8, 8, 4]} 
-          intensity={1.2}
+          intensity={0.8}
           castShadow={options.showShadow}
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -2084,7 +2137,11 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
           shadow-camera-top={10}
           shadow-camera-bottom={-10}
         />
-        <pointLight position={[-8, -8, -4]} intensity={0.4} />
+        <directionalLight 
+          position={[-8, 8, 4]} 
+          intensity={0.4}
+        />
+        <pointLight position={[0, 5, 0]} intensity={0.3} />
         
         <GeometryMesh 
           params={params}

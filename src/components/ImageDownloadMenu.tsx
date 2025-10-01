@@ -19,9 +19,9 @@ interface ImageDownloadMenuProps {
 const ImageDownloadMenu: React.FC<ImageDownloadMenuProps> = ({ onExport, disabled = false }) => {
   const { t } = useLanguage();
   const qualities = [
-    { key: 'hd' as const, label: 'HD (1.0)', description: 'Máxima qualidade' },
-    { key: 'medium' as const, label: 'Média (0.8)', description: 'Qualidade média' },
-    { key: 'low' as const, label: 'Baixa (0.6)', description: 'Arquivo menor' }
+    { key: 'hd' as const, label: 'ULTRA-HD-8K (8x)', description: 'Máxima qualidade (8x)' },
+    { key: 'medium' as const, label: 'HD-4K (4x)', description: 'Alta resolução (4x)' },
+    { key: 'low' as const, label: 'HD-2K (2x)', description: 'Boa resolução (2x)' }
   ];
 
   return (

@@ -113,7 +113,7 @@ export interface VisualizationOptions {
   showShadow: boolean;
   isFrozen: boolean;
   // Ferramenta ativa para evitar conflitos entre modos
-  activeTool?: 'none' | 'cross-section' | 'meridian-section' | 'vertex-connector' | 'plane-definition' | 'construction' | 'pan' | 'midpoint' | 'perpendicular' | 'parallel' | 'angle' | 'measure' | 'align' | 'independent-text' | 'text-select';
+  activeTool?: 'none' | 'cross-section' | 'meridian-section' | 'vertex-connector' | 'plane-definition' | 'construction' | 'pan' | 'midpoint' | 'parallel' | 'angle' | 'measure' | 'align' | 'independent-text' | 'text-select';
   // Formas inscritas e circunscritas
   showInscribedSphere: boolean;
   showCircumscribedSphere: boolean;

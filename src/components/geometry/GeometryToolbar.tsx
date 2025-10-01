@@ -36,12 +36,6 @@ export default function GeometryToolbar({ options, onOptionsChange }: GeometryTo
       description: 'Criar ponto médio entre dois vértices'
     },
     {
-      id: 'perpendicular',
-      icon: <Square className="w-4 h-4" />,
-      label: 'Perpendicular',
-      description: 'Criar linha perpendicular'
-    },
-    {
       id: 'parallel',
       icon: <Minus className="w-4 h-4" />,
       label: 'Paralela',

@@ -1,14 +1,13 @@
-import React from 'react';
-import { useActiveTool } from '@/context/ActiveToolContext';
-import { MousePointer, Link, Plane, Wrench, Eye, EyeOff, Palette, Pen, Eraser, Undo, Redo, RotateCcw } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
+import React, { useState } from 'react';
+import { MousePointer, Palette, Pen, Pencil, Eraser, Undo, Redo, RotateCcw, Square, Circle, Minus, ArrowRight, Highlighter, Ruler, Grid3x3 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-// Cores para mesa digitalizadora - Samsung Notes Style
+// ==========================================
+// CORES - Samsung Notes Style
+// ==========================================
+
 const COLORS = [
   { label: 'Preto', value: '#000000', category: 'básica' },
   { label: 'Branco', value: '#ffffff', category: 'básica' },
@@ -23,20 +22,38 @@ const COLORS = [
   { label: 'Marrom', value: '#8b4513', category: 'neutra' },
   { label: 'Cinza', value: '#808080', category: 'neutra' },
   { label: 'Dourado', value: '#ffd700', category: 'premium' },
-  { label: 'Prata', value: '#c0c0c0', category: 'premium' }
+  { label: 'Prata', value: '#c0c0c0', category: 'premium' },
+  { label: 'Amarelo Ouro', value: '#ffd700', category: 'nova' },
+  { label: 'Azul Céu', value: '#87ceeb', category: 'nova' },
+  { label: 'Roxo Violeta', value: '#8a2be2', category: 'nova' },
+  { label: 'Verde Musgo', value: '#8fbc8f', category: 'nova' }
 ];
 
-// Ferramentas de interação (exclusivas) - serão traduzidas dinamicamente
-const interactionTools = [
-  { key: 'vertex-connector', labelKey: 'interaction.connect_vertices', icon: Link, description: 'Criar segmentos entre vértices' },
-  { key: 'plane-definition', labelKey: 'interaction.create_plane', icon: Plane, description: 'Definir planos por 3 pontos' },
-] as const;
+// ==========================================
+// TIPOS DE FERRAMENTAS
+// ==========================================
 
-// Ferramentas de visualização (independentes - precisam de estado separado) - serão traduzidas dinamicamente
-const visualizationTools = [
-  { key: 'cross-section', labelKey: 'visualization.cross_section', icon: Eye, description: 'Cortar o sólido horizontalmente' },
-  { key: 'meridian-section', labelKey: 'visualization.meridian_section', icon: EyeOff, description: 'Cortar o sólido verticalmente' },
-] as const;
+const DRAWING_TOOLS = [
+  { type: 'pen', icon: Pen, name: 'Caneta', tooltip: 'Caneta (P)' },
+  { type: 'pencil', icon: Pencil, name: 'Lápis', tooltip: 'Lápis (L)' },
+  { type: 'marker', icon: Highlighter, name: 'Marcador', tooltip: 'Marcador (M)' },
+  { type: 'technical', icon: Ruler, name: 'Técnica', tooltip: 'Caneta Técnica (T)' },
+  { type: 'highlighter', icon: Highlighter, name: 'Marca-texto', tooltip: 'Marca-texto (H)' },
+  { type: 'eraser', icon: Eraser, name: 'Borracha', tooltip: 'Borracha (E)' },
+];
+
+const GEOMETRIC_TOOLS = [
+  { type: 'rectangle', icon: Square, name: 'Retângulo', tooltip: 'Retângulo (R)' },
+  { type: 'square', icon: Square, name: 'Quadrado', tooltip: 'Quadrado (Q)' },
+  { type: 'circle', icon: Circle, name: 'Círculo', tooltip: 'Círculo (C)' },
+  { type: 'line', icon: Minus, name: 'Reta', tooltip: 'Reta (-)' },
+  { type: 'dashed-line', icon: Minus, name: 'Reta Tracejada', tooltip: 'Reta Tracejada (Shift+-)' },
+  { type: 'arrow', icon: ArrowRight, name: 'Seta', tooltip: 'Seta (A)' },
+];
+
+// ==========================================
+// INTERFACE
+// ==========================================
 
 interface ToolBarProps {
   isTabletActive?: boolean;
@@ -45,6 +62,9 @@ interface ToolBarProps {
     color: string;
     thickness: number;
     opacity: number;
+    pressure: boolean;
+    smoothing: number;
+    fontFamily?: string;
   };
   tabletTool?: {
     type: string;
@@ -57,12 +77,27 @@ interface ToolBarProps {
   onTabletClear?: () => void;
   canTabletUndo?: boolean;
   canTabletRedo?: boolean;
+  showGrid?: boolean;
+  onToggleGrid?: () => void;
+  snapEnabled?: boolean;
+  onToggleSnap?: () => void;
 }
+
+// ==========================================
+// COMPONENTE TOOLBAR
+// ==========================================
 
 export function ToolBar({ 
   isTabletActive = false,
   onTabletToggle,
-  tabletStyle = { color: '#ff0000', thickness: 3, opacity: 1 },
+  tabletStyle = { 
+    color: '#ffffff', 
+    thickness: 2, 
+    opacity: 1, 
+    pressure: true, 
+    smoothing: 0.8, 
+    fontFamily: 'Poppins' 
+  },
   tabletTool = { type: 'pen', name: 'Caneta' },
   onTabletStyleChange,
   onTabletToolChange,
@@ -70,194 +105,244 @@ export function ToolBar({
   onTabletRedo,
   onTabletClear,
   canTabletUndo = false,
-  canTabletRedo = false
+  canTabletRedo = false,
+  showGrid = false,
+  onToggleGrid,
+  snapEnabled = false,
+  onToggleSnap
 }: ToolBarProps) {
-  const { t } = useLanguage();
-  const { activeTool, setActiveTool } = useActiveTool();
+  
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   return (
-    <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b border-white/10 shadow-lg">
-      {/* Seção de Interação */}
-      <div className="flex flex-col gap-3">
-        <div className="flex gap-1.5">
-          {interactionTools.map(tool => {
-            const Icon = tool.icon;
-            const isActive = activeTool === tool.key;
-            
-            return (
-              <button
-                key={tool.key}
-                onClick={() => setActiveTool(tool.key)}
-                className={`
-                  group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium
-                  transition-all duration-300 ease-out transform
-                  ${isActive 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-2xl shadow-blue-500/40 scale-105' 
-                    : 'bg-white/5 text-white/80 hover:bg-white/10 hover:text-white hover:scale-105 border border-white/20 hover:border-white/40'
-                  }
-                `}
-                title={tool.description}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{t(tool.labelKey)}</span>
-                {isActive && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b border-white/10 shadow-lg overflow-x-auto min-h-[80px]">
 
-      {/* Separador Visual */}
-      <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
-
-      {/* Mesa Digitalizadora - Versão Completa */}
+      {/* Mesa Digitalizadora */}
       <div className="flex flex-col gap-3">
         
         {isTabletActive ? (
-          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 border border-white/20">
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-green-500/20 border border-green-500/30 min-w-max flex-shrink-0">
+            
             {/* Toggle */}
             <div className="flex items-center gap-2">
               <Palette className="w-4 h-4 text-green-400" />
-              <Label htmlFor="tablet-toggle" className="text-xs text-white/70">
-                Ativa
+              <Label htmlFor="tablet-toggle" className="text-xs text-green-300 font-medium">
+                Mesa Ativa
               </Label>
               <Switch
                 id="tablet-toggle"
                 checked={isTabletActive}
-                onCheckedChange={(checked) => {
-                  console.log('🖊️ Toggle mesa digitalizadora:', checked);
-                  onTabletToggle(checked);
-                }}
-                className="data-[state=checked]:bg-green-500"
+                onCheckedChange={onTabletToggle}
+                className="data-[state=checked]:bg-green-500 scale-75"
               />
             </div>
 
-            {/* Separador */}
-            <div className="w-px h-6 bg-white/20"></div>
+            <div className="w-px h-6 bg-green-500/30"></div>
 
-            {/* Ferramentas - Compactas */}
+            {/* Ferramentas de Seleção */}
             <div className="flex items-center gap-1">
               <Button
                 variant={tabletTool.type === 'select' ? "default" : "outline"}
                 size="sm"
                 onClick={() => onTabletToolChange?.({ type: 'select', name: 'Seleção' })}
                 className={`h-8 w-8 p-0 ${tabletTool.type === 'select' ? 'bg-green-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="🎯 Seleção de Texto"
+                title="Seleção"
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                </svg>
-              </Button>
-              <Button
-                variant={tabletTool.type === 'pen' ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTabletToolChange?.({ type: 'pen', name: 'Caneta' })}
-                className={`h-8 w-8 p-0 ${tabletTool.type === 'pen' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="✏️ Caneta"
-              >
-                <Pen className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={tabletTool.type === 'highlighter' ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTabletToolChange?.({ type: 'highlighter', name: 'Marcador' })}
-                className={`h-8 w-8 p-0 ${tabletTool.type === 'highlighter' ? 'bg-yellow-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="🖌️ Marcador"
-              >
-                <div className="w-4 h-4 bg-yellow-400 rounded-sm" />
-              </Button>
-              <Button
-                variant={tabletTool.type === 'pencil' ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTabletToolChange?.({ type: 'pencil', name: 'Lápis' })}
-                className={`h-8 w-8 p-0 ${tabletTool.type === 'pencil' ? 'bg-gray-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="✏️ Lápis"
-              >
-                <Pen className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={tabletTool.type === 'eraser' ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTabletToolChange?.({ type: 'eraser', name: 'Borracha' })}
-                className={`h-8 w-8 p-0 ${tabletTool.type === 'eraser' ? 'bg-red-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="Borracha"
-              >
-                <Eraser className="w-4 h-4" />
+                <MousePointer className="w-3 h-3" />
               </Button>
             </div>
 
-            {/* Separador */}
-            <div className="w-px h-6 bg-white/20"></div>
+            <div className="w-px h-6 bg-green-500/30"></div>
 
-            {/* Desenho Assistido - Funcional */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-green-400 font-medium">Assistido</span>
-              </div>
-              <span className="text-xs text-white/60">Segure 1-2s</span>
+            {/* Ferramentas de Desenho */}
+            <div className="flex items-center gap-1 max-w-[300px] overflow-x-auto">
+              {DRAWING_TOOLS.map(tool => {
+                const Icon = tool.icon;
+                return (
+                  <Button
+                    key={tool.type}
+                    variant={tabletTool.type === tool.type ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onTabletToolChange?.({ type: tool.type, name: tool.name })}
+                    className={`h-8 w-8 p-0 flex-shrink-0 ${
+                      tabletTool.type === tool.type ? 'bg-green-500 text-white' : 'bg-white/5 text-white/70'
+                    }`}
+                    title={tool.tooltip}
+                  >
+                    <Icon className="w-3 h-3" />
+                  </Button>
+                );
+              })}
             </div>
 
-            {/* Separador */}
-            <div className="w-px h-6 bg-white/20"></div>
+            <div className="w-px h-6 bg-green-500/30"></div>
 
-            {/* Cores - Compactas */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <div 
-                    className="w-4 h-4 rounded-full border border-white/30" 
-                    style={{ backgroundColor: tabletStyle.color }}
-                  />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-3">
-                <div className="grid grid-cols-6 gap-2">
-                  {COLORS.slice(0, 12).map((color) => (
-                    <button
-                      key={color.value}
-                      className={`w-6 h-6 rounded-full border-2 ${
-                        tabletStyle.color === color.value 
-                          ? 'border-white ring-2 ring-white/50' 
-                          : 'border-gray-600'
-                      }`}
-                      style={{ backgroundColor: color.value }}
-                      onClick={() => onTabletStyleChange?.('color', color.value)}
-                      title={color.label}
-                    />
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            {/* Ferramentas Geométricas */}
+            <div className="flex items-center gap-1 max-w-[300px] overflow-x-auto">
+              <span className="text-xs text-green-300 mr-1">Geometria:</span>
+              {GEOMETRIC_TOOLS.map(tool => {
+                const Icon = tool.icon;
+                return (
+                  <Button
+                    key={tool.type}
+                    variant={tabletTool.type === tool.type ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onTabletToolChange?.({ type: tool.type, name: tool.name })}
+                    className={`h-8 w-8 p-0 flex-shrink-0 ${
+                      tabletTool.type === tool.type ? 'bg-green-500 text-white' : 'bg-white/5 text-white/70'
+                    }`}
+                    title={tool.tooltip}
+                  >
+                    <Icon className="w-3 h-3" />
+                  </Button>
+                );
+              })}
+            </div>
 
-            {/* Espessura - Compacta */}
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full border border-white/30 flex items-center justify-center bg-white/5">
-                <div
-                  className="rounded-full bg-white"
-                  style={{
-                    width: `${Math.max(2, tabletStyle.thickness * 0.6)}px`,
-                    height: `${Math.max(2, tabletStyle.thickness * 0.6)}px`
-                  }}
-                />
-              </div>
-              <Slider
-                value={[tabletStyle.thickness]}
-                onValueChange={([value]) => {
-                  onTabletStyleChange?.('thickness', value);
-                }}
-                min={1}
-                max={20}
-                step={1}
-                className="w-16 h-2"
+            <div className="w-px h-6 bg-green-500/30"></div>
+
+            {/* Seletor de Cor */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0 bg-white/5 text-white/70 border-green-500/30 hover:bg-white/10"
+              onClick={() => setShowColorPicker(true)}
+              title="Selecionar Cor"
+            >
+              <div 
+                className="w-4 h-4 rounded border border-white/30"
+                style={{ backgroundColor: tabletStyle.color }}
               />
-              <span className="text-xs text-white/60 w-8">{tabletStyle.thickness}px</span>
+            </Button>
+
+            <div className="w-px h-6 bg-green-500/30"></div>
+
+            {/* Espessura */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-green-300">Esp:</span>
+              <input
+                type="range"
+                min="0.5"
+                max="20"
+                step="0.5"
+                value={tabletStyle.thickness || 2}
+                onChange={(e) => onTabletStyleChange?.('thickness', Number(e.target.value))}
+                className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #10b981 0%, #10b981 ${((tabletStyle.thickness || 2) / 20) * 100}%, #374151 ${((tabletStyle.thickness || 2) / 20) * 100}%, #374151 100%)`
+                }}
+              />
+              <span className="text-xs text-green-300 w-10">{(tabletStyle.thickness || 2).toFixed(1)}px</span>
             </div>
 
-            {/* Separador */}
-            <div className="w-px h-6 bg-white/20"></div>
+            <div className="w-px h-6 bg-green-500/30"></div>
+
+            {/* Opacidade */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-green-300">Opac:</span>
+              <input
+                type="range"
+                min="0.1"
+                max="1"
+                step="0.1"
+                value={tabletStyle.opacity || 1}
+                onChange={(e) => onTabletStyleChange?.('opacity', Number(e.target.value))}
+                className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-xs text-green-300 w-8">{Math.round((tabletStyle.opacity || 1) * 100)}%</span>
+            </div>
+
+            <div className="w-px h-6 bg-green-500/30"></div>
+
+            {/* Configurações Avançadas */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+              className="h-8 px-2 border-green-500/30 text-green-300 hover:bg-green-500/20 text-xs"
+              title="Configurações Avançadas"
+            >
+              {showAdvancedSettings ? '◀' : '▶'}
+            </Button>
+
+            {showAdvancedSettings && (
+              <>
+                <div className="w-px h-6 bg-green-500/30"></div>
+                
+                {/* Suavização */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-green-300">Suave:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={tabletStyle.smoothing || 0.8}
+                    onChange={(e) => onTabletStyleChange?.('smoothing', Number(e.target.value))}
+                    className="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <span className="text-xs text-green-300 w-8">{Math.round((tabletStyle.smoothing || 0.8) * 100)}%</span>
+                </div>
+
+                <div className="w-px h-6 bg-green-500/30"></div>
+
+                {/* Pressão */}
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-green-300">Pressão</Label>
+                  <Switch
+                    checked={tabletStyle.pressure}
+                    onCheckedChange={(checked) => onTabletStyleChange?.('pressure', checked)}
+                    className="data-[state=checked]:bg-green-500 scale-75"
+                  />
+                </div>
+
+                <div className="w-px h-6 bg-green-500/30"></div>
+
+                {/* Grade */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={showGrid ? "default" : "outline"}
+                    size="sm"
+                    onClick={onToggleGrid}
+                    className={`h-8 w-8 p-0 ${showGrid ? 'bg-green-500' : 'border-green-500/30 text-green-300'}`}
+                    title="Grade (Ctrl+G)"
+                  >
+                    <Grid3x3 className="w-3 h-3" />
+                  </Button>
+                  
+                  {showGrid && (
+                    <div className="flex items-center gap-1">
+                      <Label className="text-xs text-green-300">Snap</Label>
+                      <Switch
+                        checked={snapEnabled}
+                        onCheckedChange={onToggleSnap}
+                        className="data-[state=checked]:bg-green-500 scale-75"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-px h-6 bg-green-500/30"></div>
+
+                {/* Fonte */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-green-300">Fonte:</span>
+                  <select
+                    value={tabletStyle.fontFamily || 'Poppins'}
+                    onChange={(e) => onTabletStyleChange?.('fontFamily', e.target.value)}
+                    className="bg-white/10 text-green-300 text-xs px-2 py-1 rounded border border-green-500/30 focus:border-green-400 focus:outline-none"
+                  >
+                    <option value="Poppins">Poppins</option>
+                    <option value="Nunito">Nunito</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Helvetica">Helvetica</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            <div className="w-px h-6 bg-green-500/30"></div>
 
             {/* Ações */}
             <div className="flex items-center gap-1">
@@ -266,8 +351,8 @@ export function ToolBar({
                 size="sm"
                 onClick={onTabletUndo}
                 disabled={!canTabletUndo}
-                className="h-8 w-8 p-0"
-                title="Desfazer"
+                className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20 disabled:opacity-30"
+                title="Desfazer (Ctrl+Z)"
               >
                 <Undo className="w-3 h-3" />
               </Button>
@@ -276,8 +361,8 @@ export function ToolBar({
                 size="sm"
                 onClick={onTabletRedo}
                 disabled={!canTabletRedo}
-                className="h-8 w-8 p-0"
-                title="Refazer"
+                className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20 disabled:opacity-30"
+                title="Refazer (Ctrl+Y)"
               >
                 <Redo className="w-3 h-3" />
               </Button>
@@ -285,38 +370,89 @@ export function ToolBar({
                 variant="outline"
                 size="sm"
                 onClick={onTabletClear}
-                className="h-8 w-8 p-0"
-                title="Limpar"
+                className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20"
+                title="Limpar (Delete)"
               >
                 <RotateCcw className="w-3 h-3" />
               </Button>
             </div>
-            
-
           </div>
         ) : (
-          <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 border border-white/20">
-            <Palette className="w-4 h-4 text-green-400" />
+          // Mesa Inativa
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/20 hover:bg-white/10 transition-colors">
+            <Palette className="w-4 h-4 text-white/60" />
             <div className="flex items-center gap-2">
               <Label htmlFor="tablet-toggle" className="text-xs text-white/70">
-                Inativa
+                Mesa Digitalizadora
               </Label>
               <Switch
                 id="tablet-toggle"
                 checked={isTabletActive}
                 onCheckedChange={onTabletToggle}
-                className="data-[state=checked]:bg-green-500"
+                className="data-[state=checked]:bg-green-500 scale-75"
               />
             </div>
-            
           </div>
         )}
       </div>
 
+      {/* Modal de Cores Compacto */}
+      {showColorPicker && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowColorPicker(false)}
+        >
+          <div 
+            className="bg-gray-900/95 backdrop-blur-xl border border-green-500/30 rounded-lg p-4 w-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-white">Selecionar Cor</h3>
+              <button
+                onClick={() => setShowColorPicker(false)}
+                className="text-white/50 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {/* Grade de cores */}
+            <div className="grid grid-cols-9 gap-2">
+              {COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  className={`w-8 h-8 rounded border-2 transition-all duration-150 hover:scale-110 ${
+                    tabletStyle.color === color.value 
+                      ? 'border-white ring-2 ring-white/50' 
+                      : 'border-white/20 hover:border-white/40'
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => {
+                    onTabletStyleChange?.('color', color.value);
+                    setShowColorPicker(false);
+                  }}
+                  title={color.label}
+                />
+              ))}
+            </div>
+            
+            {/* Seletor de cor personalizada */}
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <label className="text-xs text-white/70 block mb-2">Cor Personalizada:</label>
+              <input
+                type="color"
+                value={tabletStyle.color}
+                onChange={(e) => {
+                  onTabletStyleChange?.('color', e.target.value);
+                }}
+                className="w-full h-10 rounded cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default ToolBar;
-
-
