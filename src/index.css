@@ -1,0 +1,256 @@
+/* Excalidraw Font */
+@import url('https://fonts.googleapis.com/css2?family=Virgil:wght@400&display=swap');
+
+/* Custom Fonts for Drawing */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@import './styles/equations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* GeoTeach Design System - Modern geometry visualization */
+
+/* Custom Font Classes for Drawing */
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+.font-nunito {
+  font-family: 'Nunito', sans-serif;
+}
+
+.font-drawing {
+  font-family: 'Poppins', 'Nunito', sans-serif;
+}
+
+/* Custom Scrollbar styles */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.6) transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary) / 0.6);
+  border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary) / 0.8);
+}
+
+@layer base {
+  :root {
+    /* Core Space Theme - Deep cosmos inspired */
+    --background: 240 15% 8%;
+    --foreground: 210 20% 98%;
+
+    --card: 240 12% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 240 15% 10%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Primary - Stellar Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 221 83% 63%;
+
+    /* Secondary - Nebula Purple */
+    --secondary: 270 75% 45%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Muted - Space Gray */
+    --muted: 240 8% 20%;
+    --muted-foreground: 240 5% 65%;
+
+    /* Accent - Cosmic Teal */
+    --accent: 189 95% 55%;
+    --accent-foreground: 240 15% 8%;
+
+    /* Geometry Colors */
+    --geometry-edge: 221 83% 53%;
+    --geometry-face: 270 75% 45%;
+    --geometry-vertex: 189 95% 55%;
+    --geometry-measurement: 51 100% 50%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 240 8% 25%;
+    --input: 240 8% 18%;
+    --ring: 221 83% 53%;
+
+    /* Enhanced Gradients */
+    --gradient-cosmic: linear-gradient(135deg, hsl(221 83% 53%), hsl(270 75% 45%));
+    --gradient-nebula: linear-gradient(180deg, hsl(240 15% 8%), hsl(240 12% 12%));
+    --gradient-stellar: linear-gradient(45deg, hsl(221 83% 53%), hsl(189 95% 55%));
+    
+    /* Glows and Effects */
+    --glow-primary: 0 0 30px hsl(221 83% 53% / 0.4);
+    --glow-accent: 0 0 20px hsl(189 95% 55% / 0.3);
+    --shadow-cosmic: 0 10px 30px -5px hsl(221 83% 53% / 0.2);
+
+    --radius: 0.75rem;
+
+    /* Sidebar colors */
+    --sidebar-background: 240 12% 10%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 240 8% 20%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 240 8% 25%;
+    --sidebar-ring: 221 83% 53%;
+  }
+
+  /* Light mode - Clean and professional for classroom use */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 15%;
+
+    /* Primary - Professional Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 221 83% 63%;
+
+    /* Secondary - Elegant Purple */
+    --secondary: 270 75% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted - Light Gray */
+    --muted: 220 14% 95%;
+    --muted-foreground: 240 5% 50%;
+
+    /* Accent - Vibrant Teal */
+    --accent: 189 95% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Geometry Colors for Light Mode */
+    --geometry-edge: 221 83% 53%;
+    --geometry-face: 270 75% 55%;
+    --geometry-vertex: 189 95% 45%;
+    --geometry-measurement: 28 100% 45%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 88%;
+    --input: 220 13% 95%;
+    --ring: 221 83% 53%;
+
+    /* Light mode gradients */
+    --gradient-cosmic: linear-gradient(135deg, hsl(221 83% 53%), hsl(270 75% 55%));
+    --gradient-nebula: linear-gradient(180deg, hsl(0 0% 98%), hsl(220 13% 95%));
+    --gradient-stellar: linear-gradient(45deg, hsl(221 83% 53%), hsl(189 95% 45%));
+    
+    /* Light shadows */
+    --glow-primary: 0 0 30px hsl(221 83% 53% / 0.15);
+    --glow-accent: 0 0 20px hsl(189 95% 45% / 0.12);
+    --shadow-cosmic: 0 4px 20px -2px hsl(221 83% 53% / 0.08);
+
+    /* Light sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 95%;
+    --sidebar-accent-foreground: 240 10% 15%;
+    --sidebar-border: 220 13% 88%;
+    --sidebar-ring: 221 83% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* Smooth animations */
+  * {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  /* Custom scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+  }
+}
+
+@layer components {
+  /* Geometry control panel styles */
+  .control-section {
+    @apply bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4;
+  }
+
+  .geometry-canvas {
+    @apply bg-gradient-to-br from-background via-card to-muted/20 rounded-lg border border-border/30;
+    box-shadow: var(--shadow-cosmic);
+  }
+
+  /* Interactive elements */
+  .interactive-button {
+    @apply bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 
+           text-primary hover:text-primary-foreground transition-all duration-200;
+  }
+
+  .interactive-button.active {
+    @apply bg-primary text-primary-foreground border-primary shadow-[var(--glow-primary)];
+  }
+
+  .measurement-line {
+    stroke: hsl(var(--geometry-measurement));
+    stroke-dasharray: 5,5;
+    stroke-width: 2;
+  }
+
+  /* Reset view button animation */
+  .reset-view-button {
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+    0% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0.7); 
+    }
+    70% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(59, 130, 246, 0); 
+    }
+    100% { 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0); 
+    }
+  }
+}
