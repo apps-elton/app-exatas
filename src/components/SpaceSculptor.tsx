@@ -1193,19 +1193,6 @@ function SpaceSculptorContent() {
         </aside>
       
         <section className="flex-1 flex flex-col min-w-0 min-h-0" style={{ marginTop: 0, paddingTop: 0 }}>
-          {/* Barra de Ferramentas Principal */}
-          <div className="border-b border-border/30 bg-background/50 backdrop-blur" style={{ marginTop: 0, paddingTop: 0 }}>
-            <div className="flex items-center gap-6 px-4 py-0 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[40px]" style={{ marginTop: 0, paddingTop: 0, paddingBottom: 0 }}>
-              
-
-              {/* Separador */}
-              <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
-
-
-            </div>
-          </div>
-          
-
           {/* Conteúdo da Geometria */}
           <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0 }}>
 
@@ -1324,7 +1311,7 @@ function SpaceSculptorContent() {
               )}
 
               {/* 5. MESA DIGITALIZADORA - SEMPRE VISÍVEL */}
-              <div className="absolute inset-0 w-full h-full" style={{ zIndex: isTabletActive ? 10 : 5, pointerEvents: isTabletActive ? 'auto' : 'none', marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0, top: 0 }}>
+              <div className="absolute inset-0 w-full h-full" style={{ zIndex: isTabletActive ? 10 : 5, pointerEvents: isTabletActive ? 'auto' : 'none', marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0, top: 0, left: 0, right: 0, bottom: 0 }}>
                 <DrawingTablet
                   isActive={isTabletActive}
                   onToggle={() => setIsTabletActive(!isTabletActive)}
