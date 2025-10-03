@@ -1,855 +1,494 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { 
-  Pen, 
-  Eraser, 
-  Palette, 
-  Settings, 
-  Undo, 
-  Redo, 
-  Trash2,
-  MousePointer,
-  Ruler
-} from 'lucide-react';
-// Removed unused imports
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 
-export interface DrawingTool {
-  type: 'pen' | 'pencil' | 'marker' | 'eraser' | 'ruler' | 'select' | 'area-select';
-  name: string;
-  icon: React.ReactNode;
-}
+const MIN_DISTANCE = 1;
+const FRAME_TIME = 8;
+const QUICK_COLORS_DARK = ['#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500'];
+const QUICK_COLORS_LIGHT = ['#000000', '#ff0000', '#00aa00', '#0000ff', '#cccc00', '#cc00cc', '#00aaaa', '#ff8800'];
 
-export interface DrawingStyle {
-  color: string;
-  thickness: number;
-  opacity: number;
-  pressure: boolean;
-  smoothing: number;
-  fontFamily?: string;
-}
-
-export interface DrawingPoint {
-  x: number;
-  y: number;
-  pressure?: number;
-  timestamp: number;
-}
-
-export interface DrawingStroke {
-  id: string;
-  tool: DrawingTool;
-  style: DrawingStyle;
-  points: DrawingPoint[];
-  timestamp: number;
-}
+const distance = (p1: any, p2: any) => {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  return Math.sqrt(dx * dx + dy * dy);
+};
 
 interface DrawingTabletProps {
   isActive: boolean;
   onToggle: () => void;
-  onDrawingChange?: (strokes: DrawingStroke[]) => void;
-  currentStyle?: DrawingStyle;
-  currentTool?: DrawingTool;
-  onStyleChange?: (style: DrawingStyle) => void;
-  onToolChange?: (tool: DrawingTool) => void;
   className?: string;
 }
 
-const DRAWING_TOOLS: DrawingTool[] = [
-  { type: 'pen', name: 'Caneta', icon: <Pen className="w-4 h-4" /> },
-  { type: 'pencil', name: 'Lápis', icon: <Pen className="w-4 h-4" /> },
-  { type: 'marker', name: 'Marcador', icon: <Pen className="w-4 h-4" /> },
-  { type: 'eraser', name: 'Borracha', icon: <Eraser className="w-4 h-4" /> },
-  { type: 'ruler', name: 'Régua', icon: <Ruler className="w-4 h-4" /> }
-];
-
-const PEN_TYPES = [
-  { value: 'ballpoint', label: 'Caneta Esferográfica' },
-  { value: 'fountain', label: 'Caneta Tinteiro' },
-  { value: 'gel', label: 'Caneta Gel' },
-  { value: 'marker', label: 'Marcador' },
-  { value: 'brush', label: 'Pincel' }
-];
-
-const PENCIL_TYPES = [
-  { value: 'hb', label: 'HB (Padrão)' },
-  { value: '2b', label: '2B (Macio)' },
-  { value: '4b', label: '4B (Muito Macio)' },
-  { value: '6b', label: '6B (Extra Macio)' },
-  { value: 'h', label: 'H (Duro)' },
-  { value: 'charcoal', label: 'Carvão' },
-  { value: 'colored', label: 'Colorido' }
-];
-
-const COLORS = [
-  { value: '#000000', label: 'Preto' },
-  { value: '#ffffff', label: 'Branco' },
-  { value: '#ff0000', label: 'Vermelho' },
-  { value: '#00ff00', label: 'Verde' },
-  { value: '#0000ff', label: 'Azul' },
-  { value: '#ffff00', label: 'Amarelo' },
-  { value: '#ff00ff', label: 'Magenta' },
-  { value: '#00ffff', label: 'Ciano' },
-  { value: '#ffa500', label: 'Laranja' },
-  { value: '#800080', label: 'Roxo' },
-  { value: '#8b4513', label: 'Marrom' },
-  { value: '#808080', label: 'Cinza' }
-];
-
-export default function DrawingTablet({ 
-  isActive, 
-  onToggle, 
-  onDrawingChange,
-  currentStyle,
-  currentTool,
-  onStyleChange,
-  onToolChange,
-  className = '' 
-}: DrawingTabletProps) {
-  const [activeTool, setActiveTool] = useState<DrawingTool>(currentTool || DRAWING_TOOLS[0]);
-  
-  const [drawingStyle, setDrawingStyle] = useState<DrawingStyle>(currentStyle || {
-    color: '#ffffff',
-    thickness: 2,
-    opacity: 1,
-    pressure: true,
-    smoothing: 0.8, // Suavização alta para eliminar retas
-    fontFamily: 'Poppins' // Fonte padrão
-  });
-  
-  // Estados para fluidez da caneta
-  const [currentPressure, setCurrentPressure] = useState(0.5);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastTimeRef, setLastTimeRef] = useState(0);
-  
-  // Constantes para fluidez
-  const MIN_DISTANCE = 2;
-  const FRAME_TIME = 16;
-  
-  // Funções auxiliares para fluidez
-  const distance = (p1: DrawingPoint, p2: DrawingPoint) => {
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const smoothPoints = (points: DrawingPoint[], factor: number): DrawingPoint[] => {
-    if (points.length < 3 || factor === 0) return points;
-    
-    const result: DrawingPoint[] = [points[0]];
-    
-    for (let i = 1; i < points.length - 1; i++) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      const next = points[i + 1];
-      
-      result.push({
-        x: curr.x * (1 - factor) + (prev.x + next.x) * 0.5 * factor,
-        y: curr.y * (1 - factor) + (prev.y + next.y) * 0.5 * factor,
-        pressure: curr.pressure,
-        timestamp: curr.timestamp
-      });
-    }
-    
-    result.push(points[points.length - 1]);
-    return result;
-  };
-  const [penType, setPenType] = useState('ballpoint');
-  const [pencilType, setPencilType] = useState('hb');
-  
-  // Configurações de ferramentas com suavização alta
-  const toolConfigs = {
-    pen: {
-      ballpoint: { smoothing: 0.8, pressure: true, thickness: 2 },
-      gel: { smoothing: 0.9, pressure: true, thickness: 1.5 },
-      fountain: { smoothing: 0.7, pressure: true, thickness: 2.5 }
-    },
-    pencil: {
-      hb: { smoothing: 0.6, pressure: true, thickness: 1.8 },
-      '2b': { smoothing: 0.5, pressure: true, thickness: 2.2 },
-      '4b': { smoothing: 0.4, pressure: true, thickness: 2.8 }
-    }
-  };
-  const [strokes, setStrokes] = useState<DrawingStroke[]>([]);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [currentStroke, setCurrentStroke] = useState<DrawingStroke | null>(null);
-  const [history, setHistory] = useState<DrawingStroke[][]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  
-
-  // Aplicar configurações específicas da ferramenta para smooth draw
-  useEffect(() => {
-    if (activeTool.type === 'pen') {
-      const config = toolConfigs.pen[penType as keyof typeof toolConfigs.pen];
-      if (config) {
-        setDrawingStyle(prev => ({
-          ...prev,
-          smoothing: config.smoothing,
-          pressure: config.pressure,
-          thickness: config.thickness
-        }));
-        onStyleChange?.({
-          ...prev,
-          smoothing: config.smoothing,
-          pressure: config.pressure,
-          thickness: config.thickness
-        });
-      }
-    } else if (activeTool.type === 'pencil') {
-      const config = toolConfigs.pencil[pencilType as keyof typeof toolConfigs.pencil];
-      if (config) {
-        setDrawingStyle(prev => ({
-          ...prev,
-          smoothing: config.smoothing,
-          pressure: config.pressure,
-          thickness: config.thickness
-        }));
-        onStyleChange?.({
-          ...prev,
-          smoothing: config.smoothing,
-          pressure: config.pressure,
-          thickness: config.thickness
-        });
-      }
-    }
-  }, [activeTool.type, penType, pencilType, onStyleChange]);
-  const [currentPressure, setCurrentPressure] = useState(0);
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
-  const [tabletSettings, setTabletSettings] = useState({
-    pressureSensitivity: 1,
-    smoothingLevel: 0.5,
-    autoSave: true,
-    tabletMode: 'pen'
-  });
-  const [isEraserMode, setIsEraserMode] = useState(false);
-  
-  // Estados para seleção de área
-  const [isAreaSelecting, setIsAreaSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<{x: number, y: number} | null>(null);
-  const [selectionEnd, setSelectionEnd] = useState<{x: number, y: number} | null>(null);
-  const [selectedStrokes, setSelectedStrokes] = useState<string[]>([]);
-
-  // Estados para desenho assistido (Samsung Notes style)
-  const [assistedDrawing, setAssistedDrawing] = useState(false);
-  const [strokeStartTime, setStrokeStartTime] = useState<number | null>(null);
-  const [isHolding, setIsHolding] = useState(false);
-  const [holdTimer, setHoldTimer] = useState<NodeJS.Timeout | null>(null);
-
-
+export default function DrawingTablet({ isActive, onToggle, className = '' }: DrawingTabletProps) {
+  console.log('🎨 DrawingTablet renderizado - isActive:', isActive);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
+  const lastTimeRef = useRef(0);
 
-  // Sincronizar com props externas
-  useEffect(() => {
-    if (currentStyle) {
-      setDrawingStyle(currentStyle);
+  const [pages, setPages] = useState([{ id: '1', name: 'Página 1', strokes: [] }]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [strokes, setStrokes] = useState<any[]>([]);
+  const [current, setCurrent] = useState<any>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  const [tool, setTool] = useState('pen');
+  const [color, setColor] = useState('#ffffff');
+  const [thickness, setThickness] = useState(3);
+  const [opacity, setOpacity] = useState(1);
+
+  const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
+  const [canvasScale, setCanvasScale] = useState(1);
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastPanPoint, setLastPanPoint] = useState<any>(null);
+
+  const [showGrid, setShowGrid] = useState(false);
+  const [gridSize, setGridSize] = useState(50);
+  const [showAxis, setShowAxis] = useState(false);
+  const [axisX, setAxisX] = useState(50);
+  const [axisY, setAxisY] = useState(50);
+  const [laserPoint, setLaserPoint] = useState<any>(null);
+  const [laserColor, setLaserColor] = useState('#ff0000');
+
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textPosition, setTextPosition] = useState({ x: 0, y: 0, pressure: 0.5 });
+  const [textValue, setTextValue] = useState('');
+
+  const [showRuler, setShowRuler] = useState(false);
+  const [rulerAngle, setRulerAngle] = useState(0);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showToolsPanel, setShowToolsPanel] = useState(true);
+  const [showShapesMenu, setShowShapesMenu] = useState(false);
+
+  const [polygonSides, setPolygonSides] = useState(6);
+  const [showApothem, setShowApothem] = useState(false);
+  const [isDashed, setIsDashed] = useState(false);
+
+  const [theme, setTheme] = useState('dark');
+
+  const [showSubjectPanel, setShowSubjectPanel] = useState(false);
+  const [currentSubject, setCurrentSubject] = useState('fisica');
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showPeriodicTable, setShowPeriodicTable] = useState(false);
+  const [calculatorValue, setCalculatorValue] = useState('0');
+  const [pendingSymbol, setPendingSymbol] = useState<string | null>(null);
+  const [selectedStroke, setSelectedStroke] = useState<any>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [lastClickTime, setLastClickTime] = useState(0);
+  const [lastClickStroke, setLastClickStroke] = useState<any>(null);
+
+  // Cores adaptadas para combinar com a aplicação
+  const themeColors = {
+    dark: {
+      bg: 'from-slate-950 via-slate-900 to-slate-950',
+      toolbar: 'bg-slate-900/80 backdrop-blur-2xl border-slate-800/50',
+      border: 'border-slate-800/50',
+      text: 'text-slate-50',
+      textMuted: 'text-slate-400',
+      buttonActive: 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 ring-1 ring-blue-500/50',
+      buttonInactive: 'bg-slate-800/60 hover:bg-slate-700/80 text-slate-200 backdrop-blur-xl',
+      card: 'bg-slate-900/90 backdrop-blur-2xl',
+      cardBorder: 'border-slate-800/50'
+    },
+    light: {
+      bg: 'from-slate-50 via-white to-slate-100',
+      toolbar: 'bg-white/80 backdrop-blur-2xl border-slate-200/60',
+      border: 'border-slate-200/60',
+      text: 'text-slate-900',
+      textMuted: 'text-slate-500',
+      buttonActive: 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/30 ring-1 ring-blue-400/50',
+      buttonInactive: 'bg-slate-100/80 hover:bg-slate-200/80 text-slate-700 backdrop-blur-xl',
+      card: 'bg-white/90 backdrop-blur-2xl',
+      cardBorder: 'border-slate-200/60'
     }
-  }, [currentStyle]);
+  };
 
-  useEffect(() => {
-    if (currentTool) {
-      setActiveTool(currentTool);
-    }
-  }, [currentTool]);
+  const t = themeColors[theme as keyof typeof themeColors];
 
-  // Detectar mesa digitalizadora
-  useEffect(() => {
-    const handleTabletDetected = (event: any) => {
-      if (event.pointerType === 'pen') {
-        console.log('Mesa digitalizadora detectada:', event);
-      }
-    };
-
-    if (isActive) {
-      document.addEventListener('pointerdown', handleTabletDetected);
-      document.addEventListener('pointermove', handleTabletDetected);
-    }
-
-    return () => {
-      document.removeEventListener('pointerdown', handleTabletDetected);
-      document.removeEventListener('pointermove', handleTabletDetected);
-    };
-  }, [isActive]);
-
-  // Atalhos de teclado para ferramentas
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isActive) return;
-
-      // Atalhos para ferramentas
-      switch (event.key.toLowerCase()) {
-        case 'p':
-          event.preventDefault();
-          handleToolChange(DRAWING_TOOLS.find(t => t.type === 'pen')!);
-          break;
-        case 'l':
-          event.preventDefault();
-          handleToolChange(DRAWING_TOOLS.find(t => t.type === 'pencil')!);
-          break;
-        case 'h':
-          event.preventDefault();
-          handleToolChange(DRAWING_TOOLS.find(t => t.type === 'marker')!);
-          break;
-        case 'e':
-          event.preventDefault();
-          handleToolChange(DRAWING_TOOLS.find(t => t.type === 'eraser')!);
-          break;
-        case 'z':
-          if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            if (event.shiftKey) {
-              redo();
-            } else {
-              undo();
-            }
-          }
-          break;
-        case 'y':
-          if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            redo();
-          }
-          break;
-        case 'delete':
-        case 'backspace':
-          event.preventDefault();
-          clearCanvas();
-          break;
-      }
-    };
-
-    if (isActive) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isActive, handleToolChange, undo, redo, clearCanvas]);
-
-  const getPoint = useCallback((e: React.PointerEvent): DrawingPoint => {
+  // Funções de desenho
+  const getPoint = useCallback((e: any) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0, pressure: 0.5, timestamp: Date.now() };
-    
+    if (!canvas) return { x: 0, y: 0, pressure: 0.5 };
     const rect = canvas.getBoundingClientRect();
     const p = e.pressure || (e.pointerType === 'pen' ? 0.7 : 0.5);
+
+    const x = (e.clientX - rect.left - canvasOffset.x) / canvasScale;
+    const y = (e.clientY - rect.top - canvasOffset.y) / canvasScale;
     
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      pressure: Math.max(0.3, Math.min(1, p)),
-      timestamp: Date.now()
+      x,
+      y,
+      pressure: Math.max(0.3, Math.min(1, p))
     };
-  }, []);
+  }, [canvasOffset, canvasScale]);
 
-  const startDrawing = useCallback((event: React.PointerEvent) => {
+  const start = useCallback((e: any) => {
     if (!isActive) return;
-    
-    event.preventDefault();
-    const point = getPoint(event);
-    setCurrentPressure(point.pressure);
-    
-    setCurrentStroke({
+    e.preventDefault();
+    const point = getPoint(e);
+
+    if (tool === 'text') {
+      setTextPosition(point);
+      setTextValue('');
+      setShowTextInput(true);
+      setTimeout(() => {
+        if (textInputRef.current) textInputRef.current.focus();
+      }, 10);
+      return;
+    }
+
+    setCurrent({
       id: Date.now().toString(),
-      tool: activeTool,
+      tool,
       points: [point],
-      color: drawingStyle.color,
-      thickness: drawingStyle.thickness,
-      opacity: drawingStyle.opacity
+      color,
+      thickness,
+      opacity,
+      sides: polygonSides,
+      showApothem: showApothem,
+      dashed: isDashed
     });
     setIsDrawing(true);
-  }, [isActive, activeTool, drawingStyle, getPoint]);
-
-  const draw = useCallback((event: React.PointerEvent) => {
-    if (!isDrawing || !currentStroke) return;
+  }, [isActive, tool, color, thickness, opacity, getPoint, polygonSides, showApothem, isDashed]);
     
-    event.preventDefault();
+  const move = useCallback((e: any) => {
+    if (!isDrawing || !current) return;
+    e.preventDefault();
+    const point = getPoint(e);
     const now = performance.now();
-    if (now - lastTimeRef < FRAME_TIME) return;
-    setLastTimeRef(now);
+    if (now - lastTimeRef.current < FRAME_TIME) return;
+    lastTimeRef.current = now;
     
-    const point = getPoint(event);
-    setCurrentPressure(point.pressure);
-    
-    const last = currentStroke.points[currentStroke.points.length - 1];
+    const last = current.points[current.points.length - 1];
     if (distance(last, point) < MIN_DISTANCE) return;
-    
-    setCurrentStroke({
-      ...currentStroke,
-      points: [...currentStroke.points, point]
-    });
-  }, [isDrawing, currentStroke, getPoint]);
+    setCurrent((c: any) => c ? { ...c, points: [...c.points, point] } : null);
+  }, [isDrawing, current, getPoint]);
 
-  const stopDrawing = useCallback(() => {
-    if (!isDrawing) return;
-    
-    if (currentStroke && currentStroke.points.length > 1) {
-      setStrokes(prev => [...prev, currentStroke]);
+  const stop = useCallback(() => {
+    if (!isDrawing || !current) return;
+    if (current.points.length > 0) {
+      setStrokes(prev => [...prev, current]);
     }
-    
-    setCurrentStroke(null);
+    setCurrent(null);
     setIsDrawing(false);
-  }, [isDrawing, currentStroke]);
+  }, [isDrawing, current]);
 
-  // Função para verificar se os pontos formam uma linha aproximadamente reta
-  const isApproximatelyStraightLine = useCallback((points: DrawingPoint[]) => {
-    if (points.length < 3) return false;
-    
-    const startPoint = points[0];
-    const endPoint = points[points.length - 1];
-    
-    // Calcular a distância total da linha reta
-    const straightDistance = Math.sqrt(
-      Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2)
-    );
-    
-    if (straightDistance < 20) return false; // Linha muito curta
-    
-    // Calcular a distância total percorrida pelos pontos
-    let totalDistance = 0;
-    for (let i = 1; i < points.length; i++) {
-      const dx = points[i].x - points[i-1].x;
-      const dy = points[i].y - points[i-1].y;
-      totalDistance += Math.sqrt(dx * dx + dy * dy);
+  const handleTextSubmit = useCallback(() => {
+    if (textValue.trim()) {
+      setStrokes(prev => [...prev, {
+        id: Date.now().toString(),
+        tool: 'text',
+        points: [textPosition],
+        color,
+        thickness,
+        opacity,
+        text: textValue
+      }]);
     }
-    
-    // Se a distância percorrida é muito maior que a linha reta, não é uma linha reta
-    const ratio = totalDistance / straightDistance;
-    
-    // Se a razão for menor que 1.3, é aproximadamente uma linha reta
-    return ratio < 1.3;
-  }, []);
+    setShowTextInput(false);
+    setTextValue('');
+    setTool('pen');
+  }, [textValue, textPosition, color, thickness, opacity]);
 
-
-  const drawStroke = useCallback((stroke: DrawingStroke) => {
+  // Função de redesenho
+  const redraw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    ctx.save();
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = stroke.color;
-    ctx.globalCompositeOperation = stroke.tool.type === 'eraser' ? 'destination-out' : 'source-over';
-    
-    ctx.beginPath();
-    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-    
-    for (let i = 1; i < stroke.points.length; i++) {
-      const curr = stroke.points[i - 1];
-      const next = stroke.points[i];
-      
-      const p = curr.pressure;
-      const w = stroke.thickness * (0.5 + p * 1.5);
-      
-      ctx.lineWidth = w;
-      ctx.globalAlpha = stroke.opacity;
-      
-      const cpx = (curr.x + next.x) / 2;
-      const cpy = (curr.y + next.y) / 2;
-      ctx.quadraticCurveTo(curr.x, curr.y, cpx, cpy);
-    }
-    
-    ctx.stroke();
-    ctx.restore();
-    
-    // Textura para lápis
-    if (stroke.tool.type === 'pencil') {
-      ctx.save();
-      ctx.globalAlpha = stroke.opacity * 0.3;
-      ctx.lineWidth = 1;
-      
-      for (let i = 0; i < stroke.points.length - 1; i++) {
-        const curr = stroke.points[i];
-        const next = stroke.points[i + 1];
-        const offset = Math.random() * 2 - 1;
-        
-        ctx.beginPath();
-        ctx.moveTo(curr.x + offset, curr.y + offset);
-        ctx.lineTo(next.x + offset, next.y + offset);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-  }, []);
-
-  const redrawCanvas = useCallback((strokesToDraw: DrawingStroke[]) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
+    // Limpar canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Não desenhar fundo - deixar transparente para mostrar o sólido
+
+      ctx.save();
+    ctx.translate(canvasOffset.x, canvasOffset.y);
+    ctx.scale(canvasScale, canvasScale);
+    
     // Desenhar strokes
-    [...strokesToDraw, currentStroke].filter(Boolean).forEach((stroke) => {
-      if (!stroke || stroke.points.length < 2) return;
-      
-      const smoothed = smoothPoints(stroke.points, drawingStyle.smoothing);
+    const allStrokes = [...strokes];
+    if (current) allStrokes.push(current);
+
+    allStrokes.forEach((stroke) => {
+      if (!stroke) return;
+
+      if (stroke.tool === 'text' && stroke.text) {
+        ctx.save();
+        ctx.fillStyle = stroke.color;
+        ctx.font = stroke.thickness * 8 + 'px "Comic Sans MS", "Segoe Print", "Bradley Hand", cursive';
+        ctx.globalAlpha = stroke.opacity;
+        const lines = stroke.text.split('\n');
+        lines.forEach((line: string, i: number) => {
+          ctx.fillText(line, stroke.points[0].x, stroke.points[0].y + (i * stroke.thickness * 10));
+        });
+        ctx.restore();
+        return;
+      }
+
+      if (stroke.points.length < 2) return;
       
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.strokeStyle = stroke.color;
-      ctx.globalCompositeOperation = stroke.tool.type === 'eraser' ? 'destination-out' : 'source-over';
-      
-      ctx.beginPath();
-      ctx.moveTo(smoothed[0].x, smoothed[0].y);
-      
-      for (let i = 1; i < smoothed.length; i++) {
-        const curr = smoothed[i - 1];
-        const next = smoothed[i];
-        
-        const p = curr.pressure;
-        const w = stroke.thickness * (0.5 + p * 1.5);
-        
-        ctx.lineWidth = w;
         ctx.globalAlpha = stroke.opacity;
         
-        const cpx = (curr.x + next.x) / 2;
-        const cpy = (curr.y + next.y) / 2;
-        ctx.quadraticCurveTo(curr.x, curr.y, cpx, cpy);
+      const path = new Path2D();
+      path.moveTo(stroke.points[0].x, stroke.points[0].y);
+
+      for (let i = 1; i < stroke.points.length; i++) {
+        path.lineTo(stroke.points[i].x, stroke.points[i].y);
       }
-      
-      ctx.stroke();
+
+      const avgPressure = stroke.points.reduce((sum: number, p: any) => sum + p.pressure, 0) / stroke.points.length;
+      ctx.lineWidth = stroke.thickness * (0.7 + avgPressure * 0.6);
+      ctx.stroke(path);
       ctx.restore();
-      
-      // Textura para lápis
-      if (stroke.tool.type === 'pencil') {
-        ctx.save();
-        ctx.globalAlpha = stroke.opacity * 0.3;
-        ctx.lineWidth = 1;
-        
-        for (let i = 0; i < smoothed.length - 1; i++) {
-          const curr = smoothed[i];
-          const next = smoothed[i + 1];
-          const offset = Math.random() * 2 - 1;
-          
-          ctx.beginPath();
-          ctx.moveTo(curr.x + offset, curr.y + offset);
-          ctx.lineTo(next.x + offset, next.y + offset);
-          ctx.stroke();
-        }
-        ctx.restore();
-      }
     });
-  }, [drawStroke, currentStroke, drawingStyle.smoothing]);
 
-  const clearCanvas = useCallback(() => {
-    console.log('clearCanvas called');
-    
-    // Limpar todos os estados locais
-    setStrokes([]);
-    setHistory([]);
-    setHistoryIndex(-1);
-    setCurrentStroke(null);
-    setIsDrawing(false);
-    console.log('Local states cleared');
-    
-    // Notificar o componente pai (DrawingOverlay3D) para limpar o canvas real
-    onDrawingChange?.([]);
-    console.log('Parent notified with empty array - this should clear the real canvas');
-  }, [onDrawingChange]);
+    ctx.restore();
+  }, [strokes, current, theme, canvasOffset, canvasScale, isActive]);
 
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      const newStrokes = history[newIndex] || [];
-      setStrokes(newStrokes);
-      setHistoryIndex(newIndex);
-      onDrawingChange?.(newStrokes);
-      redrawCanvas(newStrokes);
-    }
-  }, [history, historyIndex, onDrawingChange, redrawCanvas]);
-
-  const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      const newStrokes = history[newIndex] || [];
-      setStrokes(newStrokes);
-      setHistoryIndex(newIndex);
-      onDrawingChange?.(newStrokes);
-      redrawCanvas(newStrokes);
-    }
-  }, [history, historyIndex, onDrawingChange, redrawCanvas]);
-
-  const handleStyleChange = useCallback((key: keyof DrawingStyle, value: any) => {
-    setDrawingStyle(prev => {
-      const newStyle = { ...prev, [key]: value };
-      // Notificar mudança para o componente pai
-      onStyleChange?.(newStyle);
-      // Forçar redesenho imediato do canvas
-      setTimeout(() => {
-        const strokesToDraw = [...strokes];
-        if (currentStroke) {
-          strokesToDraw.push(currentStroke);
-        }
-        redrawCanvas(strokesToDraw);
-      }, 0);
-      return newStyle;
-    });
-  }, [redrawCanvas, strokes, currentStroke, onStyleChange]);
-
-  const handleToolChange = useCallback((tool: DrawingTool) => {
-    setActiveTool(tool);
-    onToolChange?.(tool);
-  }, [onToolChange]);
-
-  // Aplicar configurações do tipo de caneta - Otimizadas para fluidez
-  const applyPenTypeSettings = useCallback((penType: string) => {
-    const penSettings = {
-      ballpoint: { thickness: 1.5, opacity: 0.9, smoothing: 0.6, pressure: true },
-      fountain: { thickness: 2, opacity: 0.8, smoothing: 0.8, pressure: true },
-      gel: { thickness: 1.8, opacity: 0.95, smoothing: 0.7, pressure: true },
-      marker: { thickness: 3, opacity: 0.7, smoothing: 0.5, pressure: true },
-      brush: { thickness: 4, opacity: 0.6, smoothing: 0.9, pressure: true }
-    };
-    
-    const settings = penSettings[penType as keyof typeof penSettings];
-    if (settings) {
-      const newStyle = { ...drawingStyle, ...settings };
-      setDrawingStyle(newStyle);
-      onStyleChange?.(newStyle);
-    }
-  }, [drawingStyle, onStyleChange]);
-
-  // Aplicar configurações do tipo de lápis - Otimizadas para fluidez
-  const applyPencilTypeSettings = useCallback((pencilType: string) => {
-    const pencilSettings = {
-      hb: { thickness: 1.5, opacity: 0.8, smoothing: 0.6, pressure: true },
-      '2b': { thickness: 2, opacity: 0.9, smoothing: 0.7, pressure: true },
-      '4b': { thickness: 2.5, opacity: 0.95, smoothing: 0.8, pressure: true },
-      '6b': { thickness: 3, opacity: 1, smoothing: 0.9, pressure: true },
-      h: { thickness: 1, opacity: 0.7, smoothing: 0.5, pressure: true },
-      charcoal: { thickness: 3.5, opacity: 0.9, smoothing: 0.9, pressure: true },
-      colored: { thickness: 2.2, opacity: 0.85, smoothing: 0.7, pressure: true }
-    };
-    
-    const settings = pencilSettings[pencilType as keyof typeof pencilSettings];
-    if (settings) {
-      const newStyle = { ...drawingStyle, ...settings };
-      setDrawingStyle(newStyle);
-      onStyleChange?.(newStyle);
-    }
-  }, [drawingStyle, onStyleChange]);
-
-  // Auto opacity para highlighter
+  // Efeitos
   useEffect(() => {
-    if (activeTool.type === 'marker') {
-      setDrawingStyle(prev => ({ ...prev, opacity: 0.3 }));
-    } else {
-      setDrawingStyle(prev => ({ ...prev, opacity: 1 }));
-    }
-  }, [activeTool.type]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      redraw();
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    return () => window.removeEventListener('resize', resize);
+  }, [redraw]);
 
-  // Redesenhar canvas quando o estilo mudar
   useEffect(() => {
-    if (isActive) {
-      const strokesToDraw = [...strokes];
-      if (currentStroke) {
-        strokesToDraw.push(currentStroke);
-      }
-      redrawCanvas(strokesToDraw);
-    }
-  }, [drawingStyle, isActive, redrawCanvas, strokes, currentStroke]);
-
-  // Função addText removida - delegada para DrawingOverlay3D
-
-  // Alternar modo borracha
-  const toggleEraserMode = useCallback(() => {
-    setIsEraserMode(prev => !prev);
-  }, []);
-
-  const getToolIcon = (tool: DrawingTool) => {
-    return tool.icon;
-  };
-
-  const getToolColor = (tool: DrawingTool) => {
-    if (tool.type === 'eraser') return 'text-red-500';
-    if (tool.type === 'select') return 'text-blue-500';
-    return 'text-gray-700 dark:text-gray-300';
-  };
+    redraw();
+  }, [redraw]);
 
   return (
-    <Card className={`${className} ${isActive ? 'border-primary' : ''} sticky top-4`}>
-      <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg text-primary flex items-center gap-2">
-              <Palette className="w-5 h-5" />
+    <div className={`w-full h-screen bg-transparent flex flex-col relative overflow-hidden ${className}`} style={{ zIndex: isActive ? 10 : 5, backgroundColor: 'transparent' }}>
+      {/* Header com controles - sempre visível */}
+      <div className={`${t.toolbar} border-b ${t.border} shadow-2xl shadow-black/5 ${isActive ? 'bg-opacity-90' : 'bg-opacity-30'} pointer-events-auto`} style={{ zIndex: 20 }}>
+        <div className="px-6 py-4 flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className={`${t.text} font-semibold text-lg tracking-tight`}>
               Mesa Digitalizadora
-            </CardTitle>
-            <div className="flex items-center gap-2">
+            </div>
+
+            <div className={`h-6 w-px ${t.border}`}></div>
+
+            <button
+              onClick={() => {
+                console.log('🎨 Switch Mesa Digitalizadora clicado - isActive atual:', isActive);
+                onToggle();
+                console.log('🎨 Novo valor isActive:', !isActive);
+              }}
+              className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
+                isActive ? 'bg-blue-600 shadow-lg shadow-blue-600/30' : 'bg-slate-600/50'
+              }`}
+              title="Ativar/Desativar Mesa Digitalizadora"
+            >
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 shadow-md ${
+                isActive ? 'translate-x-6' : 'translate-x-0.5'
+              }`} />
+            </button>
+
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className={`p-2.5 rounded-xl ${t.buttonInactive} transition-all duration-300 hover:scale-105 active:scale-95`}
+              title="Alternar tema"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+
+            <button
+              onClick={() => setShowToolsPanel(!showToolsPanel)}
+              className={`p-2.5 rounded-xl ${showToolsPanel ? t.buttonActive : t.buttonInactive} transition-all duration-300 hover:scale-105 active:scale-95`}
+              title="Mostrar/Ocultar Ferramentas"
+            >
+              🎨
+            </button>
+          </div>
+
+          {showToolsPanel && (
+            <>
               <div className="flex items-center gap-2">
-                <Label htmlFor="tablet-toggle" className="text-sm">
-                  {isActive ? 'Ativa' : 'Inativa'}
-                </Label>
-                <Switch
-                  id="tablet-toggle"
-                  checked={isActive}
-                  onCheckedChange={onToggle}
-                />
-              </div>
-            </div>
-          </div>
-      </CardHeader>
-
-      {isActive && (
-        <CardContent className="space-y-3">
-          {/* Ferramentas de Desenho */}
-          <div className="grid grid-cols-5 gap-1">
-            {DRAWING_TOOLS.map((tool) => (
-              <Button
-                key={tool.type}
-                variant={activeTool.type === tool.type ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleToolChange(tool)}
-                className="h-10 flex flex-col items-center gap-1 p-1"
-              >
-                {getToolIcon(tool)}
-                <span className="text-xs">{tool.name}</span>
-              </Button>
+                {[
+                  { id: 'pen', icon: '✒️', name: 'Caneta (P)' },
+                  { id: 'pencil', icon: '✏️', name: 'Lápis (L)' },
+                  { id: 'highlighter', icon: '🖍️', name: 'Marca-texto (H)' },
+                  { id: 'eraser', icon: '🧹', name: 'Borracha (E)' },
+                  { id: 'hand', icon: '✋', name: 'Mover Canvas (V)' }
+                ].map(tt => (
+                  <button
+                    key={tt.id}
+                    onClick={() => setTool(tt.id)}
+                    className={`p-2.5 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 ${tool === tt.id ? t.buttonActive : t.buttonInactive}`}
+                    title={tt.name}
+                  >
+                    {tt.icon}
+                  </button>
             ))}
           </div>
 
-          {/* Cores Essenciais - Mostrar sempre */}
-          <div className="grid grid-cols-6 gap-1">
-            {COLORS.slice(0, 6).map((color) => (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setTool('text')}
+                  className={`px-3 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 ${tool === 'text' ? t.buttonActive : t.buttonInactive}`}
+                  title="Texto"
+                >
+                  Aa
+                </button>
+                <button
+                  onClick={() => setShowGrid(s => !s)}
+                  className={`p-2.5 rounded-xl transition-all duration-200 hover:scale-105 ${showGrid ? t.buttonActive : t.buttonInactive}`}
+                  title="Grade (G)"
+                >
+                  ⊞
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={() => setStrokes(prev => prev.slice(0, -1))}
+              disabled={strokes.length === 0}
+              className={`p-2.5 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 ${strokes.length === 0 ? 'opacity-40 cursor-not-allowed ' + t.buttonInactive : 'bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/30'}`}
+              title="Desfazer (Ctrl+Z)"
+            >
+              ↶
+            </button>
               <button
-                key={color.value}
-                className={`w-6 h-6 rounded border-2 ${
-                  drawingStyle.color === color.value 
-                    ? 'border-primary ring-2 ring-primary/30' 
-                    : 'border-border'
-                }`}
-                style={{ backgroundColor: color.value }}
-                onClick={() => handleStyleChange('color', color.value)}
-                title={color.label}
+              onClick={() => setStrokes([])}
+              className="p-2.5 rounded-xl bg-red-500 hover:bg-red-400 text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-red-500/30"
+              title="Limpar (Del)"
+            >
+              🗑️
+            </button>
+          </div>
+            </div>
+
+        {showToolsPanel && (
+          <div className={`px-4 py-3 border-t ${t.border} flex items-center gap-4 flex-wrap text-sm`}>
+            <div className="flex items-center gap-2">
+              <span className={`${t.textMuted} font-medium`}>Cor:</span>
+              <div className="flex gap-1.5">
+                {(theme === 'dark' ? QUICK_COLORS_DARK : QUICK_COLORS_LIGHT).map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setColor(c)}
+                    className={`w-7 h-7 rounded-lg transition-all duration-200 hover:scale-110 ${color === c ? 'ring-2 ring-offset-2 ring-blue-500' : 'ring-1 ring-gray-300'}`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-7 h-7 rounded-lg cursor-pointer"
+            />
+          </div>
+          </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`${t.textMuted} font-medium`}>Espessura:</span>
+              <input
+                type="range"
+                min="0.5"
+                max="30"
+                step="0.5"
+                value={thickness}
+                onChange={(e) => setThickness(parseFloat(e.target.value))}
+                className="w-24"
               />
-            ))}
+              <span className={`${t.text} font-semibold w-10`}>{thickness}px</span>
           </div>
 
-          {/* Espessura - Mostrar sempre */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>{activeTool.type === 'select' ? 'Tamanho do Texto' : 'Espessura'}</span>
-              <span>{drawingStyle.thickness}px</span>
-            </div>
-            <Slider
-              value={[drawingStyle.thickness]}
-              onValueChange={([value]) => handleStyleChange('thickness', value)}
-              min={0.5}
-              max={20}
-              step={0.5}
-              className="w-full"
-            />
-          </div>
-
-          {/* Input de Texto removido - delegado para DrawingOverlay3D */}
-
-          {/* Configurações de Fluidez */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>Suavização</span>
-              <span>{Math.round(drawingStyle.smoothing * 100)}%</span>
-            </div>
-            <Slider
-              value={[drawingStyle.smoothing]}
-              onValueChange={([value]) => handleStyleChange('smoothing', value)}
-              min={0}
-              max={1}
-              step={0.1}
-              className="w-full"
-            />
-          </div>
-
-          {/* Sensibilidade à Pressão */}
-          <div className="flex items-center justify-between p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-              <span className="text-xs text-blue-400 font-medium">Sensibilidade à Pressão</span>
+              <span className={`${t.textMuted} font-medium`}>Opacidade:</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={opacity}
+                onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                className="w-24"
+              />
+              <span className={`${t.text} font-semibold w-10`}>{Math.round(opacity * 100)}%</span>
             </div>
-            <Switch
-              checked={drawingStyle.pressure}
-              onCheckedChange={(checked) => handleStyleChange('pressure', checked)}
-              className="scale-75"
-            />
           </div>
-
-          {/* Desenho Assistido */}
-          <div className="flex items-center justify-between p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400 font-medium">Desenho Assistido</span>
-            </div>
-            <Switch
-              checked={assistedDrawing}
-              onCheckedChange={setAssistedDrawing}
-              className="scale-75"
-            />
-          </div>
-
-
-          {/* Indicador de Pressão */}
-          {isDrawing && (
-            <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <div className="text-xs text-blue-400 font-medium">
-                Pressão: {Math.round(currentPressure * 100)}%
+        )}
               </div>
+
+      {/* Canvas */}
+      <div className="flex-1 relative overflow-hidden" style={{ pointerEvents: isActive ? 'auto' : 'none', opacity: 1 }}>
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0"
+          style={{
+            touchAction: 'none',
+            cursor: isActive
+              ? (tool === 'symbol-insert' ? 'crosshair' : tool === 'laser' ? 'none' : tool === 'hand' ? 'grab' : 'crosshair')
+              : 'default',
+            pointerEvents: isActive ? 'auto' : 'none',
+            opacity: 1
+          }}
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerLeave={stop}
+        />
+
+        {showTextInput && (
+          <div
+            className={`absolute ${t.card} border-2 border-blue-500 rounded-xl shadow-2xl z-50 p-2`}
+            style={{
+              left: (textPosition.x * canvasScale + canvasOffset.x) + 'px',
+              top: (textPosition.y * canvasScale + canvasOffset.y) + 'px',
+              minWidth: '200px',
+              maxWidth: '400px'
+            }}
+          >
+            <textarea
+              ref={textInputRef}
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  handleTextSubmit();
+                  e.stopPropagation();
+                }
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleTextSubmit();
+                  e.stopPropagation();
+                }
+              }}
+              onBlur={handleTextSubmit}
+              autoFocus
+              className={`w-full px-2 py-1 border-0 outline-none resize-none bg-transparent ${t.text}`}
+              style={{
+                fontSize: (thickness * 8) + 'px',
+                color: color,
+                minHeight: '40px',
+                fontFamily: '"Comic Sans MS", "Segoe Print", "Bradley Hand", cursive'
+              }}
+              placeholder="Digite aqui... (Enter para confirmar, Shift+Enter para nova linha)"
+              rows={1}
+            />
             </div>
           )}
 
-          {/* Ações Essenciais */}
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={undo}
-                disabled={historyIndex <= 0}
-                className="h-8 flex items-center gap-1 text-xs"
-              >
-                <Undo className="w-3 h-3" />
-                Desfazer
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={redo}
-                disabled={historyIndex >= history.length - 1}
-                className="h-8 flex items-center gap-1 text-xs"
-              >
-                <Redo className="w-3 h-3" />
-                Refazer
-              </Button>
+        <div className={`absolute bottom-4 right-4 ${t.card} border ${t.cardBorder} ${t.text} px-4 py-2 rounded-xl shadow-lg text-xs space-y-1`}>
+          <div className="font-semibold">Página {currentPageIndex + 1}/{pages.length}</div>
+          <div className={t.textMuted}>Traços: {strokes.length}</div>
+          <div className={t.textMuted}>Ferramenta: {tool}</div>
+          <div className={t.textMuted}>Zoom: {Math.round(canvasScale * 100)}%</div>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={clearCanvas}
-              className="w-full h-8 flex items-center gap-1 text-xs"
-            >
-              <Trash2 className="w-3 h-3" />
-              Limpar Tudo
-            </Button>
           </div>
-
-          {/* Informações de Status */}
-          <div className="text-xs text-muted-foreground space-y-1">
-            <div>Traços: {strokes.length}</div>
-            <div>Ferramenta: {activeTool.name}</div>
-            <div>Cor: {drawingStyle.color}</div>
           </div>
-        </CardContent>
-      )}
-    </Card>
   );
 }
