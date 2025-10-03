@@ -49,13 +49,6 @@ function SpaceSculptorContent() {
   const [canRedo, setCanRedo] = useState(false);
   
   
-  // Estado independente para ferramentas de texto
-  const [textSettings, setTextSettings] = useState({
-    active: false,
-    color: '#ffffff', // Branco padrão
-    size: 40, // 40px padrão
-    fontFamily: 'Virgil'
-  });
   
   // Geometry history state
   const [geometryHistory, setGeometryHistory] = useState<GeometryParams[]>([]);
@@ -74,35 +67,7 @@ function SpaceSculptorContent() {
   } = useHistory(3);
 
 
-  // Funções para gerenciar configurações de texto
-  const handleTextChange = useCallback((key: string, value: any) => {
-    setTextSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }, []);
 
-  const handleTextToolToggle = useCallback(() => {
-    const newActive = !textSettings.active;
-    console.log('🎯 handleTextToolToggle chamado - newActive:', newActive);
-    console.log('🎯 textSettings atual:', textSettings);
-    console.log('🎯 activeTool atual:', activeTool);
-    
-    setTextSettings(prev => ({
-      ...prev,
-      active: newActive
-    }));
-    
-    // Definir activeTool para ferramenta de texto
-    if (newActive) {
-      setActiveTool('independent-text');
-      console.log('🎯 Ativando ferramenta de texto independente - activeTool definido como independent-text');
-      console.log('🎯 activeTool após setActiveTool:', activeTool);
-    } else {
-      setActiveTool('none');
-      console.log('🎯 Desativando ferramenta de texto - activeTool definido como none');
-    }
-  }, [textSettings.active, setActiveTool, activeTool]);
 
   // Undo geometry
   const handleUndoGeometry = useCallback(() => {
@@ -200,13 +165,6 @@ function SpaceSculptorContent() {
       }
 
 
-      // Atalhos para ferramentas de texto
-      if (e.key === 't' || e.key === 'T') {
-        e.preventDefault();
-        console.log('⌨️ Atalho T detectado - Ativando ferramenta de texto');
-        handleTextToolToggle();
-        toast.success('Ferramenta de texto ativada');
-      }
 
 
       // Escape - Cancelar operações
@@ -214,12 +172,6 @@ function SpaceSculptorContent() {
         e.preventDefault();
         console.log('⌨️ Atalho Escape detectado');
         
-        
-        // Desativar ferramenta de texto
-        if (textSettings.active) {
-          setTextSettings(prev => ({ ...prev, active: false }));
-          toast.success('Ferramenta de texto desativada');
-        }
       }
     };
 
@@ -230,7 +182,7 @@ function SpaceSculptorContent() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [canUndoGeometry, canRedoGeometry, canUndoAction, canRedoAction, textSettings.active, handleTextToolToggle, handleUndoGeometry, handleRedoGeometry, undoAction, redoAction]);
+  }, [canUndoGeometry, canRedoGeometry, canUndoAction, canRedoAction, handleUndoGeometry, handleRedoGeometry, undoAction, redoAction]);
 
   const [options, setOptions] = useState<VisualizationOptions>({
     showEdges: true,
@@ -1249,87 +1201,6 @@ function SpaceSculptorContent() {
               {/* Separador */}
               <div className="w-px h-12 bg-gradient-to-b from-transparent via-border/50 to-transparent"></div>
 
-              {/* 2. Ferramenta de Texto (SEMPRE VISÍVEL) */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleTextToolToggle}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
-                    textSettings.active
-                      ? 'bg-green-500 text-white shadow-lg' 
-                      : 'bg-white/5 text-white/70 border border-white/20'
-                  }`}
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 7.82L12 12l5 4.18M12 12H3m4 0V5" />
-                    <rect x="12" y="5" width="9" height="14" rx="2" />
-                  </svg>
-                  <span className="text-sm">Texto</span>
-                </button>
-
-
-                    {/* Controles visíveis apenas quando texto está ativo */}
-                    {textSettings.active && (
-                      <>
-                        {/* Botão de Seleção de Texto */}
-                        <button
-                          onClick={() => {
-                            if (activeTool === 'text-select') {
-                              setActiveTool('none'); // Desativar seleção
-                            } else {
-                              setActiveTool('text-select'); // Ativar seleção
-                            }
-                          }}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all h-10 ${
-                            activeTool === 'text-select'
-                              ? 'bg-blue-500 text-white shadow-lg' 
-                              : 'bg-white/5 text-white/70 border border-white/20'
-                          }`}
-                          title={activeTool === 'text-select' ? 'Desativar seleção' : 'Selecionar texto existente'}
-                        >
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M3 3h18v18H3z"/>
-                            <path d="M8 8h8M8 12h8M8 16h8"/>
-                          </svg>
-                          <span className="text-sm">Selecionar</span>
-                        </button>
-
-                    {/* Seletor de Cor */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/60">Cor:</span>
-                      <div className="flex gap-1">
-                        {['#000000', '#ffffff', '#ff0000', '#0000ff', '#00ff00', '#ffff00'].map(color => (
-                          <button
-                            key={color}
-                            className={`w-6 h-6 rounded-full border-2 transition-all ${
-                              textSettings.color === color 
-                                ? 'border-white ring-2 ring-white/50 scale-110' 
-                                : 'border-gray-600 hover:scale-110'
-                            }`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => handleTextChange('color', color)}
-                            title={`Cor ${color}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Controle de Tamanho do Texto */}
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-white/5">
-                      <span className="text-xs text-white/60">Tamanho:</span>
-                      <input
-                        type="range"
-                        min="20"
-                        max="50"
-                        step="2"
-                        value={textSettings.size}
-                        onChange={(e) => handleTextChange('size', Number(e.target.value))}
-                        className="w-24 h-1"
-                      />
-                      <span className="text-xs text-white/80 w-10">{textSettings.size}pt</span>
-                    </div>
-                  </>
-                )}
-              </div>
 
             </div>
           </div>
@@ -1409,21 +1280,19 @@ function SpaceSculptorContent() {
 
               {/* 2. DRAWING OVERLAY 3D - SEMPRE VISÍVEL (CAMADA INTERMEDIÁRIA) */}
               {!options.isFrozen && (
-                <div className={`absolute inset-0 w-full h-full z-5 ${textSettings.active ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+                <div className="absolute inset-0 w-full h-full z-5 pointer-events-none">
                   <DrawingOverlayWrapper
                     isTabletActive={false}
                     drawingStrokes={[]}
                     onDrawingChange={() => {}}
                     currentStyle={{
-                      color: textSettings.color,
-                      thickness: textSettings.size / 4, // Converter px para thickness
+                      color: '#ffffff',
+                      thickness: 2,
                       opacity: 1,
                       pressure: false,
                       smoothing: 0.5
                     }}
                     activeTool={activeTool}
-                    textSettings={textSettings}
-                    onTextChange={handleTextChange}
                     className="w-full h-full"
                   >
                     <div className="w-full h-full relative flex-1 min-h-0">
