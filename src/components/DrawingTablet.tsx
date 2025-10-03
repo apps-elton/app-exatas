@@ -50,6 +50,8 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
   const [showTextInput, setShowTextInput] = useState(false);
   const [textPosition, setTextPosition] = useState({ x: 0, y: 0, pressure: 0.5 });
   const [textValue, setTextValue] = useState('');
+  const [editingText, setEditingText] = useState<any>(null);
+  const [textColor, setTextColor] = useState('#ffffff');
 
   const [showRuler, setShowRuler] = useState(false);
   const [rulerAngle, setRulerAngle] = useState(0);
@@ -126,8 +128,30 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     const point = getPoint(e);
 
     if (tool === 'text') {
+      // Verificar se clicou em texto existente
+      const clickedText = strokes.find(stroke => 
+        stroke.tool === 'text' && 
+        stroke.points[0] && 
+        Math.abs(stroke.points[0].x - point.x) < 50 && 
+        Math.abs(stroke.points[0].y - point.y) < 50
+      );
+      
+      if (clickedText) {
+        setEditingText(clickedText);
+        setTextValue(clickedText.text || '');
+        setTextPosition(clickedText.points[0]);
+        setTextColor(clickedText.color);
+        setShowTextInput(true);
+        setTimeout(() => {
+          if (textInputRef.current) textInputRef.current.focus();
+        }, 10);
+        return;
+      }
+      
       setTextPosition(point);
       setTextValue('');
+      setTextColor(color);
+      setEditingText(null);
       setShowTextInput(true);
       setTimeout(() => {
         if (textInputRef.current) textInputRef.current.focus();
@@ -173,21 +197,32 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
 
   const handleTextSubmit = useCallback(() => {
     if (textValue.trim()) {
-      setStrokes(prev => [...prev, {
-        id: Date.now().toString(),
-        tool: 'text',
-        points: [textPosition],
-        color,
-        thickness,
-        opacity,
-        text: textValue
-      }]);
+      if (editingText) {
+        // Editar texto existente
+        setStrokes(prev => prev.map(stroke => 
+          stroke.id === editingText.id 
+            ? { ...stroke, text: textValue, color: textColor, points: [textPosition] }
+            : stroke
+        ));
+      } else {
+        // Adicionar novo texto
+        setStrokes(prev => [...prev, {
+          id: Date.now().toString(),
+          tool: 'text',
+          points: [textPosition],
+          color: textColor,
+          thickness,
+          opacity,
+          text: textValue
+        }]);
+      }
     }
     setShowTextInput(false);
     setTextValue('');
+    setEditingText(null);
     // Manter a ferramenta de texto ativa em vez de voltar para caneta
     // setTool('pen'); // Removido para manter a ferramenta de texto
-  }, [textValue, textPosition, color, thickness, opacity]);
+  }, [textValue, textPosition, textColor, thickness, opacity, editingText]);
 
   // Função de redesenho
   const redraw = useCallback(() => {
@@ -230,7 +265,14 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
       ctx.save();
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = stroke.color;
+      
+      if (stroke.tool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
+      } else {
+        ctx.strokeStyle = stroke.color;
+      }
+      
         ctx.globalAlpha = stroke.opacity;
         
       const path = new Path2D();
@@ -453,6 +495,23 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
               maxWidth: '400px'
             }}
           >
+            {/* Controles de cor para o texto */}
+            <div className="flex gap-1 mb-2">
+              {['#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'].map(color => (
+                <button
+                  key={color}
+                  className={`w-6 h-6 rounded-full border-2 transition-all ${
+                    textColor === color 
+                      ? 'border-white ring-2 ring-white/50 scale-110' 
+                      : 'border-gray-600 hover:scale-110'
+                  }`}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setTextColor(color)}
+                  title={`Cor ${color}`}
+                />
+              ))}
+            </div>
+            
             <textarea
               ref={textInputRef}
               value={textValue}
@@ -473,7 +532,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
               className={`w-full px-2 py-1 border-0 outline-none resize-none bg-transparent ${t.text}`}
               style={{
                 fontSize: (thickness * 8) + 'px',
-                color: color,
+                color: textColor,
                 minHeight: '40px',
                 fontFamily: '"Comic Sans MS", "Segoe Print", "Bradley Hand", cursive'
               }}
