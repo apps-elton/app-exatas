@@ -1207,7 +1207,7 @@ function SpaceSculptorContent() {
           
 
           {/* Conteúdo da Geometria */}
-          <div className="flex-1 m-0 p-0 h-full relative">
+          <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0 }}>
 
             {/* ESTRUTURA SEMPRE VISÍVEL - AMBOS OS COMPONENTES RENDERIZADOS */}
             <div className="w-full h-full relative">

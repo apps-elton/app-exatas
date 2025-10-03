@@ -185,7 +185,8 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     }
     setShowTextInput(false);
     setTextValue('');
-    setTool('pen');
+    // Manter a ferramenta de texto ativa em vez de voltar para caneta
+    // setTool('pen'); // Removido para manter a ferramenta de texto
   }, [textValue, textPosition, color, thickness, opacity]);
 
   // Função de redesenho
@@ -267,7 +268,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
   }, [redraw]);
 
   return (
-    <div className={`w-full h-screen bg-transparent flex flex-col relative overflow-hidden ${className}`} style={{ zIndex: isActive ? 10 : 5, backgroundColor: 'transparent' }}>
+    <div className={`w-full h-screen bg-transparent flex flex-col relative overflow-hidden ${className}`} style={{ zIndex: isActive ? 10 : 5, backgroundColor: 'transparent', marginTop: 0, paddingTop: 0 }}>
       {/* Header com controles - sempre visível */}
       <div className={`${t.toolbar} border-b ${t.border} shadow-2xl shadow-black/5 ${isActive ? 'bg-opacity-90' : 'bg-opacity-30'} pointer-events-auto`} style={{ zIndex: 20 }}>
         <div className="px-6 py-4 flex items-center gap-4 flex-wrap">
