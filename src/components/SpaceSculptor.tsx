@@ -1116,7 +1116,7 @@ function SpaceSculptorContent() {
   return (
     <div className="h-screen bg-gradient-nebula text-foreground flex flex-col">
       {/* Header com controles no lado direito */}
-      <header className="border-b border-border/30 bg-background/95 backdrop-blur flex items-center justify-between px-6 py-4" style={{ marginBottom: 0, paddingBottom: 0 }}>
+      <header className="border-b border-border/30 bg-background/95 backdrop-blur flex items-center justify-between px-6 py-2" style={{ marginBottom: 0, paddingBottom: 0 }}>
         <div>
           <h1 className="text-2xl font-bold bg-gradient-cosmic bg-clip-text text-transparent">
             GeoTeach
@@ -1195,7 +1195,7 @@ function SpaceSculptorContent() {
         <section className="flex-1 flex flex-col min-w-0 min-h-0" style={{ marginTop: 0, paddingTop: 0 }}>
           {/* Barra de Ferramentas Principal */}
           <div className="border-b border-border/30 bg-background/50 backdrop-blur" style={{ marginTop: 0, paddingTop: 0 }}>
-            <div className="flex items-center gap-6 px-4 py-2 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[60px]" style={{ marginTop: 0, paddingTop: 0 }}>
+            <div className="flex items-center gap-6 px-4 py-0 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[40px]" style={{ marginTop: 0, paddingTop: 0, paddingBottom: 0 }}>
               
 
               {/* Separador */}
@@ -1207,7 +1207,7 @@ function SpaceSculptorContent() {
           
 
           {/* Conteúdo da Geometria */}
-          <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0 }}>
+          <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0 }}>
 
             {/* ESTRUTURA SEMPRE VISÍVEL - AMBOS OS COMPONENTES RENDERIZADOS */}
             <div className="w-full h-full relative">
@@ -1324,7 +1324,7 @@ function SpaceSculptorContent() {
               )}
 
               {/* 5. MESA DIGITALIZADORA - SEMPRE VISÍVEL */}
-              <div className="absolute inset-0 w-full h-full" style={{ zIndex: isTabletActive ? 10 : 5, pointerEvents: isTabletActive ? 'auto' : 'none', marginTop: 0, paddingTop: 0 }}>
+              <div className="absolute inset-0 w-full h-full" style={{ zIndex: isTabletActive ? 10 : 5, pointerEvents: isTabletActive ? 'auto' : 'none', marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0, top: 0 }}>
                 <DrawingTablet
                   isActive={isTabletActive}
                   onToggle={() => setIsTabletActive(!isTabletActive)}
