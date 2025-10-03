@@ -271,8 +271,8 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     <div className={`w-full h-screen bg-transparent flex flex-col relative overflow-hidden ${className}`} style={{ zIndex: isActive ? 10 : 5, backgroundColor: 'transparent', marginTop: 0, paddingTop: 0 }}>
       {/* Header com controles - sempre visível */}
       <div className={`${t.toolbar} border-b ${t.border} shadow-2xl shadow-black/5 ${isActive ? 'bg-opacity-90' : 'bg-opacity-30'} pointer-events-auto`} style={{ zIndex: 20 }}>
-        <div className="px-6 py-2 flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
+        <div className="px-6 py-1 flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <div className={`${t.text} font-semibold text-lg tracking-tight`}>
               Mesa Digitalizadora
             </div>
@@ -333,17 +333,17 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
             ))}
           </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => setTool('text')}
-                  className={`px-3 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 ${tool === 'text' ? t.buttonActive : t.buttonInactive}`}
+                  className={`px-2 py-1.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 ${tool === 'text' ? t.buttonActive : t.buttonInactive}`}
                   title="Texto"
                 >
                   Aa
                 </button>
                 <button
                   onClick={() => setShowGrid(s => !s)}
-                  className={`p-2.5 rounded-xl transition-all duration-200 hover:scale-105 ${showGrid ? t.buttonActive : t.buttonInactive}`}
+                  className={`p-1.5 rounded-xl transition-all duration-200 hover:scale-105 ${showGrid ? t.buttonActive : t.buttonInactive}`}
                   title="Grade (G)"
                 >
                   ⊞
@@ -352,18 +352,18 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
             </>
           )}
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setStrokes(prev => prev.slice(0, -1))}
               disabled={strokes.length === 0}
-              className={`p-2.5 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 ${strokes.length === 0 ? 'opacity-40 cursor-not-allowed ' + t.buttonInactive : 'bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/30'}`}
+              className={`p-1.5 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 ${strokes.length === 0 ? 'opacity-40 cursor-not-allowed ' + t.buttonInactive : 'bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/30'}`}
               title="Desfazer (Ctrl+Z)"
             >
               ↶
             </button>
               <button
               onClick={() => setStrokes([])}
-              className="p-2.5 rounded-xl bg-red-500 hover:bg-red-400 text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-red-500/30"
+              className="p-1.5 rounded-xl bg-red-500 hover:bg-red-400 text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-red-500/30"
               title="Limpar (Del)"
             >
               🗑️

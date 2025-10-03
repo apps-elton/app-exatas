@@ -1195,7 +1195,7 @@ function SpaceSculptorContent() {
         <section className="flex-1 flex flex-col min-w-0 min-h-0" style={{ marginTop: 0, paddingTop: 0 }}>
           {/* Barra de Ferramentas Principal */}
           <div className="border-b border-border/30 bg-background/50 backdrop-blur" style={{ marginTop: 0, paddingTop: 0 }}>
-            <div className="flex items-center gap-6 p-4 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[80px]" style={{ marginTop: 0, paddingTop: 0 }}>
+            <div className="flex items-center gap-6 px-4 py-2 bg-background/95 backdrop-blur-xl border-b overflow-x-auto min-h-[60px]" style={{ marginTop: 0, paddingTop: 0 }}>
               
 
               {/* Separador */}
