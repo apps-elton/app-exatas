@@ -20,7 +20,6 @@ interface DrawingTabletProps {
 export default function DrawingTablet({ isActive, onToggle, className = '' }: DrawingTabletProps) {
   console.log('🎨 DrawingTablet renderizado - isActive:', isActive);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textInputRef = useRef<HTMLTextAreaElement>(null);
   const lastTimeRef = useRef(0);
 
   const [pages, setPages] = useState([{ id: '1', name: 'Página 1', strokes: [] }]);
@@ -47,9 +46,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
   const [laserPoint, setLaserPoint] = useState<any>(null);
   const [laserColor, setLaserColor] = useState('#ff0000');
 
-  const [showTextInput, setShowTextInput] = useState(false);
-  const [textPosition, setTextPosition] = useState({ x: 0, y: 0, pressure: 0.5 });
-  const [textValue, setTextValue] = useState('');
 
   const [showRuler, setShowRuler] = useState(false);
   const [rulerAngle, setRulerAngle] = useState(0);
@@ -125,15 +121,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     e.preventDefault();
     const point = getPoint(e);
 
-    if (tool === 'text') {
-      setTextPosition(point);
-      setTextValue('');
-      setShowTextInput(true);
-      setTimeout(() => {
-        if (textInputRef.current) textInputRef.current.focus();
-      }, 10);
-      return;
-    }
 
     setCurrent({
       id: Date.now().toString(),
@@ -171,22 +158,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     setIsDrawing(false);
   }, [isDrawing, current]);
 
-  const handleTextSubmit = useCallback(() => {
-    if (textValue.trim()) {
-      setStrokes(prev => [...prev, {
-        id: Date.now().toString(),
-        tool: 'text',
-        points: [textPosition],
-        color,
-        thickness,
-        opacity,
-        text: textValue
-      }]);
-    }
-    setShowTextInput(false);
-    setTextValue('');
-    setTool('pen');
-  }, [textValue, textPosition, color, thickness, opacity]);
 
   // Função de redesenho
   const redraw = useCallback(() => {
@@ -211,18 +182,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     allStrokes.forEach((stroke) => {
       if (!stroke) return;
 
-      if (stroke.tool === 'text' && stroke.text) {
-        ctx.save();
-        ctx.fillStyle = stroke.color;
-        ctx.font = stroke.thickness * 8 + 'px "Comic Sans MS", "Segoe Print", "Bradley Hand", cursive';
-        ctx.globalAlpha = stroke.opacity;
-        const lines = stroke.text.split('\n');
-        lines.forEach((line: string, i: number) => {
-          ctx.fillText(line, stroke.points[0].x, stroke.points[0].y + (i * stroke.thickness * 10));
-        });
-        ctx.restore();
-        return;
-      }
 
       if (stroke.points.length < 2) return;
       
@@ -334,13 +293,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setTool('text')}
-                  className={`px-3 py-2.5 rounded-xl font-semibold transition-all duration-200 hover:scale-105 ${tool === 'text' ? t.buttonActive : t.buttonInactive}`}
-                  title="Texto"
-                >
-                  Aa
-                </button>
-                <button
                   onClick={() => setShowGrid(s => !s)}
                   className={`p-2.5 rounded-xl transition-all duration-200 hover:scale-105 ${showGrid ? t.buttonActive : t.buttonInactive}`}
                   title="Grade (G)"
@@ -442,45 +394,6 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
           onPointerLeave={stop}
         />
 
-        {showTextInput && (
-          <div
-            className={`absolute ${t.card} border-2 border-blue-500 rounded-xl shadow-2xl z-50 p-2`}
-            style={{
-              left: (textPosition.x * canvasScale + canvasOffset.x) + 'px',
-              top: (textPosition.y * canvasScale + canvasOffset.y) + 'px',
-              minWidth: '200px',
-              maxWidth: '400px'
-            }}
-          >
-            <textarea
-              ref={textInputRef}
-              value={textValue}
-              onChange={(e) => setTextValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  handleTextSubmit();
-                  e.stopPropagation();
-                }
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleTextSubmit();
-                  e.stopPropagation();
-                }
-              }}
-              onBlur={handleTextSubmit}
-              autoFocus
-              className={`w-full px-2 py-1 border-0 outline-none resize-none bg-transparent ${t.text}`}
-              style={{
-                fontSize: (thickness * 8) + 'px',
-                color: color,
-                minHeight: '40px',
-                fontFamily: '"Comic Sans MS", "Segoe Print", "Bradley Hand", cursive'
-              }}
-              placeholder="Digite aqui... (Enter para confirmar, Shift+Enter para nova linha)"
-              rows={1}
-            />
-            </div>
-          )}
 
         <div className={`absolute bottom-4 right-4 ${t.card} border ${t.cardBorder} ${t.text} px-4 py-2 rounded-xl shadow-lg text-xs space-y-1`}>
           <div className="font-semibold">Página {currentPageIndex + 1}/{pages.length}</div>
