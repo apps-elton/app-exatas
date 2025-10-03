@@ -271,7 +271,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
     <div className={`w-full h-screen bg-transparent flex flex-col relative overflow-hidden ${className}`} style={{ zIndex: isActive ? 10 : 5, backgroundColor: 'transparent', marginTop: 0, paddingTop: 0 }}>
       {/* Header com controles - sempre visível */}
       <div className={`${t.toolbar} border-b ${t.border} shadow-2xl shadow-black/5 ${isActive ? 'bg-opacity-90' : 'bg-opacity-30'} pointer-events-auto`} style={{ zIndex: 20 }}>
-        <div className="px-6 py-4 flex items-center gap-4 flex-wrap">
+        <div className="px-6 py-2 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className={`${t.text} font-semibold text-lg tracking-tight`}>
               Mesa Digitalizadora
