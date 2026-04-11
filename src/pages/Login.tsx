@@ -99,7 +99,7 @@ export default function Login() {
       }
     }
 
-    // Don't set submitting to false here — let the Navigate handle redirect
+    setSubmitting(false);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
