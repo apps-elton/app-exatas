@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Search, ToggleLeft, ToggleRight } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
@@ -126,7 +126,7 @@ export default function AdminUsers() {
   );
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
@@ -262,6 +262,6 @@ export default function AdminUsers() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

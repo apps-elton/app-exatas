@@ -12,17 +12,37 @@ import {
   Settings,
   LogOut,
   User,
+  Users,
   Shield,
   School,
   GraduationCap,
   Crown,
+  MessageSquare,
 } from 'lucide-react';
 
-const NAV_ITEMS = [
+const TEACHER_NAV = [
   { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
   { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', disabled: true },
   { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
+];
+
+const ADMIN_NAV = [
+  { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
+  { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
+  { id: 'users', label: 'Usuários da Escola', icon: Users, path: '/school/users', disabled: true },
+  { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
+];
+
+const SUPERADMIN_NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
+  { id: 'tenants', label: 'Tenants', icon: School, path: '/admin/tenants' },
+  { id: 'users', label: 'Usuários', icon: Users, path: '/admin/users' },
+  { id: 'subscriptions', label: 'Assinaturas', icon: CreditCard, path: '/admin/subscriptions' },
+  { id: 'support', label: 'Suporte', icon: MessageSquare, path: '/admin/support' },
+  { id: 'system', label: 'Sistema', icon: Settings, path: '/admin/settings' },
+  { id: 'divider', label: '', icon: Box, path: '', divider: true },
+  { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
+  { id: 'projects', label: 'Projetos', icon: FolderOpen, path: '/projects' },
 ];
 
 const ROLE_CONFIG = {
@@ -49,6 +69,12 @@ export function AppSidebar() {
   const planConfig = PLAN_CONFIG[plan];
   const RoleIcon = roleConfig.icon;
 
+  const navItems = role === 'superadmin'
+    ? SUPERADMIN_NAV
+    : role === 'admin'
+    ? ADMIN_NAV
+    : TEACHER_NAV;
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
@@ -64,8 +90,18 @@ export function AppSidebar() {
       <div className="flex items-center justify-between p-3 border-b border-border/30">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <Box className="w-7 h-7 text-primary shrink-0" />
-            <span className="font-poppins font-bold text-lg text-foreground">GeoTeach</span>
+            {role === 'superadmin' ? (
+              <>
+                <Shield className="w-6 h-6 text-red-400 shrink-0" />
+                <span className="font-poppins font-bold text-foreground">GeoTeach</span>
+                <span className="text-xs text-red-400 font-poppins font-semibold">Admin</span>
+              </>
+            ) : (
+              <>
+                <Box className="w-7 h-7 text-primary shrink-0" />
+                <span className="font-poppins font-bold text-lg text-foreground">GeoTeach</span>
+              </>
+            )}
           </div>
         )}
         <Button
@@ -109,52 +145,44 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
+          if ((item as any).divider) {
+            return (
+              <div key={item.id} className={`my-2 border-t border-border/30 ${collapsed ? 'mx-1' : 'mx-2'}`} />
+            );
+          }
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const isActive = item.path === '/admin'
+            ? location.pathname === '/admin'
+            : item.path !== '/'
+            ? location.pathname.startsWith(item.path)
+            : location.pathname === '/';
+          const accentColor = role === 'superadmin' ? 'text-red-400 bg-red-400/10' : 'text-primary bg-primary/10';
           return (
             <button
               key={item.id}
-              onClick={() => !item.disabled && navigate(item.path)}
-              disabled={item.disabled}
+              onClick={() => !(item as any).disabled && navigate(item.path)}
+              disabled={(item as any).disabled}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-nunito transition-colors ${
                 isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : item.disabled
+                  ? `${accentColor} font-semibold`
+                  : (item as any).disabled
                   ? 'text-muted-foreground/40 cursor-not-allowed'
                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
               } ${collapsed ? 'justify-center px-0' : ''}`}
               title={collapsed ? item.label : undefined}
             >
-              <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-primary' : ''}`} />
+              <Icon className={`w-5 h-5 shrink-0`} />
               {!collapsed && (
                 <span className="truncate">{item.label}</span>
               )}
-              {!collapsed && item.disabled && (
+              {!collapsed && (item as any).disabled && (
                 <span className="ml-auto text-[10px] bg-muted/50 text-muted-foreground px-1.5 py-0.5 rounded">Em breve</span>
               )}
             </button>
           );
         })}
       </nav>
-
-      {/* Admin Panel link (superadmin only) */}
-      {role === 'superadmin' && (
-        <div className="px-2 pb-1">
-          <button
-            onClick={() => navigate('/admin')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-nunito transition-colors border border-red-400/20 ${
-              location.pathname.startsWith('/admin')
-                ? 'bg-red-400/10 text-red-400 font-semibold'
-                : 'text-red-400/70 hover:bg-red-400/10 hover:text-red-400'
-            } ${collapsed ? 'justify-center px-0' : ''}`}
-            title={collapsed ? 'Painel Admin' : undefined}
-          >
-            <Shield className={`w-5 h-5 shrink-0`} />
-            {!collapsed && <span>Painel Admin</span>}
-          </button>
-        </div>
-      )}
 
       {/* Upgrade banner (only for free plan) */}
       {plan === 'free' && !collapsed && (

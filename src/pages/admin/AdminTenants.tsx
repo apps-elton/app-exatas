@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Plus, Search, Trash2, ToggleLeft, ToggleRight, X } from 'lucide-react';
 
@@ -135,7 +135,7 @@ export default function AdminTenants() {
   );
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -313,6 +313,6 @@ export default function AdminTenants() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

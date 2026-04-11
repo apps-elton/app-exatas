@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -96,7 +96,7 @@ export default function AdminSubscriptions() {
   };
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
@@ -207,6 +207,6 @@ export default function AdminSubscriptions() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

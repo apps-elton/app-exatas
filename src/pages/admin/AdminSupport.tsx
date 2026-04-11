@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
@@ -194,7 +194,7 @@ export default function AdminSupport() {
   const openCount = tickets.filter((t) => t.status === 'open').length;
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -407,6 +407,6 @@ export default function AdminSupport() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

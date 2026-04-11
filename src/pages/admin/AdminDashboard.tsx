@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { School, Users, FolderKanban, TicketCheck, Loader2 } from 'lucide-react';
 
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
@@ -295,6 +295,6 @@ export default function AdminDashboard() {
           </>
         )}
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

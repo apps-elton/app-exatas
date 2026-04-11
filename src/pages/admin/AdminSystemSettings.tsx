@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -107,16 +107,16 @@ export default function AdminSystemSettings() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AppLayout>
         <div className="flex items-center justify-center h-full py-20">
           <Loader2 className="w-8 h-8 animate-spin text-red-400" />
         </div>
-      </AdminLayout>
+      </AppLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <AppLayout>
       <div className="p-6 space-y-6 max-w-4xl">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -331,6 +331,6 @@ export default function AdminSystemSettings() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }
