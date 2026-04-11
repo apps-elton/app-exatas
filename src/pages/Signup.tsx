@@ -1,21 +1,71 @@
-import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, UserPlus, Box, Check } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School } from 'lucide-react';
+
+type AccountType = 'teacher' | 'school' | null;
+
+interface InviteData {
+  id: string;
+  tenant_id: string;
+  role: string;
+  tenant_name: string;
+}
 
 export default function Signup() {
-  const { signUp, session, loading } = useAuth();
+  const { session, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
+
+  const [accountType, setAccountType] = useState<AccountType>(inviteToken ? 'teacher' : null);
+  const [inviteData, setInviteData] = useState<InviteData | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(!!inviteToken);
+  const [inviteError, setInviteError] = useState('');
+
+  // Form fields
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [schoolName, setSchoolName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Validate invite token
+  useEffect(() => {
+    if (!inviteToken) return;
+    (async () => {
+      setInviteLoading(true);
+      const { data, error } = await supabase
+        .from('tenant_invites')
+        .select('id, tenant_id, role, tenants(name)')
+        .eq('token', inviteToken)
+        .is('used_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (error || !data) {
+        setInviteError('Convite inválido, expirado ou já utilizado.');
+        setInviteLoading(false);
+        return;
+      }
+
+      const tenantName = (data as any).tenants?.name ?? 'Escola';
+      setInviteData({
+        id: data.id,
+        tenant_id: data.tenant_id,
+        role: data.role,
+        tenant_name: tenantName,
+      });
+      setInviteLoading(false);
+    })();
+  }, [inviteToken]);
 
   if (loading) return null;
   if (session) return <Navigate to="/" replace />;
@@ -24,6 +74,9 @@ export default function Signup() {
     length: password.length >= 6,
     match: password === confirmPassword && confirmPassword.length > 0,
   };
+
+  const generateSlug = (name: string) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,20 +90,104 @@ export default function Signup() {
       setError('As senhas não coincidem');
       return;
     }
+    if (accountType === 'school' && !schoolName.trim()) {
+      setError('Informe o nome da escola');
+      return;
+    }
 
     setSubmitting(true);
-    const { error } = await signUp(email, password, fullName);
-    if (error) {
-      setError(
-        error.includes('already registered')
-          ? 'Este email já está cadastrado'
-          : error
-      );
-    } else {
+
+    try {
+      const role = inviteData ? inviteData.role : accountType === 'school' ? 'admin' : 'teacher';
+
+      // 1. Create auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, role },
+        },
+      });
+
+      if (signUpError) {
+        setError(
+          signUpError.message.includes('already registered')
+            ? 'Este email já está cadastrado'
+            : signUpError.message
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      const userId = authData.user?.id;
+      if (!userId) {
+        setError('Erro ao criar conta. Tente novamente.');
+        setSubmitting(false);
+        return;
+      }
+
+      // Wait for trigger to create profile
+      await new Promise(r => setTimeout(r, 1000));
+
+      // 2. If school signup, create tenant and link
+      if (accountType === 'school' && !inviteData) {
+        const slug = generateSlug(schoolName) + '-' + Date.now().toString(36);
+        const { data: tenant, error: tenantError } = await supabase
+          .from('tenants')
+          .insert({ name: schoolName, slug, max_users: 5 })
+          .select('id')
+          .single();
+
+        if (tenantError) {
+          setError('Erro ao criar escola: ' + tenantError.message);
+          setSubmitting(false);
+          return;
+        }
+
+        // Link profile to tenant
+        await supabase
+          .from('profiles')
+          .update({ tenant_id: tenant.id, role: 'admin' as any })
+          .eq('id', userId);
+
+        // Create tenant subscription
+        await supabase
+          .from('subscriptions')
+          .update({ tenant_id: tenant.id })
+          .eq('user_id', userId);
+      }
+
+      // 3. If invite, link to tenant and mark invite as used
+      if (inviteData) {
+        await supabase
+          .from('profiles')
+          .update({ tenant_id: inviteData.tenant_id, role: inviteData.role as any })
+          .eq('id', userId);
+
+        await supabase
+          .from('tenant_invites')
+          .update({ used_at: new Date().toISOString() })
+          .eq('id', inviteData.id);
+      }
+
       setSuccess(true);
+    } catch (err) {
+      setError('Erro inesperado. Tente novamente.');
     }
     setSubmitting(false);
   };
+
+  // Invite loading state
+  if (inviteLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground font-poppins">Verificando convite...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -93,7 +230,26 @@ export default function Signup() {
             <h1 className="text-3xl font-bold font-poppins text-foreground">GeoTeach</h1>
           </div>
 
-          {success ? (
+          {/* Invite error */}
+          {inviteError && (
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-6">
+                <span className="text-3xl">!</span>
+              </div>
+              <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
+                Convite inválido
+              </h2>
+              <p className="text-muted-foreground font-nunito mb-6">{inviteError}</p>
+              <Link to="/signup">
+                <Button variant="outline" className="h-12 px-8 font-poppins font-semibold">
+                  Criar conta sem convite
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Success */}
+          {success && !inviteError && (
             <div className="text-center">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
                 <Check className="w-8 h-8 text-primary" />
@@ -102,7 +258,11 @@ export default function Signup() {
                 Conta criada!
               </h2>
               <p className="text-muted-foreground font-nunito mb-6">
-                Verifique seu email para confirmar sua conta. Depois é só fazer login.
+                {accountType === 'school'
+                  ? `Sua escola "${schoolName}" foi cadastrada. Verifique seu email e faça login.`
+                  : inviteData
+                  ? `Você foi adicionado à ${inviteData.tenant_name}. Verifique seu email e faça login.`
+                  : 'Verifique seu email para confirmar sua conta. Depois é só fazer login.'}
               </p>
               <Link to="/login">
                 <Button className="h-12 px-8 font-poppins font-semibold">
@@ -110,18 +270,111 @@ export default function Signup() {
                 </Button>
               </Link>
             </div>
-          ) : (
+          )}
+
+          {/* Account type selection */}
+          {!success && !inviteError && !accountType && (
             <>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
                 Criar conta
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
-                Comece a usar o GeoTeach gratuitamente
+                Como você quer usar o GeoTeach?
+              </p>
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => setAccountType('teacher')}
+                  className="w-full flex items-center gap-4 p-5 rounded-xl border border-border/50 hover:border-emerald-400/50 hover:bg-emerald-400/5 transition-colors text-left"
+                >
+                  <div className="w-12 h-12 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-poppins font-semibold text-foreground">Sou Professor</p>
+                    <p className="text-sm text-muted-foreground font-nunito">
+                      Conta individual gratuita para usar geometria 3D
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setAccountType('school')}
+                  className="w-full flex items-center gap-4 p-5 rounded-xl border border-border/50 hover:border-amber-400/50 hover:bg-amber-400/5 transition-colors text-left"
+                >
+                  <div className="w-12 h-12 rounded-full bg-amber-400/10 flex items-center justify-center shrink-0">
+                    <School className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="font-poppins font-semibold text-foreground">Sou Escola</p>
+                    <p className="text-sm text-muted-foreground font-nunito">
+                      Cadastre sua escola e convide professores
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              <div className="mt-8 text-center">
+                <p className="text-muted-foreground font-nunito text-sm">
+                  Já tem conta?{' '}
+                  <Link to="/login" className="text-primary font-semibold hover:underline">
+                    Fazer login
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Signup form */}
+          {!success && !inviteError && accountType && (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                {!inviteData && (
+                  <button
+                    onClick={() => setAccountType(null)}
+                    className="text-sm text-muted-foreground hover:text-foreground font-nunito"
+                  >
+                    &larr; Voltar
+                  </button>
+                )}
+              </div>
+
+              <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
+                {inviteData
+                  ? `Convite para ${inviteData.tenant_name}`
+                  : accountType === 'school'
+                  ? 'Cadastrar Escola'
+                  : 'Criar conta de Professor'}
+              </h2>
+              <p className="text-muted-foreground font-nunito mb-8">
+                {inviteData
+                  ? `Crie sua conta para acessar a ${inviteData.tenant_name}`
+                  : accountType === 'school'
+                  ? 'Você será o administrador da escola'
+                  : 'Conta individual gratuita'}
               </p>
 
               <form onSubmit={handleSignup} className="space-y-5">
+                {/* School name (only for school signup) */}
+                {accountType === 'school' && !inviteData && (
+                  <div className="space-y-2">
+                    <Label htmlFor="school" className="font-poppins text-sm">Nome da Escola</Label>
+                    <Input
+                      id="school"
+                      type="text"
+                      placeholder="Ex: Colégio São Paulo"
+                      value={schoolName}
+                      onChange={(e) => setSchoolName(e.target.value)}
+                      required
+                      className="h-12 bg-card border-border/50 font-nunito"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="font-poppins text-sm">Nome completo</Label>
+                  <Label htmlFor="name" className="font-poppins text-sm">
+                    {accountType === 'school' ? 'Seu nome (administrador)' : 'Nome completo'}
+                  </Label>
                   <Input
                     id="name"
                     type="text"
@@ -213,7 +466,11 @@ export default function Signup() {
                   ) : (
                     <UserPlus className="w-5 h-5" />
                   )}
-                  {submitting ? 'Criando conta...' : 'Criar conta grátis'}
+                  {submitting
+                    ? 'Criando...'
+                    : accountType === 'school'
+                    ? 'Cadastrar Escola'
+                    : 'Criar conta grátis'}
                 </Button>
               </form>
 

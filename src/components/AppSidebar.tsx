@@ -21,15 +21,17 @@ import {
 } from 'lucide-react';
 
 const TEACHER_NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
   { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
   { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
 ];
 
 const ADMIN_NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
   { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
-  { id: 'users', label: 'Usuários da Escola', icon: Users, path: '/school/users', disabled: true },
+  { id: 'users', label: 'Usuários da Escola', icon: Users, path: '/school/users' },
   { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
 ];
 

@@ -285,6 +285,57 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_invites: {
+        Row: {
+          created_at: string
+          created_by: string
+          email: string | null
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id: string
+          token?: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_invites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_invites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
@@ -371,21 +422,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_superadmin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      get_my_tenant_id: { Args: never; Returns: string }
+      is_superadmin: { Args: never; Returns: boolean }
     }
     Enums: {
       subscription_plan: "free" | "professor" | "institution"
-      ticket_priority: "low" | "medium" | "high" | "critical"
-      ticket_status: "open" | "in_progress" | "resolved" | "closed"
       subscription_status:
         | "active"
         | "canceled"
         | "past_due"
         | "trialing"
         | "inactive"
+      ticket_priority: "low" | "medium" | "high" | "critical"
+      ticket_status: "open" | "in_progress" | "resolved" | "closed"
       user_role: "superadmin" | "admin" | "teacher"
     }
     CompositeTypes: {
@@ -515,8 +564,6 @@ export const Constants = {
   public: {
     Enums: {
       subscription_plan: ["free", "professor", "institution"],
-      ticket_priority: ["low", "medium", "high", "critical"],
-      ticket_status: ["open", "in_progress", "resolved", "closed"],
       subscription_status: [
         "active",
         "canceled",
@@ -524,6 +571,8 @@ export const Constants = {
         "trialing",
         "inactive",
       ],
+      ticket_priority: ["low", "medium", "high", "critical"],
+      ticket_status: ["open", "in_progress", "resolved", "closed"],
       user_role: ["superadmin", "admin", "teacher"],
     },
   },

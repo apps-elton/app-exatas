@@ -11,6 +11,8 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Projects from "./pages/Projects";
+import Dashboard from "./pages/Dashboard";
+import SchoolUsers from "./pages/SchoolUsers";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTenants from "./pages/admin/AdminTenants";
@@ -46,6 +48,22 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Projects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/school/users"
+                element={
+                  <ProtectedRoute>
+                    <SchoolUsers />
                   </ProtectedRoute>
                 }
               />
