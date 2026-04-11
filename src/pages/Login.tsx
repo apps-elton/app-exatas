@@ -38,7 +38,7 @@ const TEST_ACCOUNTS = [
 ];
 
 export default function Login() {
-  const { signIn, signOut, resetPassword, session, loading } = useAuth();
+  const { signIn, signOut, resetPassword, session, profile, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -50,9 +50,10 @@ export default function Login() {
 
   if (loading) return null;
   if (session && !submitting) {
-    // Redirect based on role from user metadata
-    const role = session.user?.user_metadata?.role;
-    if (role === 'superadmin') return <Navigate to="/admin" replace />;
+    // Wait for profile to load from database before redirecting
+    if (!profile) return null;
+    // Redirect based on role from database profile (not user_metadata)
+    if (profile.role === 'superadmin') return <Navigate to="/admin" replace />;
     return <Navigate to="/" replace />;
   }
 

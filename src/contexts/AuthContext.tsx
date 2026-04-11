@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, role: 'teacher' },
       },
     });
     return { error: error?.message ?? null };
