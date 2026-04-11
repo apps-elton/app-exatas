@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Loader2, Search, ToggleLeft, ToggleRight } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -99,8 +100,10 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
       );
+      toast.success('Role atualizado');
     } catch (err) {
       console.error('Erro ao alterar role:', err);
+      toast.error('Erro ao atualizar');
     }
   };
 
@@ -114,8 +117,10 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, is_active: !u.is_active } : u))
       );
+      toast.success('Status atualizado');
     } catch (err) {
       console.error('Erro ao alterar status:', err);
+      toast.error('Erro ao atualizar');
     }
   };
 

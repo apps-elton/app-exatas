@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Loader2, Plus, Search, Trash2, ToggleLeft, ToggleRight, X } from 'lucide-react';
 
 interface Tenant {
@@ -96,9 +97,11 @@ export default function AdminTenants() {
       setFormSlug('');
       setFormMaxUsers(5);
       setShowForm(false);
+      toast.success('Tenant criado com sucesso');
       await fetchTenants();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao criar tenant:', err);
+      toast.error('Erro: ' + (err?.message || 'Erro ao criar tenant'));
     } finally {
       setSaving(false);
     }
@@ -114,19 +117,23 @@ export default function AdminTenants() {
       setTenants((prev) =>
         prev.map((t) => (t.id === tenant.id ? { ...t, is_active: !t.is_active } : t))
       );
-    } catch (err) {
+      toast.success('Status atualizado');
+    } catch (err: any) {
       console.error('Erro ao alterar status:', err);
+      toast.error('Erro: ' + (err?.message || 'Erro ao alterar status'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este tenant?')) return;
+    if (!window.confirm('Tem certeza que deseja excluir este tenant?')) return;
     try {
       const { error } = await supabase.from('tenants').delete().eq('id', id);
       if (error) throw error;
       setTenants((prev) => prev.filter((t) => t.id !== id));
-    } catch (err) {
+      toast.success('Tenant excluído');
+    } catch (err: any) {
       console.error('Erro ao excluir tenant:', err);
+      toast.error('Erro: ' + (err?.message || 'Erro ao excluir tenant'));
     }
   };
 

@@ -148,6 +148,7 @@ export default function AdminSupport() {
   };
 
   const handleDelete = async (ticketId: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este ticket?')) return;
     const { error } = await supabase
       .from('support_tickets')
       .delete()

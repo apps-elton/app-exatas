@@ -69,6 +69,7 @@ export default function Projects() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este projeto?')) return;
     await supabase.from('projects').delete().eq('id', id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
     setMenuOpen(null);

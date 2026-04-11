@@ -260,8 +260,8 @@ export default function Login() {
                 </p>
               </div>
 
-              {/* DEV PANEL - Acesso rápido para testes */}
-              <div className="mt-8 border border-dashed border-muted-foreground/30 rounded-lg p-4">
+              {/* DEV PANEL - Acesso rápido para testes (só em dev) */}
+              {import.meta.env.DEV && <div className="mt-8 border border-dashed border-muted-foreground/30 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Wrench className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs font-poppins font-semibold text-muted-foreground uppercase tracking-wider">
@@ -295,7 +295,7 @@ export default function Login() {
                     {devMessage}
                   </div>
                 )}
-              </div>
+              </div>}
             </>
           ) : (
             <>
