@@ -49,21 +49,24 @@ export default function Login() {
   const [devMessage, setDevMessage] = useState('');
 
   if (loading) return null;
-  if (session && !submitting) return <Navigate to="/" replace />;
+  if (session && !submitting) {
+    // Redirect based on role from user metadata
+    const role = session.user?.user_metadata?.role;
+    if (role === 'superadmin') return <Navigate to="/admin" replace />;
+    return <Navigate to="/" replace />;
+  }
 
   const quickLogin = async (account: typeof TEST_ACCOUNTS[number]) => {
     setError('');
     setDevMessage('');
     setSubmitting(true);
 
-    // Sign out first if already logged in
-    if (session) {
-      await signOut();
-      // Small delay to let auth state clear
-      await new Promise(r => setTimeout(r, 300));
-    }
+    // Always sign out first and wait for state to clear
+    await supabase.auth.signOut();
+    // Wait for auth state to fully clear
+    await new Promise(r => setTimeout(r, 500));
 
-    // Try to sign in first
+    // Try to sign in
     const { error: signInError } = await signIn(account.email, account.password);
 
     if (signInError) {
@@ -84,8 +87,8 @@ export default function Login() {
         return;
       }
 
-      // Small delay to let the trigger create the profile
-      await new Promise(r => setTimeout(r, 500));
+      // Wait for the trigger to create the profile
+      await new Promise(r => setTimeout(r, 1000));
 
       // Try signing in again
       const { error: retryError } = await signIn(account.email, account.password);
@@ -96,7 +99,7 @@ export default function Login() {
       }
     }
 
-    setSubmitting(false);
+    // Don't set submitting to false here — let the Navigate handle redirect
   };
 
   const handleLogin = async (e: React.FormEvent) => {
