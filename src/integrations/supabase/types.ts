@@ -422,6 +422,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite: { Args: { invite_token: string }; Returns: undefined }
+      create_school_and_link_admin: { Args: { school_name: string; school_slug: string }; Returns: string }
       get_my_tenant_id: { Args: never; Returns: string }
       is_superadmin: { Args: never; Returns: boolean }
     }

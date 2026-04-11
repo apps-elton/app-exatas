@@ -129,46 +129,39 @@ export default function Signup() {
       // Wait for trigger to create profile
       await new Promise(r => setTimeout(r, 1000));
 
-      // 2. If school signup, create tenant and link
+      // Sign in to get a session (needed for RPC calls)
+      await supabase.auth.signInWithPassword({ email, password });
+
+      // 2. If school signup, use RPC to create tenant atomically
       if (accountType === 'school' && !inviteData) {
         const slug = generateSlug(schoolName) + '-' + Date.now().toString(36);
-        const { data: tenant, error: tenantError } = await supabase
-          .from('tenants')
-          .insert({ name: schoolName, slug, max_users: 5 })
-          .select('id')
-          .single();
+        const { error: rpcError } = await supabase.rpc('create_school_and_link_admin', {
+          school_name: schoolName,
+          school_slug: slug,
+        });
 
-        if (tenantError) {
-          setError('Erro ao criar escola: ' + tenantError.message);
+        if (rpcError) {
+          setError('Erro ao criar escola: ' + rpcError.message);
           setSubmitting(false);
           return;
         }
-
-        // Link profile to tenant
-        await supabase
-          .from('profiles')
-          .update({ tenant_id: tenant.id, role: 'admin' as any })
-          .eq('id', userId);
-
-        // Create tenant subscription
-        await supabase
-          .from('subscriptions')
-          .update({ tenant_id: tenant.id })
-          .eq('user_id', userId);
       }
 
-      // 3. If invite, link to tenant and mark invite as used
+      // 3. If invite, use RPC to accept invite atomically
       if (inviteData) {
-        await supabase
-          .from('profiles')
-          .update({ tenant_id: inviteData.tenant_id, role: inviteData.role as any })
-          .eq('id', userId);
+        const { error: rpcError } = await supabase.rpc('accept_invite', {
+          invite_token: inviteToken,
+        });
 
-        await supabase
-          .from('tenant_invites')
-          .update({ used_at: new Date().toISOString() })
-          .eq('id', inviteData.id);
+        if (rpcError) {
+          setError('Erro ao aceitar convite: ' + rpcError.message);
+          setSubmitting(false);
+          return;
+        }
       }
+
+      // Sign out so user goes through login flow
+      await supabase.auth.signOut();
 
       setSuccess(true);
     } catch (err) {
