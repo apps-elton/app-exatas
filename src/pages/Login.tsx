@@ -38,7 +38,7 @@ const TEST_ACCOUNTS = [
 ];
 
 export default function Login() {
-  const { signIn, resetPassword, session, loading } = useAuth();
+  const { signIn, signOut, resetPassword, session, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -49,12 +49,19 @@ export default function Login() {
   const [devMessage, setDevMessage] = useState('');
 
   if (loading) return null;
-  if (session) return <Navigate to="/" replace />;
+  if (session && !submitting) return <Navigate to="/" replace />;
 
   const quickLogin = async (account: typeof TEST_ACCOUNTS[number]) => {
     setError('');
     setDevMessage('');
     setSubmitting(true);
+
+    // Sign out first if already logged in
+    if (session) {
+      await signOut();
+      // Small delay to let auth state clear
+      await new Promise(r => setTimeout(r, 300));
+    }
 
     // Try to sign in first
     const { error: signInError } = await signIn(account.email, account.password);
@@ -63,11 +70,11 @@ export default function Login() {
       // User doesn't exist yet — create it
       setDevMessage(`Criando conta ${account.label}...`);
 
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: account.email,
         password: account.password,
         options: {
-          data: { full_name: account.label },
+          data: { full_name: account.label, role: account.role },
         },
       });
 
@@ -77,13 +84,8 @@ export default function Login() {
         return;
       }
 
-      // Update role in profiles
-      if (signUpData.user) {
-        await supabase
-          .from('profiles')
-          .update({ role: account.role })
-          .eq('id', signUpData.user.id);
-      }
+      // Small delay to let the trigger create the profile
+      await new Promise(r => setTimeout(r, 500));
 
       // Try signing in again
       const { error: retryError } = await signIn(account.email, account.password);

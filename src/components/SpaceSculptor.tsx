@@ -1124,7 +1124,7 @@ function SpaceSculptorContent() {
   }, [isDrawingMode, handleUndo, handleRedo, handleToggleDrawing, canUndoGeometry, canRedoGeometry, handleUndoGeometry, handleRedoGeometry]);
 
   return (
-    <div className="h-screen bg-gradient-nebula text-foreground flex flex-col">
+    <div className="h-full bg-gradient-nebula text-foreground flex flex-col">
       {/* Header com controles no lado direito */}
       <header className="border-b border-border/30 bg-background/95 backdrop-blur flex items-center justify-between px-6 py-2" style={{ marginBottom: 0, paddingBottom: 0 }}>
         <div>
