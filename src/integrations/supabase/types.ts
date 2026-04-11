@@ -10,61 +10,216 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      subscribers: {
+      profiles: {
         Row: {
-          annotations_limit: number | null
+          avatar_url: string | null
           created_at: string
           email: string
+          full_name: string | null
           id: string
-          projects_limit: number | null
-          storage_limit_gb: number | null
+          is_active: boolean
+          role: Database["public"]["Enums"]["user_role"]
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["user_role"]
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          drawing_data: Json | null
+          geometry_data: Json
+          id: string
+          is_public: boolean
+          name: string
+          share_token: string | null
+          tenant_id: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          drawing_data?: Json | null
+          geometry_data?: Json
+          id?: string
+          is_public?: boolean
+          name?: string
+          share_token?: string | null
+          tenant_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          drawing_data?: Json | null
+          geometry_data?: Json
+          id?: string
+          is_public?: boolean
+          name?: string
+          share_token?: string | null
+          tenant_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          projects_limit: number
+          status: Database["public"]["Enums"]["subscription_status"]
+          storage_limit_mb: number
           stripe_customer_id: string | null
-          subscribed: boolean
-          subscription_end: string | null
-          subscription_plan:
-            | Database["public"]["Enums"]["subscription_plan"]
-            | null
-          subscription_tier: string | null
+          stripe_subscription_id: string | null
+          tenant_id: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          annotations_limit?: number | null
           created_at?: string
-          email: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           id?: string
-          projects_limit?: number | null
-          storage_limit_gb?: number | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          projects_limit?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          storage_limit_mb?: number
           stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_plan?:
-            | Database["public"]["Enums"]["subscription_plan"]
-            | null
-          subscription_tier?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          annotations_limit?: number | null
           created_at?: string
-          email?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           id?: string
-          projects_limit?: number | null
-          storage_limit_gb?: number | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          projects_limit?: number
+          status?: Database["public"]["Enums"]["subscription_status"]
+          storage_limit_mb?: number
           stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_plan?:
-            | Database["public"]["Enums"]["subscription_plan"]
-            | null
-          subscription_tier?: string | null
+          stripe_subscription_id?: string | null
+          tenant_id?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          custom_domain: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          max_users: number
+          name: string
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          max_users?: number
+          name: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_domain?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          max_users?: number
+          name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -76,7 +231,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      subscription_plan: "essentials" | "professor" | "institution"
+      subscription_plan: "free" | "professor" | "institution"
+      subscription_status:
+        | "active"
+        | "canceled"
+        | "past_due"
+        | "trialing"
+        | "inactive"
+      user_role: "superadmin" | "admin" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -204,7 +366,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      subscription_plan: ["essentials", "professor", "institution"],
+      subscription_plan: ["free", "professor", "institution"],
+      subscription_status: [
+        "active",
+        "canceled",
+        "past_due",
+        "trialing",
+        "inactive",
+      ],
+      user_role: ["superadmin", "admin", "teacher"],
     },
   },
 } as const

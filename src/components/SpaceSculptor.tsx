@@ -32,6 +32,7 @@ function SpaceSculptorContent() {
   const { activeTool, setActiveTool } = useActiveTool();
   const { t } = useLanguage();
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
+  const orbitControlsRef = useRef<any>(null);
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
@@ -490,7 +491,16 @@ function SpaceSculptorContent() {
   const properties = useMemo(() => GeometryCalculator.calculateProperties(params), [params]);
 
   const handleResetView = useCallback(() => {
-    toast.success('Vista resetada');
+    try {
+      if (orbitControlsRef.current && typeof orbitControlsRef.current.reset === 'function') {
+        orbitControlsRef.current.reset();
+        toast.success('Vista centralizada');
+      } else {
+        toast.error('Controles não disponíveis para resetar');
+      }
+    } catch (_) {
+      toast.error('Não foi possível centralizar a vista');
+    }
   }, []);
 
   // Funções de desfazer e refazer
@@ -1130,6 +1140,14 @@ function SpaceSculptorContent() {
             onExport={handleExportCombined}
           />
           <Button
+            variant="outline"
+            size="sm" 
+            onClick={handleResetView}
+            className="reset-view-button"
+          >
+            🎯 Centralizar Vista
+          </Button>
+          <Button
             variant={options.isFrozen ? "default" : "outline"} 
             size="sm" 
             onClick={options.isFrozen ? handleUnfreezeView : handleFreezeView}
@@ -1182,7 +1200,6 @@ function SpaceSculptorContent() {
               addToHistory('style_change', style);
               setStyle(newStyle);
             }}
-            onResetView={handleResetView}
             onExportImage={handleExportImage}
             onVertexSelect={(vertexIndex) => {
               // Esta função agora é apenas para compatibilidade
@@ -1206,6 +1223,7 @@ function SpaceSculptorContent() {
                       params={params}
                       options={options}
                       style={style}
+                      onControlsRef={(ref) => { orbitControlsRef.current = ref; }}
                       onVertexSelect={(vertexIndex) => {
                         // Sistema de seleção baseado em modo ativo - cada funcionalidade opera independentemente
                         

@@ -29,7 +29,6 @@ interface ControlPanelProps {
   onParamsChange: (params: GeometryParams) => void;
   onOptionsChange: (options: VisualizationOptions) => void;
   onStyleChange: (style: StyleOptions) => void;
-  onResetView: () => void;
   onExportImage: (format?: 'png' | 'jpg', quality?: 'hd' | 'medium' | 'low') => void;
   onVertexSelect?: (vertexIndex: number) => void;
   // Props da mesa digitalizadora
@@ -52,7 +51,6 @@ export default function ControlPanel({
   onParamsChange,
   onOptionsChange,
   onStyleChange,
-  onResetView,
   onExportImage,
   onVertexSelect,
   // Props da mesa digitalizadora
@@ -2326,10 +2324,6 @@ export default function ControlPanel({
             )}
           </Button>
 
-          <Button variant="outline" onClick={onResetView} className="w-full">
-            <RotateCcw className="w-4 h-4 mr-2" />
-{t('controls.reset_view')}
-          </Button>
 
           <ImageDownloadMenu 
             onExport={(format, quality) => onExportImage(format, quality)}
