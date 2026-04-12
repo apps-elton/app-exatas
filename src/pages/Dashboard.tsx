@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,19 +22,20 @@ interface RecentProject {
   updated_at: string;
 }
 
-const PLAN_LABELS: Record<string, string> = {
-  free: 'Gratuito',
-  professor: 'Professor',
-  institution: 'Instituição',
-};
-
 export default function Dashboard() {
+  const { t, i18n } = useTranslation();
   const { user, profile, subscription } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [projectCount, setProjectCount] = useState(0);
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [tenantName, setTenantName] = useState<string | null>(null);
+
+  const PLAN_LABELS: Record<string, string> = {
+    free: t('plans.free'),
+    professor: t('plans.professor'),
+    institution: t('plans.institution'),
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -78,10 +80,10 @@ export default function Dashboard() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-poppins font-bold text-foreground">
-            Olá, {profile?.full_name?.split(' ')[0] ?? 'Professor'}!
+            {t('dashboard.greeting', { name: profile?.full_name?.split(' ')[0] ?? t('dashboard.greeting_fallback') })}
           </h1>
           <p className="text-sm font-nunito text-muted-foreground">
-            Seu painel de atividades no GeoTeach
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
@@ -99,7 +101,7 @@ export default function Dashboard() {
                   <FolderOpen className="w-6 h-6 text-violet-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-nunito text-muted-foreground">Projetos</p>
+                  <p className="text-sm font-nunito text-muted-foreground">{t('dashboard.projects')}</p>
                   <p className="text-2xl font-poppins font-bold text-violet-400">
                     {projectCount}
                     <span className="text-sm text-muted-foreground font-normal">/{limit}</span>
@@ -117,7 +119,7 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-nunito text-muted-foreground">Plano</p>
+                  <p className="text-sm font-nunito text-muted-foreground">{t('dashboard.plan')}</p>
                   <p className="text-2xl font-poppins font-bold text-amber-400">
                     {PLAN_LABELS[plan] ?? plan}
                   </p>
@@ -130,9 +132,9 @@ export default function Dashboard() {
                   <School className="w-6 h-6 text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-nunito text-muted-foreground">Escola</p>
+                  <p className="text-sm font-nunito text-muted-foreground">{t('dashboard.school')}</p>
                   <p className="text-lg font-poppins font-bold text-blue-400 truncate max-w-[140px]">
-                    {tenantName ?? 'Individual'}
+                    {tenantName ?? t('dashboard.school_individual')}
                   </p>
                 </div>
               </div>
@@ -143,9 +145,9 @@ export default function Dashboard() {
                   <Box className="w-6 h-6 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-nunito text-muted-foreground">Cargo</p>
+                  <p className="text-sm font-nunito text-muted-foreground">{t('dashboard.role')}</p>
                   <p className="text-2xl font-poppins font-bold text-emerald-400">
-                    {profile?.role === 'admin' ? 'Admin' : 'Professor'}
+                    {profile?.role === 'admin' ? t('roles.admin') : t('roles.teacher')}
                   </p>
                 </div>
               </div>
@@ -155,7 +157,7 @@ export default function Dashboard() {
             <div className="bg-card border border-border/30 rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-poppins font-semibold text-foreground">
-                  Projetos Recentes
+                  {t('dashboard.recent_projects')}
                 </h2>
                 <Button
                   variant="ghost"
@@ -163,7 +165,7 @@ export default function Dashboard() {
                   onClick={() => navigate('/projects')}
                   className="gap-1 text-xs font-nunito"
                 >
-                  Ver todos <ArrowRight className="w-3.5 h-3.5" />
+                  {t('dashboard.view_all')} <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </div>
 
@@ -171,11 +173,11 @@ export default function Dashboard() {
                 <div className="text-center py-8">
                   <Box className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-sm font-nunito text-muted-foreground mb-4">
-                    Você ainda não criou nenhum projeto.
+                    {t('dashboard.no_projects')}
                   </p>
                   <Button onClick={() => navigate('/')} className="gap-2 font-poppins">
                     <Box className="w-4 h-4" />
-                    Criar primeiro projeto
+                    {t('dashboard.create_first_project')}
                   </Button>
                 </div>
               ) : (
@@ -192,7 +194,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
-                        {new Date(project.updated_at).toLocaleDateString('pt-BR')}
+                        {new Date(project.updated_at).toLocaleDateString(i18n.language)}
                       </div>
                     </button>
                   ))}
@@ -206,14 +208,14 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-poppins font-bold text-foreground mb-1">
-                      Faça upgrade para desbloquear mais recursos
+                      {t('dashboard.upgrade_title')}
                     </h3>
                     <p className="text-sm font-nunito text-muted-foreground">
-                      Projetos ilimitados, mais armazenamento e funcionalidades avançadas.
+                      {t('dashboard.upgrade_description')}
                     </p>
                   </div>
                   <Button disabled className="font-poppins shrink-0">
-                    Em breve
+                    {t('common.coming_soon')}
                   </Button>
                 </div>
               </div>
