@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +38,7 @@ interface Invite {
 
 export default function SchoolUsers() {
   const { profile } = useAuth();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<TenantUser[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export default function SchoolUsers() {
 
     setUsers(usersRes.data ?? []);
     setInvites(invitesRes.data ?? []);
-    setTenantName(tenantRes.data?.name ?? 'Minha Escola');
+    setTenantName(tenantRes.data?.name ?? t('school.default_name'));
     setLoading(false);
   }, [profile?.tenant_id]);
 
@@ -123,10 +125,10 @@ export default function SchoolUsers() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-poppins font-bold text-foreground">
-              Usuários — {tenantName}
+              {t('school.title', { name: tenantName })}
             </h1>
             <p className="text-sm font-nunito text-muted-foreground">
-              Gerencie os professores da sua escola
+              {t('school.subtitle')}
             </p>
           </div>
           <Button onClick={createInvite} disabled={creating} className="gap-2 font-poppins">
@@ -135,7 +137,7 @@ export default function SchoolUsers() {
             ) : (
               <UserPlus className="w-4 h-4" />
             )}
-            Gerar Convite
+            {t('school.generate_invite')}
           </Button>
         </div>
 
@@ -144,7 +146,7 @@ export default function SchoolUsers() {
           <div className="bg-card border border-border/30 rounded-xl p-5">
             <h2 className="text-lg font-poppins font-semibold text-foreground mb-4 flex items-center gap-2">
               <LinkIcon className="w-5 h-5 text-primary" />
-              Convites Pendentes
+              {t('school.pending_invites')}
             </h2>
             <div className="space-y-3">
               {invites.map(invite => (
@@ -160,12 +162,12 @@ export default function SchoolUsers() {
                     <Clock className={`w-4 h-4 ${isExpired(invite.expires_at) ? 'text-destructive' : 'text-muted-foreground'}`} />
                     <div>
                       <p className="text-sm font-nunito text-foreground">
-                        Convite para <span className="font-semibold">{invite.role}</span>
+                        {t('school.invite_for_role', { role: invite.role })}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {isExpired(invite.expires_at)
-                          ? 'Expirado'
-                          : `Expira em ${new Date(invite.expires_at).toLocaleDateString('pt-BR')}`}
+                          ? t('school.invite_expired')
+                          : t('school.invite_expires_at', { date: new Date(invite.expires_at).toLocaleDateString('pt-BR') })}
                       </p>
                     </div>
                   </div>
@@ -180,12 +182,12 @@ export default function SchoolUsers() {
                         {copiedToken === invite.token ? (
                           <>
                             <Check className="w-3.5 h-3.5 text-green-500" />
-                            Copiado!
+                            {t('school.copied')}
                           </>
                         ) : (
                           <>
                             <Copy className="w-3.5 h-3.5" />
-                            Copiar Link
+                            {t('school.copy_link')}
                           </>
                         )}
                       </Button>
@@ -210,12 +212,12 @@ export default function SchoolUsers() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-poppins font-semibold text-foreground flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
-              Membros ({users.length})
+              {t('school.members', { count: users.length })}
             </h2>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar..."
+                placeholder={t('school.search_placeholder')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="pl-9 h-9 font-nunito"
@@ -229,18 +231,18 @@ export default function SchoolUsers() {
             </div>
           ) : filteredUsers.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8 font-nunito">
-              Nenhum membro encontrado.
+              {t('school.no_members_found')}
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm font-nunito">
                 <thead>
                   <tr className="border-b border-border/30 text-muted-foreground">
-                    <th className="text-left py-2 pr-2 font-semibold">Nome</th>
-                    <th className="text-left py-2 pr-2 font-semibold">Email</th>
-                    <th className="text-left py-2 pr-2 font-semibold">Cargo</th>
-                    <th className="text-left py-2 pr-2 font-semibold">Status</th>
-                    <th className="text-left py-2 font-semibold">Desde</th>
+                    <th className="text-left py-2 pr-2 font-semibold">{t('school.table_name')}</th>
+                    <th className="text-left py-2 pr-2 font-semibold">{t('school.table_email')}</th>
+                    <th className="text-left py-2 pr-2 font-semibold">{t('school.table_role')}</th>
+                    <th className="text-left py-2 pr-2 font-semibold">{t('school.table_status')}</th>
+                    <th className="text-left py-2 font-semibold">{t('school.table_since')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -249,7 +251,7 @@ export default function SchoolUsers() {
                       <td className="py-2.5 pr-2 text-foreground">
                         {user.full_name || '—'}
                         {user.id === profile?.id && (
-                          <span className="ml-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">Você</span>
+                          <span className="ml-2 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">{t('school.you_badge')}</span>
                         )}
                       </td>
                       <td className="py-2.5 pr-2 text-muted-foreground truncate max-w-[200px]">
@@ -261,7 +263,7 @@ export default function SchoolUsers() {
                             ? 'bg-amber-400/10 text-amber-400'
                             : 'bg-emerald-400/10 text-emerald-400'
                         }`}>
-                          {user.role === 'admin' ? 'Admin' : 'Professor'}
+                          {user.role === 'admin' ? t('roles.admin') : t('roles.teacher')}
                         </span>
                       </td>
                       <td className="py-2.5 pr-2">
@@ -274,7 +276,7 @@ export default function SchoolUsers() {
                               : 'bg-zinc-400/10 text-zinc-400 hover:bg-zinc-400/20'
                           } ${user.id === profile?.id ? 'cursor-default' : 'cursor-pointer'}`}
                         >
-                          {user.is_active ? 'Ativo' : 'Inativo'}
+                          {user.is_active ? t('school.status_active') : t('school.status_inactive')}
                         </button>
                       </td>
                       <td className="py-2.5 text-muted-foreground text-xs">
