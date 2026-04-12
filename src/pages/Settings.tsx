@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,28 +18,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const PLAN_DETAILS = {
-  free: {
-    name: 'Gratuito',
-    price: 'R$ 0',
-    color: 'text-muted-foreground',
-    features: ['3 projetos', '100MB de armazenamento', 'Todas as ferramentas 3D'],
-  },
-  professor: {
-    name: 'Professor',
-    price: 'R$ 29/mês',
-    color: 'text-primary',
-    features: ['Projetos ilimitados', '5GB de armazenamento', 'Compartilhamento público', 'Suporte prioritário'],
-  },
-  institution: {
-    name: 'Instituição',
-    price: 'R$ 299/mês',
-    color: 'text-accent',
-    features: ['Tudo do Professor', 'Até 50 professores', 'Domínio personalizado', 'Logo e cores da escola', 'Dashboard de uso'],
-  },
-};
-
 export default function Settings() {
+  const { t, i18n } = useTranslation();
   const { user, profile, subscription } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'plan'>('profile');
 
@@ -53,6 +34,43 @@ export default function Settings() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   const plan = subscription?.plan ?? 'free';
+
+  const PLAN_DETAILS = {
+    free: {
+      name: t('settings.plan_free_name'),
+      price: t('settings.plan_free_price'),
+      color: 'text-muted-foreground',
+      features: [
+        t('settings.plan_free_feature_1'),
+        t('settings.plan_free_feature_2'),
+        t('settings.plan_free_feature_3'),
+      ],
+    },
+    professor: {
+      name: t('settings.plan_professor_name'),
+      price: t('settings.plan_professor_price'),
+      color: 'text-primary',
+      features: [
+        t('settings.plan_professor_feature_1'),
+        t('settings.plan_professor_feature_2'),
+        t('settings.plan_professor_feature_3'),
+        t('settings.plan_professor_feature_4'),
+      ],
+    },
+    institution: {
+      name: t('settings.plan_institution_name'),
+      price: t('settings.plan_institution_price'),
+      color: 'text-accent',
+      features: [
+        t('settings.plan_institution_feature_1'),
+        t('settings.plan_institution_feature_2'),
+        t('settings.plan_institution_feature_3'),
+        t('settings.plan_institution_feature_4'),
+        t('settings.plan_institution_feature_5'),
+      ],
+    },
+  };
+
   const planDetails = PLAN_DETAILS[plan];
 
   const handleSaveProfile = async () => {
@@ -64,9 +82,9 @@ export default function Settings() {
       .eq('id', user.id);
 
     if (error) {
-      toast.error('Erro ao salvar perfil');
+      toast.error(t('settings.save_profile_error'));
     } else {
-      toast.success('Perfil atualizado');
+      toast.success(t('settings.save_profile_success'));
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
@@ -75,11 +93,11 @@ export default function Settings() {
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres');
+      toast.error(t('settings.password_min_error'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('As senhas não coincidem');
+      toast.error(t('settings.password_mismatch_error'));
       return;
     }
 
@@ -87,9 +105,9 @@ export default function Settings() {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
 
     if (error) {
-      toast.error('Erro ao alterar senha');
+      toast.error(t('settings.change_password_error'));
     } else {
-      toast.success('Senha alterada com sucesso');
+      toast.success(t('settings.change_password_success'));
       setNewPassword('');
       setConfirmPassword('');
     }
@@ -97,9 +115,9 @@ export default function Settings() {
   };
 
   const tabs = [
-    { id: 'profile' as const, label: 'Perfil', icon: User },
-    { id: 'security' as const, label: 'Segurança', icon: Lock },
-    { id: 'plan' as const, label: 'Meu Plano', icon: CreditCard },
+    { id: 'profile' as const, label: t('settings.tab_profile'), icon: User },
+    { id: 'security' as const, label: t('settings.tab_security'), icon: Lock },
+    { id: 'plan' as const, label: t('settings.tab_plan'), icon: CreditCard },
   ];
 
   return (
@@ -107,9 +125,9 @@ export default function Settings() {
       <div className="h-full flex flex-col bg-background">
         {/* Header */}
         <div className="border-b border-border/30 bg-background/95 backdrop-blur px-6 py-4">
-          <h1 className="text-2xl font-bold font-poppins text-foreground">Configurações</h1>
+          <h1 className="text-2xl font-bold font-poppins text-foreground">{t('settings.title')}</h1>
           <p className="text-sm text-muted-foreground font-nunito mt-1">
-            Gerencie seu perfil, segurança e plano
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -141,7 +159,7 @@ export default function Settings() {
               <div className="space-y-6">
                 <div className="rounded-xl border border-border/30 bg-card p-6">
                   <h2 className="text-lg font-poppins font-semibold text-foreground mb-4">
-                    Informações Pessoais
+                    {t('settings.personal_info')}
                   </h2>
 
                   <div className="flex items-center gap-4 mb-6">
@@ -160,7 +178,7 @@ export default function Settings() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="font-poppins text-sm">Nome completo</Label>
+                      <Label className="font-poppins text-sm">{t('auth.full_name')}</Label>
                       <Input
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
@@ -169,13 +187,13 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="font-poppins text-sm">Email</Label>
+                      <Label className="font-poppins text-sm">{t('auth.email')}</Label>
                       <Input
                         value={profile?.email ?? ''}
                         disabled
                         className="bg-muted/30 border-border/50 font-nunito"
                       />
-                      <p className="text-xs text-muted-foreground">O email não pode ser alterado</p>
+                      <p className="text-xs text-muted-foreground">{t('settings.email_readonly')}</p>
                     </div>
 
                     <Button
@@ -184,9 +202,9 @@ export default function Settings() {
                       className="gap-2 font-poppins"
                     >
                       {saved ? (
-                        <><Check className="w-4 h-4" /> Salvo</>
+                        <><Check className="w-4 h-4" /> {t('settings.saved')}</>
                       ) : (
-                        <><Save className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar alterações'}</>
+                        <><Save className="w-4 h-4" /> {saving ? t('settings.saving') : t('settings.save_changes')}</>
                       )}
                     </Button>
                   </div>
@@ -199,28 +217,28 @@ export default function Settings() {
               <div className="space-y-6">
                 <div className="rounded-xl border border-border/30 bg-card p-6">
                   <h2 className="text-lg font-poppins font-semibold text-foreground mb-4">
-                    Alterar Senha
+                    {t('settings.change_password')}
                   </h2>
 
                   <div className="space-y-4 max-w-md">
                     <div className="space-y-2">
-                      <Label className="font-poppins text-sm">Nova senha</Label>
+                      <Label className="font-poppins text-sm">{t('auth.new_password')}</Label>
                       <Input
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
+                        placeholder={t('auth.new_password_placeholder')}
                         className="bg-background border-border/50 font-nunito"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="font-poppins text-sm">Confirmar nova senha</Label>
+                      <Label className="font-poppins text-sm">{t('auth.confirm_new_password')}</Label>
                       <Input
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Repita a nova senha"
+                        placeholder={t('auth.repeat_new_password_placeholder')}
                         className="bg-background border-border/50 font-nunito"
                       />
                     </div>
@@ -231,21 +249,21 @@ export default function Settings() {
                       className="gap-2 font-poppins"
                     >
                       <Lock className="w-4 h-4" />
-                      {changingPassword ? 'Alterando...' : 'Alterar senha'}
+                      {changingPassword ? t('settings.changing_password') : t('settings.change_password_button')}
                     </Button>
                   </div>
                 </div>
 
                 <div className="rounded-xl border border-border/30 bg-card p-6">
                   <h2 className="text-lg font-poppins font-semibold text-foreground mb-2">
-                    Sessão Ativa
+                    {t('settings.active_session')}
                   </h2>
                   <p className="text-sm text-muted-foreground font-nunito mb-4">
-                    Você está logado desde {new Date(profile?.created_at ?? '').toLocaleDateString('pt-BR')}
+                    {t('settings.logged_since', { date: new Date(profile?.created_at ?? '').toLocaleDateString(i18n.language) })}
                   </p>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                     <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <span className="text-sm font-nunito text-foreground">Navegador atual — ativo agora</span>
+                    <span className="text-sm font-nunito text-foreground">{t('settings.current_browser')}</span>
                   </div>
                 </div>
               </div>
@@ -258,7 +276,7 @@ export default function Settings() {
                 <div className="rounded-xl border border-border/30 bg-card p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-poppins font-semibold text-foreground">
-                      Plano Atual
+                      {t('settings.current_plan')}
                     </h2>
                     {plan !== 'free' && <Crown className="w-5 h-5 text-amber-400" />}
                   </div>
@@ -282,13 +300,13 @@ export default function Settings() {
                   {subscription && (
                     <div className="pt-4 border-t border-border/30 space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground font-nunito">Projetos usados</span>
+                        <span className="text-muted-foreground font-nunito">{t('settings.projects_used')}</span>
                         <span className="font-poppins font-semibold text-foreground">
                           — / {subscription.projects_limit}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground font-nunito">Armazenamento</span>
+                        <span className="text-muted-foreground font-nunito">{t('settings.storage')}</span>
                         <span className="font-poppins font-semibold text-foreground">
                           — / {subscription.storage_limit_mb}MB
                         </span>
@@ -298,7 +316,7 @@ export default function Settings() {
                 </div>
 
                 {/* All plans */}
-                <h3 className="text-lg font-poppins font-semibold text-foreground">Todos os Planos</h3>
+                <h3 className="text-lg font-poppins font-semibold text-foreground">{t('settings.all_plans')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {(Object.entries(PLAN_DETAILS) as [keyof typeof PLAN_DETAILS, typeof PLAN_DETAILS[keyof typeof PLAN_DETAILS]][]).map(
                     ([key, details]) => (
@@ -314,7 +332,7 @@ export default function Settings() {
                           <h4 className={`font-poppins font-bold ${details.color}`}>{details.name}</h4>
                           {key === plan && (
                             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded font-poppins">
-                              Atual
+                              {t('settings.current_badge')}
                             </span>
                           )}
                         </div>
@@ -331,7 +349,7 @@ export default function Settings() {
                         </ul>
                         {key !== plan && key !== 'free' && (
                           <Button size="sm" variant="outline" className="w-full mt-4 font-poppins" disabled>
-                            Em breve
+                            {t('common.coming_soon')}
                           </Button>
                         )}
                       </div>

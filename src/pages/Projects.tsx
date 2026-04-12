@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,7 @@ import type { Tables } from '@/integrations/supabase/types';
 type Project = Tables<'projects'>;
 
 export default function Projects() {
+  const { t, i18n } = useTranslation();
   const { user, subscription } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -56,7 +58,7 @@ export default function Projects() {
       .from('projects')
       .insert({
         user_id: user.id,
-        name: `Projeto ${projectsUsed + 1}`,
+        name: t('projects.default_name', { number: projectsUsed + 1 }),
         geometry_data: {},
       })
       .select()
@@ -69,7 +71,7 @@ export default function Projects() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este projeto?')) return;
+    if (!window.confirm(t('projects.confirm_delete'))) return;
     await supabase.from('projects').delete().eq('id', id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
     setMenuOpen(null);
@@ -89,7 +91,7 @@ export default function Projects() {
     if (!user || !canCreate) return;
     await supabase.from('projects').insert({
       user_id: user.id,
-      name: `${project.name} (cópia)`,
+      name: `${project.name} ${t('projects.copy_suffix')}`,
       geometry_data: project.geometry_data,
       drawing_data: project.drawing_data,
     });
@@ -103,7 +105,7 @@ export default function Projects() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', {
+    return date.toLocaleDateString(i18n.language, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -119,9 +121,9 @@ export default function Projects() {
         <div className="border-b border-border/30 bg-background/95 backdrop-blur px-6 py-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold font-poppins text-foreground">Meus Projetos</h1>
+              <h1 className="text-2xl font-bold font-poppins text-foreground">{t('projects.title')}</h1>
               <p className="text-sm text-muted-foreground font-nunito mt-1">
-                {projectsUsed} de {projectsLimit} projetos utilizados
+                {t('projects.used_of', { used: projectsUsed, limit: projectsLimit })}
               </p>
             </div>
             <Button
@@ -130,7 +132,7 @@ export default function Projects() {
               className="gap-2 font-poppins"
             >
               <Plus className="w-4 h-4" />
-              Novo Projeto
+              {t('projects.new_project')}
             </Button>
           </div>
 
@@ -146,7 +148,7 @@ export default function Projects() {
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar projetos..."
+              placeholder={t('projects.search_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 bg-card border-border/50 font-nunito"
@@ -164,17 +166,17 @@ export default function Projects() {
             <div className="flex flex-col items-center justify-center h-64 text-center">
               <FolderOpen className="w-16 h-16 text-muted-foreground/30 mb-4" />
               <h3 className="text-lg font-poppins font-semibold text-foreground mb-2">
-                {search ? 'Nenhum projeto encontrado' : 'Nenhum projeto ainda'}
+                {search ? t('projects.no_results') : t('projects.no_projects_yet')}
               </h3>
               <p className="text-sm text-muted-foreground font-nunito mb-4">
                 {search
-                  ? 'Tente buscar com outros termos'
-                  : 'Crie seu primeiro projeto para começar'}
+                  ? t('projects.try_other_terms')
+                  : t('projects.create_first')}
               </p>
               {!search && (
                 <Button onClick={handleCreate} disabled={!canCreate} className="gap-2">
                   <Plus className="w-4 h-4" />
-                  Criar primeiro projeto
+                  {t('projects.create_first_button')}
                 </Button>
               )}
             </div>
@@ -219,7 +221,7 @@ export default function Projects() {
                             <Lock className="w-3 h-3 text-muted-foreground" />
                           )}
                           <span className="text-[11px] text-muted-foreground">
-                            {project.is_public ? 'Público' : 'Privado'}
+                            {project.is_public ? t('projects.public') : t('projects.private')}
                           </span>
                         </div>
                       </div>
@@ -244,16 +246,16 @@ export default function Projects() {
                               onClick={() => handleDuplicate(project)}
                               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted/50"
                             >
-                              <Copy className="w-4 h-4" /> Duplicar
+                              <Copy className="w-4 h-4" /> {t('projects.duplicate')}
                             </button>
                             <button
                               onClick={() => handleTogglePublic(project)}
                               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted/50"
                             >
                               {project.is_public ? (
-                                <><Lock className="w-4 h-4" /> Tornar privado</>
+                                <><Lock className="w-4 h-4" /> {t('projects.make_private')}</>
                               ) : (
-                                <><Globe className="w-4 h-4" /> Tornar público</>
+                                <><Globe className="w-4 h-4" /> {t('projects.make_public')}</>
                               )}
                             </button>
                             <hr className="my-1 border-border/30" />
@@ -261,7 +263,7 @@ export default function Projects() {
                               onClick={() => handleDelete(project.id)}
                               className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                             >
-                              <Trash2 className="w-4 h-4" /> Excluir
+                              <Trash2 className="w-4 h-4" /> {t('projects.delete')}
                             </button>
                           </div>
                         )}

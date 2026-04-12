@@ -1,14 +1,14 @@
 import React from 'react';
 import { GeometryParams } from '@/types/geometry';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface GeometryCalculationsProps {
   params: GeometryParams;
 }
 
 export function GeometryCalculations({ params }: GeometryCalculationsProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const formatWithPi = (coefficient: number): string => {
     if (coefficient === 0) return '0';
     if (coefficient === 1) return 'π';

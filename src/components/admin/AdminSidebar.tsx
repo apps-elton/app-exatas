@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -11,19 +12,20 @@ import {
   Shield,
 } from 'lucide-react';
 
-const ADMIN_NAV = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-  { label: 'Tenants', icon: School, path: '/admin/tenants' },
-  { label: 'Usuários', icon: Users, path: '/admin/users' },
-  { label: 'Assinaturas', icon: CreditCard, path: '/admin/subscriptions' },
-  { label: 'Suporte', icon: MessageSquare, path: '/admin/support' },
-  { label: 'Sistema', icon: Settings, path: '/admin/settings' },
-];
-
 export function AdminSidebar() {
+  const { t } = useTranslation();
   const { profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const ADMIN_NAV = [
+    { label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/admin' },
+    { label: t('sidebar.tenants'), icon: School, path: '/admin/tenants' },
+    { label: t('sidebar.users'), icon: Users, path: '/admin/users' },
+    { label: t('sidebar.subscriptions'), icon: CreditCard, path: '/admin/subscriptions' },
+    { label: t('sidebar.support'), icon: MessageSquare, path: '/admin/support' },
+    { label: t('sidebar.system'), icon: Settings, path: '/admin/settings' },
+  ];
 
   return (
     <div className="h-screen w-64 flex flex-col border-r border-red-400/20 bg-background/95 backdrop-blur">
@@ -32,14 +34,14 @@ export function AdminSidebar() {
         <Shield className="w-6 h-6 text-red-400" />
         <div>
           <span className="font-poppins font-bold text-foreground">GeoTeach</span>
-          <span className="text-xs text-red-400 font-poppins ml-1">Admin</span>
+          <span className="text-xs text-red-400 font-poppins ml-1">{t('roles.admin')}</span>
         </div>
       </div>
 
       {/* User */}
       <div className="px-4 py-3 border-b border-border/30">
         <p className="text-sm font-poppins font-semibold text-foreground truncate">{profile?.full_name}</p>
-        <p className="text-xs text-red-400">Super Admin</p>
+        <p className="text-xs text-red-400">{t('roles.superadmin')}</p>
       </div>
 
       {/* Nav */}
@@ -71,7 +73,7 @@ export function AdminSidebar() {
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-nunito text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          Voltar ao App
+          {t('sidebar.back_to_app')}
         </button>
       </div>
     </div>

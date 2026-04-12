@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { RTL_LANGUAGES } from "@/i18n";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SuperAdminRoute } from "@/components/admin/SuperAdminRoute";
 import Index from "./pages/Index";
@@ -23,6 +26,16 @@ import AdminSupport from "./pages/admin/AdminSupport";
 import AdminSystemSettings from "./pages/admin/AdminSystemSettings";
 import NotFound from "./pages/NotFound";
 
+function DirectionManager() {
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    const dir = RTL_LANGUAGES.includes(i18n.language) ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+  return null;
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +47,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <DirectionManager />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />

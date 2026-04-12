@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,23 +46,24 @@ const STATUS_COLORS: Record<string, string> = {
   closed: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  open: 'Aberto',
-  in_progress: 'Em Andamento',
-  resolved: 'Resolvido',
-  closed: 'Fechado',
-};
-
-const FILTER_TABS = [
-  { key: 'all', label: 'Todos' },
-  { key: 'open', label: 'Abertos' },
-  { key: 'in_progress', label: 'Em Andamento' },
-  { key: 'resolved', label: 'Resolvidos' },
-  { key: 'closed', label: 'Fechados' },
-];
-
 export default function AdminSupport() {
+  const { t } = useTranslation();
   const { user } = useAuth();
+
+  const STATUS_LABELS: Record<string, string> = {
+    open: t('admin.support_status_open'),
+    in_progress: t('admin.support_status_in_progress'),
+    resolved: t('admin.support_status_resolved'),
+    closed: t('admin.support_status_closed'),
+  };
+
+  const FILTER_TABS = [
+    { key: 'all', label: t('admin.support_filter_all') },
+    { key: 'open', label: t('admin.support_filter_open') },
+    { key: 'in_progress', label: t('admin.support_filter_in_progress') },
+    { key: 'resolved', label: t('admin.support_filter_resolved') },
+    { key: 'closed', label: t('admin.support_filter_closed') },
+  ];
   const [tickets, setTickets] = useState<TicketWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
@@ -79,7 +81,7 @@ export default function AdminSupport() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      toast.error('Erro ao carregar tickets');
+      toast.error(t('admin.support_load_error'));
       console.error(error);
     } else {
       setTickets((data as TicketWithProfile[]) || []);
@@ -96,7 +98,7 @@ export default function AdminSupport() {
       .order('created_at', { ascending: true });
 
     if (error) {
-      toast.error('Erro ao carregar mensagens');
+      toast.error(t('admin.support_messages_load_error'));
       console.error(error);
     } else {
       setMessages((data as MessageWithSender[]) || []);
@@ -126,9 +128,9 @@ export default function AdminSupport() {
       .eq('id', ticketId);
 
     if (error) {
-      toast.error('Erro ao atualizar status');
+      toast.error(t('admin.support_status_update_error'));
     } else {
-      toast.success(`Status atualizado para ${STATUS_LABELS[newStatus] || newStatus}`);
+      toast.success(t('admin.support_status_updated', { status: STATUS_LABELS[newStatus] || newStatus }));
       fetchTickets();
     }
   };
@@ -140,24 +142,24 @@ export default function AdminSupport() {
       .eq('id', ticketId);
 
     if (error) {
-      toast.error('Erro ao atualizar prioridade');
+      toast.error(t('admin.support_priority_error'));
     } else {
-      toast.success('Prioridade atualizada');
+      toast.success(t('admin.support_priority_updated'));
       fetchTickets();
     }
   };
 
   const handleDelete = async (ticketId: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este ticket?')) return;
+    if (!window.confirm(t('admin.support_confirm_delete'))) return;
     const { error } = await supabase
       .from('support_tickets')
       .delete()
       .eq('id', ticketId);
 
     if (error) {
-      toast.error('Erro ao excluir ticket');
+      toast.error(t('admin.support_delete_error'));
     } else {
-      toast.success('Ticket excluido');
+      toast.success(t('admin.support_deleted'));
       if (expandedTicket === ticketId) {
         setExpandedTicket(null);
         setMessages([]);
@@ -177,10 +179,10 @@ export default function AdminSupport() {
     });
 
     if (error) {
-      toast.error('Erro ao enviar resposta');
+      toast.error(t('admin.support_reply_error'));
       console.error(error);
     } else {
-      toast.success('Resposta enviada');
+      toast.success(t('admin.support_reply_sent'));
       setReplyText('');
       fetchMessages(ticketId);
     }
@@ -202,14 +204,14 @@ export default function AdminSupport() {
           <div>
             <h1 className="text-2xl font-poppins font-bold text-foreground flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-red-400" />
-              Suporte
+              {t('admin.support_title')}
             </h1>
             <p className="text-sm font-nunito text-muted-foreground mt-1">
-              Gerencie os tickets de suporte da plataforma
+              {t('admin.support_subtitle')}
             </p>
           </div>
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
-            <span className="text-xs font-nunito text-muted-foreground">Abertos</span>
+            <span className="text-xs font-nunito text-muted-foreground">{t('admin.support_open_count')}</span>
             <p className="text-xl font-poppins font-bold text-emerald-400">{openCount}</p>
           </div>
         </div>
@@ -243,12 +245,12 @@ export default function AdminSupport() {
                 <thead>
                   <tr className="border-b border-border/50 bg-muted/30">
                     <th className="w-8 px-2 py-3" />
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Assunto</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Usuario</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Prioridade</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Status</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Criado em</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Acoes</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_subject')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_user')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_priority')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_status')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_created_at')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.support_table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -295,10 +297,10 @@ export default function AdminSupport() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="open">Aberto</SelectItem>
-                                <SelectItem value="in_progress">Em Andamento</SelectItem>
-                                <SelectItem value="resolved">Resolvido</SelectItem>
-                                <SelectItem value="closed">Fechado</SelectItem>
+                                <SelectItem value="open">{t('admin.support_status_open')}</SelectItem>
+                                <SelectItem value="in_progress">{t('admin.support_status_in_progress')}</SelectItem>
+                                <SelectItem value="resolved">{t('admin.support_status_resolved')}</SelectItem>
+                                <SelectItem value="closed">{t('admin.support_status_closed')}</SelectItem>
                               </SelectContent>
                             </Select>
                             <Select
@@ -338,12 +340,12 @@ export default function AdminSupport() {
                             ) : (
                               <div className="space-y-4 max-w-3xl">
                                 <h4 className="font-poppins font-semibold text-sm text-foreground">
-                                  Mensagens ({messages.length})
+                                  {t('admin.support_messages', { count: messages.length })}
                                 </h4>
 
                                 {messages.length === 0 ? (
                                   <p className="text-sm text-muted-foreground py-2">
-                                    Nenhuma mensagem ainda
+                                    {t('admin.support_no_messages')}
                                   </p>
                                 ) : (
                                   <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
@@ -354,7 +356,7 @@ export default function AdminSupport() {
                                       >
                                         <div className="flex items-center justify-between mb-1">
                                           <span className="text-xs font-semibold text-foreground">
-                                            {msg.profiles?.full_name || msg.profiles?.email || 'Usuario'}
+                                            {msg.profiles?.full_name || msg.profiles?.email || t('admin.support_user_fallback')}
                                           </span>
                                           <span className="text-xs text-muted-foreground">
                                             {new Date(msg.created_at).toLocaleString('pt-BR')}
@@ -371,7 +373,7 @@ export default function AdminSupport() {
                                 {/* Reply */}
                                 <div className="flex gap-2 pt-2">
                                   <Textarea
-                                    placeholder="Digite sua resposta..."
+                                    placeholder={t('admin.support_reply_placeholder')}
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
                                     className="min-h-[60px] text-sm resize-none"
@@ -398,7 +400,7 @@ export default function AdminSupport() {
                   {filteredTickets.length === 0 && (
                     <tr>
                       <td colSpan={7} className="text-center py-10 text-muted-foreground">
-                        Nenhum ticket encontrado
+                        {t('admin.support_no_tickets')}
                       </td>
                     </tr>
                   )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ const DEFAULT_SECURITY: SecuritySettings = {
 };
 
 export default function AdminSystemSettings() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [platform, setPlatform] = useState<PlatformSettings>(DEFAULT_PLATFORM);
@@ -57,7 +59,7 @@ export default function AdminSystemSettings() {
       .in('key', ['platform', 'plan_defaults', 'security']);
 
     if (error) {
-      toast.error('Erro ao carregar configuracoes');
+      toast.error(t('admin.system_load_error'));
       console.error(error);
     } else if (data) {
       for (const row of data) {
@@ -97,10 +99,10 @@ export default function AdminSystemSettings() {
 
     const hasError = errors.some((e) => e !== null);
     if (hasError) {
-      toast.error('Erro ao salvar configuracoes');
+      toast.error(t('admin.system_save_error'));
       errors.forEach((e) => e && console.error(e));
     } else {
-      toast.success('Configuracoes salvas com sucesso');
+      toast.success(t('admin.system_save_success'));
     }
     setSaving(false);
   };
@@ -123,10 +125,10 @@ export default function AdminSystemSettings() {
           <div>
             <h1 className="text-2xl font-poppins font-bold text-foreground flex items-center gap-2">
               <Settings className="w-6 h-6 text-red-400" />
-              Configuracoes do Sistema
+              {t('admin.system_title')}
             </h1>
             <p className="text-sm font-nunito text-muted-foreground mt-1">
-              Gerencie as configuracoes gerais da plataforma
+              {t('admin.system_subtitle')}
             </p>
           </div>
           <Button
@@ -139,27 +141,27 @@ export default function AdminSystemSettings() {
             ) : (
               <Save className="w-4 h-4 mr-2" />
             )}
-            Salvar
+            {t('admin.system_save')}
           </Button>
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="platform" className="space-y-6">
           <TabsList className="bg-muted/30 border border-border/50">
-            <TabsTrigger value="platform" className="font-nunito">Plataforma</TabsTrigger>
-            <TabsTrigger value="plans" className="font-nunito">Planos</TabsTrigger>
-            <TabsTrigger value="security" className="font-nunito">Seguranca</TabsTrigger>
+            <TabsTrigger value="platform" className="font-nunito">{t('admin.system_tab_platform')}</TabsTrigger>
+            <TabsTrigger value="plans" className="font-nunito">{t('admin.system_tab_plans')}</TabsTrigger>
+            <TabsTrigger value="security" className="font-nunito">{t('admin.system_tab_security')}</TabsTrigger>
           </TabsList>
 
           {/* Plataforma */}
           <TabsContent value="platform">
             <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur p-6 space-y-6">
-              <h2 className="text-lg font-poppins font-semibold text-foreground">Plataforma</h2>
+              <h2 className="text-lg font-poppins font-semibold text-foreground">{t('admin.system_platform_title')}</h2>
 
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-nunito font-medium text-foreground">
-                    Nome da Plataforma
+                    {t('admin.system_platform_name')}
                   </label>
                   <Input
                     value={platform.name}
@@ -171,10 +173,10 @@ export default function AdminSystemSettings() {
                 <div className="flex items-center justify-between max-w-md rounded-lg border border-border/30 p-4">
                   <div>
                     <p className="text-sm font-nunito font-medium text-foreground">
-                      Registro Habilitado
+                      {t('admin.system_registration_enabled')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Permitir novos usuarios se registrarem
+                      {t('admin.system_registration_description')}
                     </p>
                   </div>
                   <Switch
@@ -188,10 +190,10 @@ export default function AdminSystemSettings() {
                 <div className="flex items-center justify-between max-w-md rounded-lg border border-border/30 p-4">
                   <div>
                     <p className="text-sm font-nunito font-medium text-foreground">
-                      Modo Manutencao
+                      {t('admin.system_maintenance_mode')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Bloquear acesso a plataforma temporariamente
+                      {t('admin.system_maintenance_description')}
                     </p>
                   </div>
                   <Switch
@@ -209,7 +211,7 @@ export default function AdminSystemSettings() {
           <TabsContent value="plans">
             <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur p-6 space-y-6">
               <h2 className="text-lg font-poppins font-semibold text-foreground">
-                Limites por Plano
+                {t('admin.system_plan_limits_title')}
               </h2>
 
               <div className="grid gap-6">
@@ -235,7 +237,7 @@ export default function AdminSystemSettings() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-nunito font-medium text-foreground">
-                            Limite de Projetos
+                            {t('admin.system_projects_limit')}
                           </label>
                           <Input
                             type="number"
@@ -254,7 +256,7 @@ export default function AdminSystemSettings() {
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-nunito font-medium text-foreground">
-                            Limite de Storage (MB)
+                            {t('admin.system_storage_limit')}
                           </label>
                           <Input
                             type="number"
@@ -282,12 +284,12 @@ export default function AdminSystemSettings() {
           {/* Seguranca */}
           <TabsContent value="security">
             <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur p-6 space-y-6">
-              <h2 className="text-lg font-poppins font-semibold text-foreground">Seguranca</h2>
+              <h2 className="text-lg font-poppins font-semibold text-foreground">{t('admin.system_security_title')}</h2>
 
               <div className="space-y-4 max-w-md">
                 <div className="space-y-2">
                   <label className="text-sm font-nunito font-medium text-foreground">
-                    Tamanho Minimo da Senha
+                    {t('admin.system_min_password_length')}
                   </label>
                   <Input
                     type="number"
@@ -302,13 +304,13 @@ export default function AdminSystemSettings() {
                     }
                   />
                   <p className="text-xs text-muted-foreground">
-                    Numero minimo de caracteres para senhas de usuarios
+                    {t('admin.system_min_password_description')}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-nunito font-medium text-foreground">
-                    Timeout da Sessao (horas)
+                    {t('admin.system_session_timeout')}
                   </label>
                   <Input
                     type="number"
@@ -323,7 +325,7 @@ export default function AdminSystemSettings() {
                     }
                   />
                   <p className="text-xs text-muted-foreground">
-                    Tempo em horas antes de expirar a sessao do usuario
+                    {t('admin.system_session_timeout_description')}
                   </p>
                 </div>
               </div>

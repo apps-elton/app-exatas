@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import {
   Box,
   ChevronLeft,
@@ -20,56 +22,60 @@ import {
   MessageSquare,
 } from 'lucide-react';
 
-const TEACHER_NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
-  { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
-  { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
-];
-
-const ADMIN_NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
-  { id: 'projects', label: 'Meus Projetos', icon: FolderOpen, path: '/projects' },
-  { id: 'users', label: 'Usuários da Escola', icon: Users, path: '/school/users' },
-  { id: 'settings', label: 'Configurações', icon: Settings, path: '/settings' },
-];
-
-const SUPERADMIN_NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
-  { id: 'tenants', label: 'Tenants', icon: School, path: '/admin/tenants' },
-  { id: 'users', label: 'Usuários', icon: Users, path: '/admin/users' },
-  { id: 'subscriptions', label: 'Assinaturas', icon: CreditCard, path: '/admin/subscriptions' },
-  { id: 'support', label: 'Suporte', icon: MessageSquare, path: '/admin/support' },
-  { id: 'system', label: 'Sistema', icon: Settings, path: '/admin/settings' },
-  { id: 'divider', label: '', icon: Box, path: '', divider: true },
-  { id: 'app', label: 'Geometria 3D', icon: Box, path: '/' },
-  { id: 'projects', label: 'Projetos', icon: FolderOpen, path: '/projects' },
-];
-
-const ROLE_CONFIG = {
-  superadmin: { label: 'Super Admin', icon: Shield, color: 'text-red-400', bg: 'bg-red-400/10' },
-  admin: { label: 'Admin', icon: School, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-  teacher: { label: 'Professor', icon: GraduationCap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+const ROLE_STYLE = {
+  superadmin: { icon: Shield, color: 'text-red-400', bg: 'bg-red-400/10' },
+  admin: { icon: School, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+  teacher: { icon: GraduationCap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
 };
 
-const PLAN_CONFIG = {
-  free: { label: 'Gratuito', color: 'text-muted-foreground' },
-  professor: { label: 'Professor', color: 'text-primary' },
-  institution: { label: 'Instituição', color: 'text-accent' },
+const PLAN_STYLE = {
+  free: { color: 'text-muted-foreground' },
+  professor: { color: 'text-primary' },
+  institution: { color: 'text-accent' },
 };
 
 export function AppSidebar() {
   const { profile, subscription, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
 
   const role = profile?.role ?? 'teacher';
   const plan = subscription?.plan ?? 'free';
-  const roleConfig = ROLE_CONFIG[role];
-  const planConfig = PLAN_CONFIG[plan];
-  const RoleIcon = roleConfig.icon;
+  const roleStyle = ROLE_STYLE[role];
+  const planStyle = PLAN_STYLE[plan];
+  const RoleIcon = roleStyle.icon;
+
+  const roleLabel = role === 'superadmin' ? t('roles.superadmin') : role === 'admin' ? t('roles.admin') : t('roles.teacher');
+  const planLabel = plan === 'free' ? t('plans.free') : plan === 'professor' ? t('plans.professor') : t('plans.institution');
+
+  const TEACHER_NAV = [
+    { id: 'dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
+    { id: 'projects', label: t('sidebar.my_projects'), icon: FolderOpen, path: '/projects' },
+    { id: 'settings', label: t('sidebar.settings'), icon: Settings, path: '/settings' },
+  ];
+
+  const ADMIN_NAV = [
+    { id: 'dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
+    { id: 'projects', label: t('sidebar.my_projects'), icon: FolderOpen, path: '/projects' },
+    { id: 'users', label: t('sidebar.school_users'), icon: Users, path: '/school/users' },
+    { id: 'settings', label: t('sidebar.settings'), icon: Settings, path: '/settings' },
+  ];
+
+  const SUPERADMIN_NAV = [
+    { id: 'dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/admin' },
+    { id: 'tenants', label: t('sidebar.tenants'), icon: School, path: '/admin/tenants' },
+    { id: 'users', label: t('sidebar.users'), icon: Users, path: '/admin/users' },
+    { id: 'subscriptions', label: t('sidebar.subscriptions'), icon: CreditCard, path: '/admin/subscriptions' },
+    { id: 'support', label: t('sidebar.support'), icon: MessageSquare, path: '/admin/support' },
+    { id: 'system', label: t('sidebar.system'), icon: Settings, path: '/admin/settings' },
+    { id: 'divider', label: '', icon: Box, path: '', divider: true },
+    { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
+    { id: 'projects', label: t('sidebar.projects'), icon: FolderOpen, path: '/projects' },
+  ];
 
   const navItems = role === 'superadmin'
     ? SUPERADMIN_NAV
@@ -96,7 +102,7 @@ export function AppSidebar() {
               <>
                 <Shield className="w-6 h-6 text-red-400 shrink-0" />
                 <span className="font-poppins font-bold text-foreground">GeoTeach</span>
-                <span className="text-xs text-red-400 font-poppins font-semibold">Admin</span>
+                <span className="text-xs text-red-400 font-poppins font-semibold">{t('sidebar.admin')}</span>
               </>
             ) : (
               <>
@@ -119,25 +125,25 @@ export function AppSidebar() {
       {/* User info */}
       <div className={`p-3 border-b border-border/30 ${collapsed ? 'flex justify-center' : ''}`}>
         {collapsed ? (
-          <div className={`w-9 h-9 rounded-full ${roleConfig.bg} flex items-center justify-center`}>
-            <RoleIcon className={`w-4 h-4 ${roleConfig.color}`} />
+          <div className={`w-9 h-9 rounded-full ${roleStyle.bg} flex items-center justify-center`}>
+            <RoleIcon className={`w-4 h-4 ${roleStyle.color}`} />
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full ${roleConfig.bg} flex items-center justify-center shrink-0`}>
-              <RoleIcon className={`w-5 h-5 ${roleConfig.color}`} />
+            <div className={`w-10 h-10 rounded-full ${roleStyle.bg} flex items-center justify-center shrink-0`}>
+              <RoleIcon className={`w-5 h-5 ${roleStyle.color}`} />
             </div>
             <div className="min-w-0">
               <p className="font-poppins font-semibold text-sm text-foreground truncate">
-                {profile?.full_name ?? 'Usuário'}
+                {profile?.full_name ?? t('sidebar.user_fallback')}
               </p>
               <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`text-xs font-medium ${roleConfig.color}`}>{roleConfig.label}</span>
+                <span className={`text-xs font-medium ${roleStyle.color}`}>{roleLabel}</span>
                 <span className="text-muted-foreground/40">·</span>
                 <div className="flex items-center gap-1">
                   {plan !== 'free' && <Crown className="w-3 h-3 text-amber-400" />}
-                  <span className={`text-xs ${planConfig.color}`}>{planConfig.label}</span>
+                  <span className={`text-xs ${planStyle.color}`}>{planLabel}</span>
                 </div>
               </div>
             </div>
@@ -179,7 +185,7 @@ export function AppSidebar() {
                 <span className="truncate">{item.label}</span>
               )}
               {!collapsed && (item as any).disabled && (
-                <span className="ml-auto text-[10px] bg-muted/50 text-muted-foreground px-1.5 py-0.5 rounded">Em breve</span>
+                <span className="ml-auto text-[10px] bg-muted/50 text-muted-foreground px-1.5 py-0.5 rounded">{t('common.coming_soon')}</span>
               )}
             </button>
           );
@@ -189,13 +195,18 @@ export function AppSidebar() {
       {/* Upgrade banner (only for free plan) */}
       {plan === 'free' && !collapsed && (
         <div className="mx-3 mb-2 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
-          <p className="text-xs font-poppins font-semibold text-foreground mb-1">Upgrade para Pro</p>
-          <p className="text-[11px] text-muted-foreground mb-2">Projetos ilimitados e mais recursos</p>
+          <p className="text-xs font-poppins font-semibold text-foreground mb-1">{t('sidebar.upgrade_to_pro')}</p>
+          <p className="text-[11px] text-muted-foreground mb-2">{t('sidebar.unlimited_projects')}</p>
           <Button size="sm" className="w-full h-7 text-xs font-poppins" disabled>
-            Em breve
+            {t('common.coming_soon')}
           </Button>
         </div>
       )}
+
+      {/* Language Selector */}
+      <div className={`px-2 pt-2 ${collapsed ? 'flex justify-center' : ''}`}>
+        <LanguageSelector />
+      </div>
 
       {/* Logout */}
       <div className="p-2 border-t border-border/30">
@@ -204,10 +215,10 @@ export function AppSidebar() {
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-nunito text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors ${
             collapsed ? 'justify-center px-0' : ''
           }`}
-          title={collapsed ? 'Sair' : undefined}
+          title={collapsed ? t('sidebar.logout') : undefined}
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Sair</span>}
+          {!collapsed && <span>{t('sidebar.logout')}</span>}
         </button>
       </div>
     </div>

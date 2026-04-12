@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -121,7 +121,7 @@ export default function AdvancedDrawingToolbar({
   constructionsCount = 0,
   planesCount = 0
 }: AdvancedDrawingToolbarProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const getToolName = (toolType: ToolType): string => {

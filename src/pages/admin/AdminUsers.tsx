@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [tenants, setTenants] = useState<Record<string, string>>({});
@@ -80,7 +82,7 @@ export default function AdminUsers() {
       });
       setSubscriptions(subMap);
     } catch (err) {
-      console.error('Erro ao carregar usuários:', err);
+      console.error('Error loading users:', err);
     } finally {
       setLoading(false);
     }
@@ -100,10 +102,10 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
       );
-      toast.success('Role atualizado');
+      toast.success(t('admin.users_role_updated'));
     } catch (err) {
-      console.error('Erro ao alterar role:', err);
-      toast.error('Erro ao atualizar');
+      console.error('Error changing role:', err);
+      toast.error(t('admin.users_role_error'));
     }
   };
 
@@ -117,10 +119,10 @@ export default function AdminUsers() {
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, is_active: !u.is_active } : u))
       );
-      toast.success('Status atualizado');
+      toast.success(t('admin.users_status_updated'));
     } catch (err) {
-      console.error('Erro ao alterar status:', err);
-      toast.error('Erro ao atualizar');
+      console.error('Error changing status:', err);
+      toast.error(t('admin.users_status_error'));
     }
   };
 
@@ -136,7 +138,7 @@ export default function AdminUsers() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-poppins font-bold text-foreground">
-            Usuários
+            {t('admin.users_title')}
             {!loading && (
               <span className="ml-2 text-base font-nunito font-normal text-muted-foreground">
                 ({users.length})
@@ -144,7 +146,7 @@ export default function AdminUsers() {
             )}
           </h1>
           <p className="text-sm font-nunito text-muted-foreground">
-            Gerencie todos os usuários do sistema
+            {t('admin.users_subtitle')}
           </p>
         </div>
 
@@ -155,7 +157,7 @@ export default function AdminUsers() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome ou email..."
+            placeholder={t('admin.users_search_placeholder')}
             className="w-full pl-9 pr-3 py-2 rounded-lg border border-border/30 bg-background text-foreground text-sm font-nunito focus:outline-none focus:ring-2 focus:ring-red-400/50"
           />
         </div>
@@ -168,7 +170,7 @@ export default function AdminUsers() {
         ) : filtered.length === 0 ? (
           <div className="bg-card border border-border/30 rounded-xl p-12 text-center">
             <p className="text-sm font-nunito text-muted-foreground">
-              Nenhum usuário encontrado.
+              {t('admin.users_no_results')}
             </p>
           </div>
         ) : (
@@ -177,14 +179,14 @@ export default function AdminUsers() {
               <table className="w-full text-sm font-nunito">
                 <thead>
                   <tr className="border-b border-border/30 text-muted-foreground bg-muted/30">
-                    <th className="text-left py-3 px-4 font-semibold">Nome</th>
-                    <th className="text-left py-3 px-4 font-semibold">Email</th>
-                    <th className="text-center py-3 px-4 font-semibold">Role</th>
-                    <th className="text-left py-3 px-4 font-semibold">Tenant</th>
-                    <th className="text-center py-3 px-4 font-semibold">Plano</th>
-                    <th className="text-center py-3 px-4 font-semibold">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold">Criado em</th>
-                    <th className="text-center py-3 px-4 font-semibold">Ações</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.users_table_name')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.users_table_email')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.users_table_role')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.users_table_tenant')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.users_table_plan')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.users_table_status')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.users_table_created_at')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.users_table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -222,7 +224,7 @@ export default function AdminUsers() {
                               : 'bg-zinc-400/10 text-zinc-400'
                           }`}
                         >
-                          {user.is_active ? 'Ativo' : 'Inativo'}
+                          {user.is_active ? t('common.active') : t('common.inactive')}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-muted-foreground text-xs">
@@ -248,7 +250,7 @@ export default function AdminUsers() {
                           {/* Toggle active */}
                           <button
                             onClick={() => handleToggleActive(user)}
-                            title={user.is_active ? 'Desativar' : 'Ativar'}
+                            title={user.is_active ? t('common.deactivate') : t('common.activate')}
                             className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
                           >
                             {user.is_active ? (

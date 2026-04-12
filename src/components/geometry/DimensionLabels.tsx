@@ -1,6 +1,6 @@
 import { Text } from '@react-three/drei';
 import { GeometryParams } from '@/types/geometry';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 interface DimensionLabelsProps {
   params: GeometryParams;
@@ -8,7 +8,7 @@ interface DimensionLabelsProps {
 }
 
 export function DimensionLabels({ params, showDimensions }: DimensionLabelsProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   if (!showDimensions) return null;
 
   const height = params.height || 4;

@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, LogIn, Box, Shield, School, GraduationCap, Wrench } from 'lucide-react';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 const TEST_ACCOUNTS = [
   {
-    label: 'Super Admin',
-    description: 'Suporte e gestão global',
+    labelKey: 'login.dev_superadmin',
+    descriptionKey: 'login.dev_superadmin_desc',
     email: 'superadmin@geoteach.dev',
     password: 'GeoTeach@2026',
     role: 'superadmin' as const,
@@ -18,8 +20,8 @@ const TEST_ACCOUNTS = [
     color: 'text-red-400 border-red-400/30 hover:bg-red-400/10',
   },
   {
-    label: 'Admin Escola',
-    description: 'Diretor / Coordenador',
+    labelKey: 'login.dev_school_admin',
+    descriptionKey: 'login.dev_school_admin_desc',
     email: 'admin@escola-teste.dev',
     password: 'GeoTeach@2026',
     role: 'admin' as const,
@@ -27,8 +29,8 @@ const TEST_ACCOUNTS = [
     color: 'text-amber-400 border-amber-400/30 hover:bg-amber-400/10',
   },
   {
-    label: 'Professor',
-    description: 'Usuário individual',
+    labelKey: 'login.dev_teacher',
+    descriptionKey: 'login.dev_teacher_desc',
     email: 'professor@geoteach.dev',
     password: 'GeoTeach@2026',
     role: 'teacher' as const,
@@ -38,6 +40,7 @@ const TEST_ACCOUNTS = [
 ];
 
 export default function Login() {
+  const { t } = useTranslation();
   const { signIn, signOut, resetPassword, session, profile, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,18 +75,19 @@ export default function Login() {
 
     if (signInError) {
       // User doesn't exist yet — create it
-      setDevMessage(`Criando conta ${account.label}...`);
+      const label = t(account.labelKey);
+      setDevMessage(t('login.dev_creating_account', { label }));
 
       const { error: signUpError } = await supabase.auth.signUp({
         email: account.email,
         password: account.password,
         options: {
-          data: { full_name: account.label, role: account.role },
+          data: { full_name: label, role: account.role },
         },
       });
 
       if (signUpError) {
-        setError(`Erro ao criar ${account.label}: ${signUpError.message}`);
+        setError(t('login.dev_create_error', { label, message: signUpError.message }));
         setSubmitting(false);
         return;
       }
@@ -94,7 +98,7 @@ export default function Login() {
       // Try signing in again
       const { error: retryError } = await signIn(account.email, account.password);
       if (retryError) {
-        setDevMessage(`Conta criada! Verifique se a confirmação de email está desabilitada no Supabase Dashboard → Auth → Email.`);
+        setDevMessage(t('login.dev_account_created_verify'));
         setSubmitting(false);
         return;
       }
@@ -112,7 +116,7 @@ export default function Login() {
     if (error) {
       setError(
         error.includes('Invalid login')
-          ? 'Email ou senha incorretos'
+          ? t('login.invalid_credentials')
           : error
       );
     }
@@ -134,7 +138,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background relative">
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector />
+      </div>
       {/* Left side - branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/10 to-background">
         <div className="relative z-10 text-center px-12">
@@ -145,20 +152,20 @@ export default function Login() {
             GeoTeach
           </h1>
           <p className="text-xl text-muted-foreground font-nunito max-w-md">
-            Geometria 3D interativa para professores e escolas
+            {t('login.hero_subtitle')}
           </p>
           <div className="mt-12 grid grid-cols-3 gap-6 max-w-sm mx-auto">
             <div className="text-center">
               <div className="text-3xl font-bold text-primary font-poppins">20+</div>
-              <div className="text-xs text-muted-foreground mt-1">Sólidos 3D</div>
+              <div className="text-xs text-muted-foreground mt-1">{t('login.hero_solids')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-accent font-poppins">15+</div>
-              <div className="text-xs text-muted-foreground mt-1">Ferramentas</div>
+              <div className="text-xs text-muted-foreground mt-1">{t('login.hero_tools')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-secondary font-poppins">2</div>
-              <div className="text-xs text-muted-foreground mt-1">Idiomas</div>
+              <div className="text-xs text-muted-foreground mt-1">{t('login.hero_languages')}</div>
             </div>
           </div>
         </div>
@@ -180,19 +187,19 @@ export default function Login() {
           {mode === 'login' ? (
             <>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
-                Entrar
+                {t('login.title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
-                Acesse sua conta para continuar
+                {t('login.subtitle')}
               </p>
 
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-poppins text-sm">Email</Label>
+                  <Label htmlFor="email" className="font-poppins text-sm">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder={t('auth.email_placeholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -201,12 +208,12 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="font-poppins text-sm">Senha</Label>
+                  <Label htmlFor="password" className="font-poppins text-sm">{t('auth.password')}</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Sua senha"
+                      placeholder={t('auth.password_placeholder')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -238,7 +245,7 @@ export default function Login() {
                   ) : (
                     <LogIn className="w-5 h-5" />
                   )}
-                  {submitting ? 'Entrando...' : 'Entrar'}
+                  {submitting ? t('login.submitting') : t('login.submit')}
                 </Button>
               </form>
 
@@ -247,15 +254,15 @@ export default function Login() {
                   onClick={() => { setMode('reset'); setError(''); }}
                   className="text-sm text-primary hover:underline font-nunito"
                 >
-                  Esqueci minha senha
+                  {t('login.forgot_password')}
                 </button>
               </div>
 
               <div className="mt-8 text-center">
                 <p className="text-muted-foreground font-nunito text-sm">
-                  Ainda não tem conta?{' '}
+                  {t('login.no_account')}{' '}
                   <Link to="/signup" className="text-primary font-semibold hover:underline">
-                    Criar conta grátis
+                    {t('login.create_free_account')}
                   </Link>
                 </p>
               </div>
@@ -265,11 +272,11 @@ export default function Login() {
                 <div className="flex items-center gap-2 mb-3">
                   <Wrench className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs font-poppins font-semibold text-muted-foreground uppercase tracking-wider">
-                    Painel de Desenvolvimento
+                    {t('login.dev_panel_title')}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground/70 font-nunito mb-3">
-                  Acesso rápido com contas de teste. Na primeira vez, a conta será criada automaticamente.
+                  {t('login.dev_panel_description')}
                 </p>
                 <div className="space-y-2">
                   {TEST_ACCOUNTS.map((account) => {
@@ -283,8 +290,8 @@ export default function Login() {
                       >
                         <Icon className="w-5 h-5 shrink-0" />
                         <div className="text-left">
-                          <div className="text-sm font-poppins font-semibold">{account.label}</div>
-                          <div className="text-xs text-muted-foreground">{account.description} — {account.email}</div>
+                          <div className="text-sm font-poppins font-semibold">{t(account.labelKey)}</div>
+                          <div className="text-xs text-muted-foreground">{t(account.descriptionKey)} — {account.email}</div>
                         </div>
                       </button>
                     );
@@ -300,27 +307,27 @@ export default function Login() {
           ) : (
             <>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
-                Recuperar senha
+                {t('login.reset_title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
-                Enviaremos um link para redefinir sua senha
+                {t('login.reset_subtitle')}
               </p>
 
               {resetSent ? (
                 <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 text-foreground font-nunito">
-                  <p className="font-semibold mb-1">Email enviado!</p>
+                  <p className="font-semibold mb-1">{t('login.reset_sent_title')}</p>
                   <p className="text-sm text-muted-foreground">
-                    Verifique sua caixa de entrada e clique no link para redefinir sua senha.
+                    {t('login.reset_sent_description')}
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleReset} className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email" className="font-poppins text-sm">Email</Label>
+                    <Label htmlFor="reset-email" className="font-poppins text-sm">{t('auth.email')}</Label>
                     <Input
                       id="reset-email"
                       type="email"
-                      placeholder="seu@email.com"
+                      placeholder={t('auth.email_placeholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -339,7 +346,7 @@ export default function Login() {
                     disabled={submitting}
                     className="w-full h-12 font-poppins font-semibold text-base"
                   >
-                    {submitting ? 'Enviando...' : 'Enviar link de recuperação'}
+                    {submitting ? t('login.reset_submitting') : t('login.reset_submit')}
                   </Button>
                 </form>
               )}
@@ -349,7 +356,7 @@ export default function Login() {
                   onClick={() => { setMode('login'); setError(''); setResetSent(false); }}
                   className="text-sm text-primary hover:underline font-nunito"
                 >
-                  Voltar ao login
+                  {t('login.reset_back_to_login')}
                 </button>
               </div>
             </>
