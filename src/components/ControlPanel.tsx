@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -64,7 +64,7 @@ export default function ControlPanel({
   onTabletStyleChange,
   onTabletToolChange
 }: ControlPanelProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   
   const handleTypeChange = (type: GeometryType) => {
     // Reset vertex connections when changing geometry type

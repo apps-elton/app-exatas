@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ interface ImageDownloadMenuProps {
 }
 
 const ImageDownloadMenu: React.FC<ImageDownloadMenuProps> = ({ onExport, disabled = false }) => {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const qualities = [
     { key: 'hd' as const, label: 'ULTRA-HD-8K (8x)', description: 'Máxima qualidade (8x)' },
     { key: 'medium' as const, label: 'HD-4K (4x)', description: 'Alta resolução (4x)' },

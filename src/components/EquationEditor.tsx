@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,7 @@ interface EquationEditorProps {
 }
 
 export default function EquationEditor({ onEquationAdd }: EquationEditorProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [latexInput, setLatexInput] = useState('');
   const [previewHtml, setPreviewHtml] = useState('');

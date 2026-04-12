@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { OrbitControls, Grid, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { GeometryParams, VisualizationOptions, StyleOptions } from '@/types/geometry';
@@ -42,7 +42,7 @@ interface GeometryMeshProps {
 }
 
 function GeometryMesh({ params, options, style, onVertexSelect, onStyleChange }: GeometryMeshProps) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const meshRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
 

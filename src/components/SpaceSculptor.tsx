@@ -15,10 +15,9 @@ import EquationRenderer from './EquationRenderer';
 import ImageDownloadMenu from './ImageDownloadMenu';
 import { ConstructionType } from './geometry/GeometricConstructions';
 import { ActiveToolProvider, useActiveTool } from '@/context/ActiveToolContext';
-import { LanguageProvider, useLanguage } from '@/context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import ToolBar from '@/components/ui/ToolBar';
 import StatusBar from '@/components/ui/StatusBar';
-import { LanguageToggle } from './LanguageToggle';
 import DrawingOverlayWrapper from './DrawingOverlayWrapper';
 import TopToolbar from './TopToolbar';
 import DrawingTablet from './DrawingTablet';
@@ -30,7 +29,7 @@ function SpaceSculptorContent() {
   // Teste de console no componente principal
   // console.log('🔧 TESTE CONSOLE - SpaceSculptorContent renderizado');
   const { activeTool, setActiveTool } = useActiveTool();
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
   const orbitControlsRef = useRef<any>(null);
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
@@ -1165,7 +1164,6 @@ function SpaceSculptorContent() {
             )}
           </Button>
           <div className="flex items-center gap-2">
-            <LanguageToggle />
             <ThemeToggle />
           </div>
         </div>
@@ -1354,10 +1352,8 @@ function SpaceSculptorContent() {
 // Componente principal que fornece o contexto
 export default function SpaceSculptor() {
   return (
-    <LanguageProvider>
-      <ActiveToolProvider>
-        <SpaceSculptorContent />
-      </ActiveToolProvider>
-    </LanguageProvider>
+    <ActiveToolProvider>
+      <SpaceSculptorContent />
+    </ActiveToolProvider>
   );
 }
