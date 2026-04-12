@@ -35,8 +35,8 @@ export function FloatingPanel({ title, isOpen, onClose, children }: FloatingPane
   return (
     <div
       ref={panelRef}
-      className={`fixed top-0 bottom-0 left-16 w-72 bg-background/95 backdrop-blur-xl border-r border-border/50 shadow-2xl z-30 transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none'
+      className={`fixed top-0 bottom-0 left-16 w-72 bg-background/95 backdrop-blur-xl border-r border-border/50 shadow-2xl z-30 transition-all duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 pointer-events-none invisible'
       }`}
     >
       <div className="flex items-center justify-between p-3 border-b border-border/30">
