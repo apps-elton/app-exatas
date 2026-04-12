@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminSubscriptions() {
+  const { t } = useTranslation();
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export default function AdminSubscriptions() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      toast.error('Erro ao carregar assinaturas');
+      toast.error(t('admin.subscriptions_load_error'));
       console.error(error);
     } else {
       setSubscriptions((data as SubscriptionWithProfile[]) || []);
@@ -81,10 +83,10 @@ export default function AdminSubscriptions() {
       .eq('id', subscriptionId);
 
     if (error) {
-      toast.error('Erro ao atualizar plano');
+      toast.error(t('admin.subscriptions_plan_error'));
       console.error(error);
     } else {
-      toast.success(`Plano atualizado para ${newPlan}`);
+      toast.success(t('admin.subscriptions_plan_updated', { plan: newPlan }));
       fetchSubscriptions();
     }
   };
@@ -102,10 +104,10 @@ export default function AdminSubscriptions() {
         <div>
           <h1 className="text-2xl font-poppins font-bold text-foreground flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-red-400" />
-            Assinaturas
+            {t('admin.subscriptions_title')}
           </h1>
           <p className="text-sm font-nunito text-muted-foreground mt-1">
-            Gerencie as assinaturas dos usuarios da plataforma
+            {t('admin.subscriptions_subtitle')}
           </p>
         </div>
 
@@ -142,13 +144,13 @@ export default function AdminSubscriptions() {
               <table className="w-full text-sm font-nunito">
                 <thead>
                   <tr className="border-b border-border/50 bg-muted/30">
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Email</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Plano</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Status</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Projetos Limite</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Storage Limite</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Criado em</th>
-                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">Acoes</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_email')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_plan')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_status')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_projects_limit')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_storage_limit')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_created_at')}</th>
+                    <th className="text-left px-4 py-3 font-poppins font-semibold text-muted-foreground">{t('admin.subscriptions_table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -197,7 +199,7 @@ export default function AdminSubscriptions() {
                   {subscriptions.length === 0 && (
                     <tr>
                       <td colSpan={7} className="text-center py-10 text-muted-foreground">
-                        Nenhuma assinatura encontrada
+                        {t('admin.subscriptions_no_results')}
                       </td>
                     </tr>
                   )}

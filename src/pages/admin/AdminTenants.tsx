@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ function slugify(text: string) {
 }
 
 export default function AdminTenants() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [userCounts, setUserCounts] = useState<Record<string, number>>({});
@@ -68,7 +70,7 @@ export default function AdminTenants() {
       });
       setUserCounts(counts);
     } catch (err) {
-      console.error('Erro ao carregar tenants:', err);
+      console.error('Error loading tenants:', err);
     } finally {
       setLoading(false);
     }
@@ -97,11 +99,11 @@ export default function AdminTenants() {
       setFormSlug('');
       setFormMaxUsers(5);
       setShowForm(false);
-      toast.success('Tenant criado com sucesso');
+      toast.success(t('admin.tenant_created_success'));
       await fetchTenants();
     } catch (err: any) {
-      console.error('Erro ao criar tenant:', err);
-      toast.error('Erro: ' + (err?.message || 'Erro ao criar tenant'));
+      console.error('Error creating tenant:', err);
+      toast.error(t('admin.tenant_create_error') + ': ' + (err?.message || ''));
     } finally {
       setSaving(false);
     }
@@ -117,23 +119,23 @@ export default function AdminTenants() {
       setTenants((prev) =>
         prev.map((t) => (t.id === tenant.id ? { ...t, is_active: !t.is_active } : t))
       );
-      toast.success('Status atualizado');
+      toast.success(t('admin.tenant_status_updated'));
     } catch (err: any) {
-      console.error('Erro ao alterar status:', err);
-      toast.error('Erro: ' + (err?.message || 'Erro ao alterar status'));
+      console.error('Error changing status:', err);
+      toast.error(t('admin.tenant_status_error') + ': ' + (err?.message || ''));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este tenant?')) return;
+    if (!window.confirm(t('admin.tenant_confirm_delete'))) return;
     try {
       const { error } = await supabase.from('tenants').delete().eq('id', id);
       if (error) throw error;
       setTenants((prev) => prev.filter((t) => t.id !== id));
-      toast.success('Tenant excluído');
+      toast.success(t('admin.tenant_deleted'));
     } catch (err: any) {
-      console.error('Erro ao excluir tenant:', err);
-      toast.error('Erro: ' + (err?.message || 'Erro ao excluir tenant'));
+      console.error('Error deleting tenant:', err);
+      toast.error(t('admin.tenant_delete_error') + ': ' + (err?.message || ''));
     }
   };
 
@@ -148,10 +150,10 @@ export default function AdminTenants() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-poppins font-bold text-foreground">
-              Tenants (Escolas)
+              {t('admin.tenants_title')}
             </h1>
             <p className="text-sm font-nunito text-muted-foreground">
-              Gerencie as instituições cadastradas no sistema
+              {t('admin.tenants_subtitle')}
             </p>
           </div>
           <button
@@ -159,7 +161,7 @@ export default function AdminTenants() {
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-400 text-white font-nunito text-sm font-semibold hover:bg-red-500 transition-colors"
           >
             {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            {showForm ? 'Cancelar' : 'Novo Tenant'}
+            {showForm ? t('button.cancel') : t('admin.new_tenant')}
           </button>
         </div>
 
@@ -167,36 +169,36 @@ export default function AdminTenants() {
         {showForm && (
           <div className="bg-card border border-border/30 rounded-xl p-5">
             <h2 className="text-base font-poppins font-semibold text-foreground mb-4">
-              Criar Novo Tenant
+              {t('admin.create_new_tenant')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-nunito text-muted-foreground mb-1">
-                  Nome
+                  {t('admin.tenant_name')}
                 </label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Ex: Escola Municipal"
+                  placeholder={t('admin.tenant_name_placeholder')}
                   className="w-full px-3 py-2 rounded-lg border border-border/30 bg-background text-foreground text-sm font-nunito focus:outline-none focus:ring-2 focus:ring-red-400/50"
                 />
               </div>
               <div>
                 <label className="block text-sm font-nunito text-muted-foreground mb-1">
-                  Slug
+                  {t('admin.tenant_slug')}
                 </label>
                 <input
                   type="text"
                   value={formSlug}
                   onChange={(e) => setFormSlug(e.target.value)}
-                  placeholder="escola-municipal"
+                  placeholder={t('admin.tenant_slug_placeholder')}
                   className="w-full px-3 py-2 rounded-lg border border-border/30 bg-background text-foreground text-sm font-nunito focus:outline-none focus:ring-2 focus:ring-red-400/50"
                 />
               </div>
               <div>
                 <label className="block text-sm font-nunito text-muted-foreground mb-1">
-                  Max Usuários
+                  {t('admin.tenant_max_users')}
                 </label>
                 <input
                   type="number"
@@ -214,7 +216,7 @@ export default function AdminTenants() {
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-400 text-white font-nunito text-sm font-semibold hover:bg-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                Salvar
+                {t('button.save')}
               </button>
             </div>
           </div>
@@ -227,7 +229,7 @@ export default function AdminTenants() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome..."
+            placeholder={t('admin.search_by_name')}
             className="w-full pl-9 pr-3 py-2 rounded-lg border border-border/30 bg-background text-foreground text-sm font-nunito focus:outline-none focus:ring-2 focus:ring-red-400/50"
           />
         </div>
@@ -240,7 +242,7 @@ export default function AdminTenants() {
         ) : filtered.length === 0 ? (
           <div className="bg-card border border-border/30 rounded-xl p-12 text-center">
             <p className="text-sm font-nunito text-muted-foreground">
-              Nenhum tenant encontrado.
+              {t('admin.no_tenants_found')}
             </p>
           </div>
         ) : (
@@ -249,14 +251,14 @@ export default function AdminTenants() {
               <table className="w-full text-sm font-nunito">
                 <thead>
                   <tr className="border-b border-border/30 text-muted-foreground bg-muted/30">
-                    <th className="text-left py-3 px-4 font-semibold">Nome</th>
-                    <th className="text-left py-3 px-4 font-semibold">Slug</th>
-                    <th className="text-left py-3 px-4 font-semibold">Domínio</th>
-                    <th className="text-center py-3 px-4 font-semibold">Usuários</th>
-                    <th className="text-center py-3 px-4 font-semibold">Max Usuários</th>
-                    <th className="text-center py-3 px-4 font-semibold">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold">Criado em</th>
-                    <th className="text-center py-3 px-4 font-semibold">Ações</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.tenant_name')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.tenant_slug')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.tenant_domain')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.tenant_users')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.tenant_max_users')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.tenant_status')}</th>
+                    <th className="text-left py-3 px-4 font-semibold">{t('admin.tenant_created_at')}</th>
+                    <th className="text-center py-3 px-4 font-semibold">{t('admin.tenant_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -284,7 +286,7 @@ export default function AdminTenants() {
                               : 'bg-zinc-400/10 text-zinc-400'
                           }`}
                         >
-                          {tenant.is_active ? 'Ativo' : 'Inativo'}
+                          {tenant.is_active ? t('common.active') : t('common.inactive')}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-muted-foreground text-xs">
@@ -294,7 +296,7 @@ export default function AdminTenants() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleToggleActive(tenant)}
-                            title={tenant.is_active ? 'Desativar' : 'Ativar'}
+                            title={tenant.is_active ? t('common.deactivate') : t('common.activate')}
                             className="p-1.5 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
                           >
                             {tenant.is_active ? (
@@ -305,7 +307,7 @@ export default function AdminTenants() {
                           </button>
                           <button
                             onClick={() => handleDelete(tenant.id)}
-                            title="Excluir"
+                            title={t('button.delete')}
                             className="p-1.5 rounded-lg hover:bg-red-400/10 transition-colors text-muted-foreground hover:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />

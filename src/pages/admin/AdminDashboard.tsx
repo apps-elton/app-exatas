@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { School, Users, FolderKanban, TicketCheck, Loader2 } from 'lucide-react';
@@ -67,6 +68,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
@@ -104,28 +106,28 @@ export default function AdminDashboard() {
 
         setKpis([
           {
-            label: 'Total Tenants',
+            label: t('admin.total_tenants'),
             value: tenantsRes.count ?? 0,
             icon: School,
             color: 'text-blue-400',
             bgColor: 'bg-blue-400/10',
           },
           {
-            label: 'Total Usuários',
+            label: t('admin.total_users'),
             value: profilesRes.count ?? 0,
             icon: Users,
             color: 'text-emerald-400',
             bgColor: 'bg-emerald-400/10',
           },
           {
-            label: 'Total Projetos',
+            label: t('admin.total_projects'),
             value: projectsRes.count ?? 0,
             icon: FolderKanban,
             color: 'text-violet-400',
             bgColor: 'bg-violet-400/10',
           },
           {
-            label: 'Tickets Abertos',
+            label: t('admin.open_tickets'),
             value: ticketsCount,
             icon: TicketCheck,
             color: 'text-amber-400',
@@ -143,7 +145,7 @@ export default function AdminDashboard() {
           .limit(5);
         setRecentUsers(usersRes.data ?? []);
       } catch (err) {
-        console.error('Erro ao carregar dashboard:', err);
+        console.error('Error loading dashboard:', err);
       } finally {
         setLoading(false);
       }
@@ -157,9 +159,9 @@ export default function AdminDashboard() {
       <div className="p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-poppins font-bold text-foreground">Dashboard</h1>
+          <h1 className="text-2xl font-poppins font-bold text-foreground">{t('admin.dashboard_title')}</h1>
           <p className="text-sm font-nunito text-muted-foreground">
-            Visão geral do sistema GeoTeach
+            {t('admin.dashboard_subtitle')}
           </p>
         </div>
 
@@ -197,21 +199,21 @@ export default function AdminDashboard() {
               {/* Recent Users */}
               <div className="bg-card border border-border/30 rounded-xl p-5">
                 <h2 className="text-lg font-poppins font-semibold text-foreground mb-4">
-                  Últimos Usuários
+                  {t('admin.recent_users')}
                 </h2>
                 {recentUsers.length === 0 ? (
                   <p className="text-sm font-nunito text-muted-foreground py-8 text-center">
-                    Nenhum usuário encontrado.
+                    {t('admin.no_users_found')}
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm font-nunito">
                       <thead>
                         <tr className="border-b border-border/30 text-muted-foreground">
-                          <th className="text-left py-2 pr-2 font-semibold">Nome</th>
-                          <th className="text-left py-2 pr-2 font-semibold">Email</th>
-                          <th className="text-left py-2 pr-2 font-semibold">Role</th>
-                          <th className="text-left py-2 font-semibold">Criado em</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_name')}</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_email')}</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_role')}</th>
+                          <th className="text-left py-2 font-semibold">{t('admin.table_created_at')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -244,21 +246,21 @@ export default function AdminDashboard() {
               {/* Recent Tickets */}
               <div className="bg-card border border-border/30 rounded-xl p-5">
                 <h2 className="text-lg font-poppins font-semibold text-foreground mb-4">
-                  Tickets Recentes
+                  {t('admin.recent_tickets')}
                 </h2>
                 {recentTickets.length === 0 ? (
                   <p className="text-sm font-nunito text-muted-foreground py-8 text-center">
-                    Nenhum ticket encontrado.
+                    {t('admin.no_tickets_found')}
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm font-nunito">
                       <thead>
                         <tr className="border-b border-border/30 text-muted-foreground">
-                          <th className="text-left py-2 pr-2 font-semibold">Assunto</th>
-                          <th className="text-left py-2 pr-2 font-semibold">Status</th>
-                          <th className="text-left py-2 pr-2 font-semibold">Prioridade</th>
-                          <th className="text-left py-2 font-semibold">Criado em</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_subject')}</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_status')}</th>
+                          <th className="text-left py-2 pr-2 font-semibold">{t('admin.table_priority')}</th>
+                          <th className="text-left py-2 font-semibold">{t('admin.table_created_at')}</th>
                         </tr>
                       </thead>
                       <tbody>
