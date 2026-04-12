@@ -2,10 +2,8 @@
   "app.title": "Space Sculptor",
   "app.subtitle": "3D Geometry Tool",
   "app.name": "GeoTeach",
-
   "tabs.geometry": "3D Geometry",
   "tabs.notes": "Notes Board",
-
   "drawing.interaction": "Interaction",
   "drawing.visualization": "Visualization",
   "drawing.connect_vertices": "Connect Vertices",
@@ -14,29 +12,23 @@
   "drawing.constructions": "Constructions",
   "drawing.activate_drawing": "Activate Drawing",
   "drawing.add_equation": "Add Equation",
-
   "interaction.navigate": "Navigate",
   "interaction.connect_vertices": "Connect Vertices",
   "interaction.create_plane": "Create Plane",
   "interaction.constructions": "Constructions",
-
   "visualization.cross_section": "Cross Section",
   "visualization.meridian_section": "Meridian Section",
   "visualization.dimensions": "Dimensions",
   "visualization.shadow": "Shadow",
   "visualization.unfolding": "Unfolding",
-
   "vertex_modes.title": "Vertex Selection Modes",
   "vertex_modes.meridian": "Meridian",
   "vertex_modes.planes": "Planes",
   "vertex_modes.connections": "Connections",
   "vertex_modes.constructions": "Constructions",
-
   "plane_definition.title": "Define Plane (3 Points)",
-
   "shapes.inscribed_circumscribed": "Inscribed/Circumscribed Shapes",
   "shapes.instruction": "Select cube, sphere, cylinder or cone to see inscription/circumscription options",
-
   "colors.edge_color": "Edge Color",
   "colors.meridian_section_color": "Meridian Section Color",
   "colors.height_color": "Height Color",
@@ -45,50 +37,41 @@
   "colors.circumscribed_circumference_color": "Circumscribed Circumference Color",
   "colors.inscribed_shapes_color": "Inscribed Shapes Color",
   "colors.circumscribed_shapes_color": "Circumscribed Shapes Color",
-
   "controls.title": "Controls",
   "controls.auto_rotation": "Auto Rotation",
   "controls.reset_view": "Reset View",
   "controls.download": "Download",
-
   "opacity.meridian_section": "Meridian Section Opacity",
   "opacity.general": "Opacity",
   "speed.rotation": "Speed",
-
   "tips.teachers": "Tips for Teachers",
   "tips.pedagogical_strategies": "Pedagogical Strategies",
   "tips.video_interaction": "Video Lesson Interaction",
   "tips.group_dynamics": "Group Dynamics",
   "tips.advanced_resources": "Advanced Resources",
-  "tips.special_tip": "\ud83d\udca1 Special tip: Use Ctrl+Click for multiple selections in the notes board and experiment with different visualization combinations to create more dynamic explanations.",
-
+  "tips.special_tip": "💡 Special tip: Use Ctrl+Click for multiple selections in the notes board and experiment with different visualization combinations to create more dynamic explanations.",
   "geometric.inscribed_radius": "Inscribed Radius",
   "geometric.circumscribed_radius": "Circumscribed Radius",
   "geometric.inscribed_circumference": "Inscribed Circumference",
   "geometric.circumscribed_circumference": "Circumscribed Circumference",
   "geometric.labels": "Labels",
   "geometric.mesh": "Mesh",
-
-  "strategies.rotation_3d": "\u2022 Use 3D rotation to show different perspectives of the same shape",
-  "strategies.volume_comparison": "\u2022 Compare volumes using simultaneous visualization of different geometries",
-  "strategies.color_demonstration": "\u2022 Demonstrate lateral and total area concepts by changing colors",
-  "strategies.notes_highlighting": "\u2022 Use the notes board to highlight important elements during explanation",
-
-  "video.record_explanations": "\u2022 Record explanations while manipulating shapes in real time",
-  "video.digital_tablet": "\u2022 Use a digital tablet to make direct annotations on 3D shapes",
-  "video.light_dark_mode": "\u2022 Switch between light and dark mode according to recording environment",
-  "video.screen_captures": "\u2022 Save screen captures at key moments of explanation",
-
-  "group.project_screen": "\u2022 Project on screen and ask students to identify properties",
-  "group.calculation_challenges": "\u2022 Create calculation challenges using displayed values",
-  "group.auto_rotation": "\u2022 Use auto rotation mode for group discussions",
-  "group.real_vs_virtual": "\u2022 Compare real shapes with virtual models",
-
-  "advanced.inscribed_circumscribed": "\u2022 Show inscribed and circumscribed radii to connect with trigonometry",
-  "advanced.apothems": "\u2022 Use apothems to explain plane vs. spatial geometry concepts",
-  "advanced.prism_sides": "\u2022 Vary numbers of sides in prisms to show mathematical trends",
-  "advanced.formula_connection": "\u2022 Connect visualizations with mathematical formulas in real time",
-
+  "strategies.rotation_3d": "• Use 3D rotation to show different perspectives of the same shape",
+  "strategies.volume_comparison": "• Compare volumes using simultaneous visualization of different geometries",
+  "strategies.color_demonstration": "• Demonstrate lateral and total area concepts by changing colors",
+  "strategies.notes_highlighting": "• Use the notes board to highlight important elements during explanation",
+  "video.record_explanations": "• Record explanations while manipulating shapes in real time",
+  "video.digital_tablet": "• Use a digital tablet to make direct annotations on 3D shapes",
+  "video.light_dark_mode": "• Switch between light and dark mode according to recording environment",
+  "video.screen_captures": "• Save screen captures at key moments of explanation",
+  "group.project_screen": "• Project on screen and ask students to identify properties",
+  "group.calculation_challenges": "• Create calculation challenges using displayed values",
+  "group.auto_rotation": "• Use auto rotation mode for group discussions",
+  "group.real_vs_virtual": "• Compare real shapes with virtual models",
+  "advanced.inscribed_circumscribed": "• Show inscribed and circumscribed radii to connect with trigonometry",
+  "advanced.apothems": "• Use apothems to explain plane vs. spatial geometry concepts",
+  "advanced.prism_sides": "• Vary numbers of sides in prisms to show mathematical trends",
+  "advanced.formula_connection": "• Connect visualizations with mathematical formulas in real time",
   "button.download": "Download",
   "button.clear": "Clear",
   "button.delete": "Delete",
@@ -99,7 +82,6 @@
   "button.freeze_view": "Freeze View",
   "button.unfreeze_view": "Unfreeze View",
   "button.deactivate": "Deactivate",
-
   "properties.base_area_label": "Base Area:",
   "properties.lateral_area_label": "Lateral Area:",
   "properties.total_area_label": "Total Area:",
@@ -112,19 +94,15 @@
   "properties.volume": "Volume",
   "properties.inscribed_radius": "Inscribed Radius",
   "properties.circumscribed_radius": "Circumscribed Radius",
-
   "calculations.title": "Geometric Calculations",
   "calculations.inscribed_radius_apothem": "Inscribed Radius (Apothem)",
   "calculations.center_to_edge_midpoint": "center to edge midpoint",
-
   "geometry_form.title": "Geometric Form",
   "geometry_form.type": "Type",
-
   "params.height": "Height",
   "params.sides": "Sides",
   "params.base_edge": "Base Edge",
   "params.num_sides": "Number of Sides",
-
   "geometry.prism": "Prism",
   "geometry.pyramid": "Pyramid",
   "geometry.cylinder": "Cylinder",
@@ -135,7 +113,6 @@
   "geometry.octahedron_8_faces": "Octahedron (8 faces)",
   "geometry.dodecahedron_12_faces": "Dodecahedron (12 faces)",
   "geometry.icosahedron_20_faces": "Icosahedron (20 faces)",
-
   "options.show_vertices": "Show Vertices",
   "options.show_edges": "Show Edges",
   "options.show_faces": "Show Faces",
@@ -145,36 +122,29 @@
   "options.show_inscribed_radius": "Show Inscribed Radius",
   "options.show_circumscribed_radius": "Show Circumscribed Radius",
   "options.show_base_radius": "Show Base Radius",
-
   "message.connection_created": "Connection created!",
   "message.segment_removed": "Segment removed!",
   "message.plane_created": "Plane created!",
   "message.measurement_added": "Measurement added!",
-
   "vertex_mode.connection": "Connection",
   "vertex_mode.plane": "Plane",
   "vertex_mode.measurement": "Measurement",
-
   "color.vertex": "Vertex",
   "color.edge": "Edge",
   "color.face": "Face",
   "color.segment": "Segment",
   "color.plane": "Plane",
-
   "tool.select": "Select",
   "tool.pen": "Pen",
   "tool.eraser": "Eraser",
   "tool.text": "Text",
   "tool.unknown": "Tool",
-
   "panel.parameters": "Parameters",
   "panel.visualization": "Visualization",
   "panel.style": "Style",
   "panel.properties": "Properties",
-
   "language.portuguese": "Português",
   "language.english": "English",
-
   "sidebar.dashboard": "Dashboard",
   "sidebar.geometry3d": "3D Geometry",
   "sidebar.my_projects": "My Projects",
@@ -193,15 +163,12 @@
   "sidebar.coming_soon": "Coming soon",
   "sidebar.user_fallback": "User",
   "sidebar.admin": "Admin",
-
   "roles.superadmin": "Super Admin",
   "roles.admin": "Admin",
   "roles.teacher": "Teacher",
-
   "plans.free": "Free",
   "plans.professor": "Teacher",
   "plans.institution": "Institution",
-
   "auth.email": "Email",
   "auth.password": "Password",
   "auth.email_placeholder": "your@email.com",
@@ -217,7 +184,6 @@
   "auth.min_chars": "6+ characters",
   "auth.passwords_match": "Passwords match",
   "auth.passwords_dont_match": "Passwords don't match",
-
   "login.title": "Sign In",
   "login.subtitle": "Access your account to continue",
   "login.submit": "Sign In",
@@ -241,7 +207,6 @@
   "login.dev_creating_account": "Creating account {{label}}...",
   "login.dev_account_created_verify": "Account created! Check that email confirmation is disabled in Supabase Dashboard → Auth → Email.",
   "login.dev_create_error": "Error creating {{label}}: {{message}}",
-
   "login.reset_title": "Recover password",
   "login.reset_subtitle": "We'll send you a link to reset your password",
   "login.reset_submit": "Send recovery link",
@@ -249,7 +214,6 @@
   "login.reset_sent_title": "Email sent!",
   "login.reset_sent_description": "Check your inbox and click the link to reset your password.",
   "login.reset_back_to_login": "Back to login",
-
   "signup.title": "Create account",
   "signup.subtitle": "How do you want to use GeoTeach?",
   "signup.teacher_title": "I'm a Teacher",
@@ -264,33 +228,27 @@
   "signup.hero_feature_2": "Use a drawing tablet with pressure sensitivity",
   "signup.hero_feature_3": "Create cross-sections, unfoldings and geometric constructions",
   "signup.hero_feature_4": "Save and share your projects",
-
   "signup.invite_loading": "Verifying invite...",
   "signup.invite_invalid_title": "Invalid invite",
   "signup.invite_invalid_message": "Invalid, expired or already used invite.",
   "signup.invite_create_without": "Create account without invite",
   "signup.invite_for_tenant": "Invite to {{tenant}}",
   "signup.invite_create_to_access": "Create your account to access {{tenant}}",
-
   "signup.school_register_title": "Register School",
   "signup.teacher_register_title": "Create Teacher Account",
   "signup.school_admin_subtitle": "You will be the school administrator",
   "signup.teacher_free_subtitle": "Free individual account",
-
   "signup.school_name_label": "School Name",
   "signup.school_name_placeholder": "E.g.: Springfield Elementary",
   "signup.admin_name_label": "Your name (administrator)",
-
   "signup.submitting": "Creating...",
   "signup.submit_school": "Register School",
   "signup.submit_teacher": "Create free account",
-
   "signup.success_title": "Account created!",
   "signup.success_school": "Your school \"{{schoolName}}\" has been registered. Check your email and sign in.",
   "signup.success_invite": "You have been added to {{tenant}}. Check your email and sign in.",
   "signup.success_default": "Check your email to confirm your account. Then just sign in.",
   "signup.go_to_login_button": "Go to login",
-
   "signup.error_password_min": "Password must be at least 6 characters",
   "signup.error_passwords_mismatch": "Passwords don't match",
   "signup.error_school_name_required": "Please enter the school name",
@@ -299,7 +257,6 @@
   "signup.error_create_school": "Error creating school: {{message}}",
   "signup.error_accept_invite": "Error accepting invite: {{message}}",
   "signup.error_unexpected": "Unexpected error. Please try again.",
-
   "dashboard.greeting": "Hello, {{name}}!",
   "dashboard.greeting_fallback": "Teacher",
   "dashboard.subtitle": "Your activity dashboard on GeoTeach",
@@ -314,7 +271,6 @@
   "dashboard.create_first_project": "Create first project",
   "dashboard.upgrade_title": "Upgrade to unlock more features",
   "dashboard.upgrade_description": "Unlimited projects, more storage and advanced features.",
-
   "projects.title": "My Projects",
   "projects.used_of": "{{used}} of {{limit}} projects used",
   "projects.new_project": "New Project",
@@ -333,13 +289,11 @@
   "projects.make_private": "Make private",
   "projects.make_public": "Make public",
   "projects.delete": "Delete",
-
   "settings.title": "Settings",
   "settings.subtitle": "Manage your profile, security and plan",
   "settings.tab_profile": "Profile",
   "settings.tab_security": "Security",
   "settings.tab_plan": "My Plan",
-
   "settings.personal_info": "Personal Information",
   "settings.email_readonly": "Email cannot be changed",
   "settings.save_changes": "Save changes",
@@ -347,7 +301,6 @@
   "settings.saved": "Saved",
   "settings.save_profile_error": "Error saving profile",
   "settings.save_profile_success": "Profile updated",
-
   "settings.change_password": "Change Password",
   "settings.change_password_button": "Change password",
   "settings.changing_password": "Changing...",
@@ -355,30 +308,25 @@
   "settings.change_password_success": "Password changed successfully",
   "settings.password_min_error": "Password must be at least 6 characters",
   "settings.password_mismatch_error": "Passwords don't match",
-
   "settings.active_session": "Active Session",
   "settings.logged_since": "You have been logged in since {{date}}",
   "settings.current_browser": "Current browser — active now",
-
   "settings.current_plan": "Current Plan",
   "settings.current_badge": "Current",
   "settings.all_plans": "All Plans",
   "settings.projects_used": "Projects used",
   "settings.storage": "Storage",
-
   "settings.plan_free_name": "Free",
   "settings.plan_free_price": "$0",
   "settings.plan_free_feature_1": "3 projects",
   "settings.plan_free_feature_2": "100MB storage",
   "settings.plan_free_feature_3": "All 3D tools",
-
   "settings.plan_professor_name": "Teacher",
   "settings.plan_professor_price": "$9/month",
   "settings.plan_professor_feature_1": "Unlimited projects",
   "settings.plan_professor_feature_2": "5GB storage",
   "settings.plan_professor_feature_3": "Public sharing",
   "settings.plan_professor_feature_4": "Priority support",
-
   "settings.plan_institution_name": "Institution",
   "settings.plan_institution_price": "$99/month",
   "settings.plan_institution_feature_1": "Everything in Teacher",
@@ -386,7 +334,6 @@
   "settings.plan_institution_feature_3": "Custom domain",
   "settings.plan_institution_feature_4": "School logo and colors",
   "settings.plan_institution_feature_5": "Usage dashboard",
-
   "school.title": "Users — {{name}}",
   "school.subtitle": "Manage your school's teachers",
   "school.generate_invite": "Generate Invite",
@@ -408,7 +355,6 @@
   "school.status_active": "Active",
   "school.status_inactive": "Inactive",
   "school.default_name": "My School",
-
   "admin.dashboard_title": "Dashboard",
   "admin.dashboard_subtitle": "GeoTeach system overview",
   "admin.total_tenants": "Total Tenants",
@@ -426,7 +372,6 @@
   "admin.table_subject": "Subject",
   "admin.table_status": "Status",
   "admin.table_priority": "Priority",
-
   "admin.tenants_title": "Tenants (Schools)",
   "admin.tenants_subtitle": "Manage registered institutions in the system",
   "admin.new_tenant": "New Tenant",
@@ -450,7 +395,6 @@
   "admin.tenant_confirm_delete": "Are you sure you want to delete this tenant?",
   "admin.no_tenants_found": "No tenants found.",
   "admin.search_by_name": "Search by name...",
-
   "admin.users_title": "Users",
   "admin.users_subtitle": "Manage all system users",
   "admin.users_search_placeholder": "Search by name or email...",
@@ -467,7 +411,6 @@
   "admin.users_role_error": "Error updating",
   "admin.users_status_updated": "Status updated",
   "admin.users_status_error": "Error updating",
-
   "admin.subscriptions_title": "Subscriptions",
   "admin.subscriptions_subtitle": "Manage platform user subscriptions",
   "admin.subscriptions_load_error": "Error loading subscriptions",
@@ -481,7 +424,6 @@
   "admin.subscriptions_table_storage_limit": "Storage Limit",
   "admin.subscriptions_table_created_at": "Created at",
   "admin.subscriptions_table_actions": "Actions",
-
   "admin.support_title": "Support",
   "admin.support_subtitle": "Manage platform support tickets",
   "admin.support_open_count": "Open",
@@ -516,7 +458,6 @@
   "admin.support_reply_sent": "Reply sent",
   "admin.support_no_tickets": "No tickets found",
   "admin.support_user_fallback": "User",
-
   "admin.system_title": "System Settings",
   "admin.system_subtitle": "Manage general platform settings",
   "admin.system_save": "Save",
@@ -540,7 +481,6 @@
   "admin.system_min_password_description": "Minimum number of characters for user passwords",
   "admin.system_session_timeout": "Session Timeout (hours)",
   "admin.system_session_timeout_description": "Time in hours before user session expires",
-
   "common.loading": "Loading...",
   "common.active": "Active",
   "common.inactive": "Inactive",
@@ -550,15 +490,12 @@
   "common.search": "Search",
   "common.close": "Close",
   "common.confirm": "Confirm",
-
   "errors.something_went_wrong": "Something went wrong",
   "errors.unexpected_error": "An unexpected error occurred. Try reloading the page.",
   "errors.reload_page": "Reload page",
-
   "notfound.title": "404",
   "notfound.message": "Oops! Page not found",
   "notfound.back_home": "Return to Home",
-
   "label.color": "Color:",
   "label.thickness": "Thickness:",
   "label.opacity": "Opacity:",
@@ -594,5 +531,7 @@
   "constructions.tangent_line": "Tangent Line",
   "constructions.line_segment": "Line Segment",
   "header.subtitle": "Interactive Spatial Geometry Viewer",
-  "label.eraser_size": "Eraser Size:"
+  "label.eraser_size": "Eraser Size:",
+  "panel.show": "Show panel",
+  "panel.hide": "Hide panel"
 }

@@ -205,7 +205,7 @@ export function AppSidebar() {
 
       {/* Language Selector */}
       <div className={`px-2 pt-2 ${collapsed ? 'flex justify-center' : ''}`}>
-        <LanguageSelector />
+        <LanguageSelector collapsed={collapsed} />
       </div>
 
       {/* Logout */}

@@ -2,10 +2,8 @@
   "app.title": "Space Sculptor",
   "app.subtitle": "3D-Geometrie-Werkzeug",
   "app.name": "GeoTeach",
-
   "tabs.geometry": "3D-Geometrie",
   "tabs.notes": "Notizentafel",
-
   "drawing.interaction": "Interaktion",
   "drawing.visualization": "Visualisierung",
   "drawing.connect_vertices": "Eckpunkte verbinden",
@@ -14,29 +12,23 @@
   "drawing.constructions": "Konstruktionen",
   "drawing.activate_drawing": "Zeichnung aktivieren",
   "drawing.add_equation": "Gleichung hinzufügen",
-
   "interaction.navigate": "Navigieren",
   "interaction.connect_vertices": "Eckpunkte verbinden",
   "interaction.create_plane": "Ebene erstellen",
   "interaction.constructions": "Konstruktionen",
-
   "visualization.cross_section": "Querschnitt",
   "visualization.meridian_section": "Meridianschnitt",
   "visualization.dimensions": "Maße",
   "visualization.shadow": "Schatten",
   "visualization.unfolding": "Abwicklung",
-
   "vertex_modes.title": "Eckpunkt-Auswahlmodi",
   "vertex_modes.meridian": "Meridian",
   "vertex_modes.planes": "Ebenen",
   "vertex_modes.connections": "Verbindungen",
   "vertex_modes.constructions": "Konstruktionen",
-
   "plane_definition.title": "Ebene definieren (3 Punkte)",
-
   "shapes.inscribed_circumscribed": "Einbeschriebene/Umschriebene Formen",
   "shapes.instruction": "Wählen Sie Würfel, Kugel, Zylinder oder Kegel, um Optionen für Ein-/Umschreibung zu sehen",
-
   "colors.edge_color": "Kantenfarbe",
   "colors.meridian_section_color": "Meridianschnittfarbe",
   "colors.height_color": "Höhenfarbe",
@@ -45,50 +37,41 @@
   "colors.circumscribed_circumference_color": "Farbe des Umkreises",
   "colors.inscribed_shapes_color": "Farbe einbeschriebener Formen",
   "colors.circumscribed_shapes_color": "Farbe umschriebener Formen",
-
   "controls.title": "Steuerung",
   "controls.auto_rotation": "Automatische Drehung",
   "controls.reset_view": "Ansicht zurücksetzen",
   "controls.download": "Herunterladen",
-
   "opacity.meridian_section": "Opazität des Meridianschnitts",
   "opacity.general": "Opazität",
   "speed.rotation": "Geschwindigkeit",
-
   "tips.teachers": "Tipps für Lehrkräfte",
   "tips.pedagogical_strategies": "Pädagogische Strategien",
   "tips.video_interaction": "Interaktion im Videounterricht",
   "tips.group_dynamics": "Gruppendynamik",
   "tips.advanced_resources": "Erweiterte Ressourcen",
   "tips.special_tip": "💡 Spezialtipp: Verwenden Sie Strg+Klick für Mehrfachauswahl auf der Notizentafel und experimentieren Sie mit verschiedenen Visualisierungskombinationen, um dynamischere Erklärungen zu erstellen.",
-
   "geometric.inscribed_radius": "Inkreisradius",
   "geometric.circumscribed_radius": "Umkreisradius",
   "geometric.inscribed_circumference": "Inkreis",
   "geometric.circumscribed_circumference": "Umkreis",
   "geometric.labels": "Beschriftungen",
   "geometric.mesh": "Gitter",
-
   "strategies.rotation_3d": "• Verwenden Sie die 3D-Drehung, um verschiedene Perspektiven derselben Form zu zeigen",
   "strategies.volume_comparison": "• Vergleichen Sie Volumen durch gleichzeitige Darstellung verschiedener Geometrien",
   "strategies.color_demonstration": "• Demonstrieren Sie Konzepte der Mantel- und Gesamtfläche durch Farbänderungen",
   "strategies.notes_highlighting": "• Verwenden Sie die Notizentafel, um wichtige Elemente während der Erklärung hervorzuheben",
-
   "video.record_explanations": "• Nehmen Sie Erklärungen auf, während Sie die Formen in Echtzeit manipulieren",
   "video.digital_tablet": "• Verwenden Sie ein Grafiktablett, um direkte Anmerkungen auf 3D-Formen zu machen",
   "video.light_dark_mode": "• Wechseln Sie je nach Aufnahmeumgebung zwischen hellem und dunklem Modus",
   "video.screen_captures": "• Speichern Sie Bildschirmaufnahmen an wichtigen Stellen der Erklärung",
-
   "group.project_screen": "• Projizieren Sie auf die Leinwand und bitten Sie die Schüler, Eigenschaften zu identifizieren",
   "group.calculation_challenges": "• Erstellen Sie Rechenaufgaben mit den angezeigten Werten",
   "group.auto_rotation": "• Verwenden Sie den automatischen Drehmodus für Gruppendiskussionen",
   "group.real_vs_virtual": "• Vergleichen Sie reale Formen mit virtuellen Modellen",
-
   "advanced.inscribed_circumscribed": "• Zeigen Sie Inkreis- und Umkreisradien, um Verbindungen zur Trigonometrie herzustellen",
   "advanced.apothems": "• Verwenden Sie Apothemen, um Konzepte der ebenen vs. räumlichen Geometrie zu erklären",
   "advanced.prism_sides": "• Variieren Sie die Seitenzahl bei Prismen, um mathematische Trends aufzuzeigen",
   "advanced.formula_connection": "• Verbinden Sie Visualisierungen mit mathematischen Formeln in Echtzeit",
-
   "button.download": "Herunterladen",
   "button.clear": "Löschen",
   "button.delete": "Entfernen",
@@ -99,7 +82,6 @@
   "button.freeze_view": "Ansicht einfrieren",
   "button.unfreeze_view": "Ansicht freigeben",
   "button.deactivate": "Deaktivieren",
-
   "properties.base_area_label": "Grundfläche:",
   "properties.lateral_area_label": "Mantelfläche:",
   "properties.total_area_label": "Gesamtfläche:",
@@ -112,19 +94,15 @@
   "properties.volume": "Volumen",
   "properties.inscribed_radius": "Inkreisradius",
   "properties.circumscribed_radius": "Umkreisradius",
-
   "calculations.title": "Geometrische Berechnungen",
   "calculations.inscribed_radius_apothem": "Inkreisradius (Apothem)",
   "calculations.center_to_edge_midpoint": "Mittelpunkt zur Kantenmitte",
-
   "geometry_form.title": "Geometrische Form",
   "geometry_form.type": "Typ",
-
   "params.height": "Höhe",
   "params.sides": "Seiten",
   "params.base_edge": "Grundkante",
   "params.num_sides": "Seitenzahl",
-
   "geometry.prism": "Prisma",
   "geometry.pyramid": "Pyramide",
   "geometry.cylinder": "Zylinder",
@@ -135,7 +113,6 @@
   "geometry.octahedron_8_faces": "Oktaeder (8 Flächen)",
   "geometry.dodecahedron_12_faces": "Dodekaeder (12 Flächen)",
   "geometry.icosahedron_20_faces": "Ikosaeder (20 Flächen)",
-
   "options.show_vertices": "Eckpunkte anzeigen",
   "options.show_edges": "Kanten anzeigen",
   "options.show_faces": "Flächen anzeigen",
@@ -145,36 +122,29 @@
   "options.show_inscribed_radius": "Inkreisradius anzeigen",
   "options.show_circumscribed_radius": "Umkreisradius anzeigen",
   "options.show_base_radius": "Grundflächenradius anzeigen",
-
   "message.connection_created": "Verbindung erstellt!",
   "message.segment_removed": "Segment entfernt!",
   "message.plane_created": "Ebene erstellt!",
   "message.measurement_added": "Messung hinzugefügt!",
-
   "vertex_mode.connection": "Verbindung",
   "vertex_mode.plane": "Ebene",
   "vertex_mode.measurement": "Messung",
-
   "color.vertex": "Eckpunkt",
   "color.edge": "Kante",
   "color.face": "Fläche",
   "color.segment": "Segment",
   "color.plane": "Ebene",
-
   "tool.select": "Auswahl",
   "tool.pen": "Stift",
   "tool.eraser": "Radierer",
   "tool.text": "Text",
   "tool.unknown": "Werkzeug",
-
   "panel.parameters": "Parameter",
   "panel.visualization": "Visualisierung",
   "panel.style": "Stil",
   "panel.properties": "Eigenschaften",
-
   "language.portuguese": "Português",
   "language.english": "English",
-
   "sidebar.dashboard": "Dashboard",
   "sidebar.geometry3d": "3D-Geometrie",
   "sidebar.my_projects": "Meine Projekte",
@@ -192,15 +162,12 @@
   "sidebar.unlimited_projects": "Unbegrenzte Projekte und mehr Funktionen",
   "sidebar.coming_soon": "Demnächst verfügbar",
   "sidebar.user_fallback": "Benutzer",
-
   "roles.superadmin": "Super-Admin",
   "roles.admin": "Admin",
   "roles.teacher": "Lehrkraft",
-
   "plans.free": "Kostenlos",
   "plans.professor": "Lehrkraft",
   "plans.institution": "Institution",
-
   "auth.email": "E-Mail",
   "auth.password": "Passwort",
   "auth.email_placeholder": "ihre@email.com",
@@ -216,7 +183,6 @@
   "auth.min_chars": "6+ Zeichen",
   "auth.passwords_match": "Passwörter stimmen überein",
   "auth.passwords_dont_match": "Passwörter stimmen nicht überein",
-
   "login.title": "Anmelden",
   "login.subtitle": "Melden Sie sich an, um fortzufahren",
   "login.submit": "Anmelden",
@@ -240,7 +206,6 @@
   "login.dev_creating_account": "Konto {{label}} wird erstellt...",
   "login.dev_account_created_verify": "Konto erstellt! Überprüfen Sie, ob die E-Mail-Bestätigung in Supabase Dashboard → Auth → Email deaktiviert ist.",
   "login.dev_create_error": "Fehler beim Erstellen von {{label}}: {{message}}",
-
   "login.reset_title": "Passwort wiederherstellen",
   "login.reset_subtitle": "Wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts",
   "login.reset_submit": "Wiederherstellungslink senden",
@@ -248,7 +213,6 @@
   "login.reset_sent_title": "E-Mail gesendet!",
   "login.reset_sent_description": "Überprüfen Sie Ihren Posteingang und klicken Sie auf den Link, um Ihr Passwort zurückzusetzen.",
   "login.reset_back_to_login": "Zurück zur Anmeldung",
-
   "signup.title": "Konto erstellen",
   "signup.subtitle": "Wie möchten Sie GeoTeach nutzen?",
   "signup.teacher_title": "Ich bin Lehrkraft",
@@ -263,33 +227,27 @@
   "signup.hero_feature_2": "Verwenden Sie ein Grafiktablett mit Druckempfindlichkeit",
   "signup.hero_feature_3": "Erstellen Sie Schnitte, Abwicklungen und geometrische Konstruktionen",
   "signup.hero_feature_4": "Speichern und teilen Sie Ihre Projekte",
-
   "signup.invite_loading": "Einladung wird überprüft...",
   "signup.invite_invalid_title": "Ungültige Einladung",
   "signup.invite_invalid_message": "Einladung ungültig, abgelaufen oder bereits verwendet.",
   "signup.invite_create_without": "Konto ohne Einladung erstellen",
   "signup.invite_for_tenant": "Einladung für {{tenant}}",
   "signup.invite_create_to_access": "Erstellen Sie Ihr Konto, um auf {{tenant}} zuzugreifen",
-
   "signup.school_register_title": "Schule registrieren",
   "signup.teacher_register_title": "Lehrkraft-Konto erstellen",
   "signup.school_admin_subtitle": "Sie werden der Administrator der Schule sein",
   "signup.teacher_free_subtitle": "Kostenloses Einzelkonto",
-
   "signup.school_name_label": "Name der Schule",
   "signup.school_name_placeholder": "Z.B.: Grundschule Musterstadt",
   "signup.admin_name_label": "Ihr Name (Administrator)",
-
   "signup.submitting": "Wird erstellt...",
   "signup.submit_school": "Schule registrieren",
   "signup.submit_teacher": "Kostenloses Konto erstellen",
-
   "signup.success_title": "Konto erstellt!",
   "signup.success_school": "Ihre Schule \"{{schoolName}}\" wurde registriert. Überprüfen Sie Ihre E-Mail und melden Sie sich an.",
   "signup.success_invite": "Sie wurden zu {{tenant}} hinzugefügt. Überprüfen Sie Ihre E-Mail und melden Sie sich an.",
   "signup.success_default": "Überprüfen Sie Ihre E-Mail, um Ihr Konto zu bestätigen. Dann melden Sie sich einfach an.",
   "signup.go_to_login_button": "Zur Anmeldung",
-
   "signup.error_password_min": "Das Passwort muss mindestens 6 Zeichen haben",
   "signup.error_passwords_mismatch": "Die Passwörter stimmen nicht überein",
   "signup.error_school_name_required": "Bitte geben Sie den Schulnamen ein",
@@ -298,7 +256,6 @@
   "signup.error_create_school": "Fehler beim Erstellen der Schule: {{message}}",
   "signup.error_accept_invite": "Fehler beim Annehmen der Einladung: {{message}}",
   "signup.error_unexpected": "Unerwarteter Fehler. Bitte versuchen Sie es erneut.",
-
   "dashboard.greeting": "Hallo, {{name}}!",
   "dashboard.greeting_fallback": "Lehrkraft",
   "dashboard.subtitle": "Ihr Aktivitäts-Dashboard auf GeoTeach",
@@ -313,7 +270,6 @@
   "dashboard.create_first_project": "Erstes Projekt erstellen",
   "dashboard.upgrade_title": "Upgraden Sie, um mehr Funktionen freizuschalten",
   "dashboard.upgrade_description": "Unbegrenzte Projekte, mehr Speicher und erweiterte Funktionen.",
-
   "projects.title": "Meine Projekte",
   "projects.used_of": "{{used}} von {{limit}} Projekten verwendet",
   "projects.new_project": "Neues Projekt",
@@ -332,13 +288,11 @@
   "projects.make_private": "Privat machen",
   "projects.make_public": "Öffentlich machen",
   "projects.delete": "Löschen",
-
   "settings.title": "Einstellungen",
   "settings.subtitle": "Verwalten Sie Ihr Profil, Sicherheit und Plan",
   "settings.tab_profile": "Profil",
   "settings.tab_security": "Sicherheit",
   "settings.tab_plan": "Mein Plan",
-
   "settings.personal_info": "Persönliche Informationen",
   "settings.email_readonly": "Die E-Mail kann nicht geändert werden",
   "settings.save_changes": "Änderungen speichern",
@@ -346,7 +300,6 @@
   "settings.saved": "Gespeichert",
   "settings.save_profile_error": "Fehler beim Speichern des Profils",
   "settings.save_profile_success": "Profil aktualisiert",
-
   "settings.change_password": "Passwort ändern",
   "settings.change_password_button": "Passwort ändern",
   "settings.changing_password": "Wird geändert...",
@@ -354,30 +307,25 @@
   "settings.change_password_success": "Passwort erfolgreich geändert",
   "settings.password_min_error": "Das Passwort muss mindestens 6 Zeichen haben",
   "settings.password_mismatch_error": "Die Passwörter stimmen nicht überein",
-
   "settings.active_session": "Aktive Sitzung",
   "settings.logged_since": "Sie sind angemeldet seit {{date}}",
   "settings.current_browser": "Aktueller Browser — jetzt aktiv",
-
   "settings.current_plan": "Aktueller Plan",
   "settings.current_badge": "Aktuell",
   "settings.all_plans": "Alle Pläne",
   "settings.projects_used": "Verwendete Projekte",
   "settings.storage": "Speicher",
-
   "settings.plan_free_name": "Kostenlos",
   "settings.plan_free_price": "0 €",
   "settings.plan_free_feature_1": "3 Projekte",
   "settings.plan_free_feature_2": "100 MB Speicher",
   "settings.plan_free_feature_3": "Alle 3D-Werkzeuge",
-
   "settings.plan_professor_name": "Lehrkraft",
   "settings.plan_professor_price": "9 €/Monat",
   "settings.plan_professor_feature_1": "Unbegrenzte Projekte",
   "settings.plan_professor_feature_2": "5 GB Speicher",
   "settings.plan_professor_feature_3": "Öffentliches Teilen",
   "settings.plan_professor_feature_4": "Prioritäts-Support",
-
   "settings.plan_institution_name": "Institution",
   "settings.plan_institution_price": "99 €/Monat",
   "settings.plan_institution_feature_1": "Alles aus dem Lehrkraft-Plan",
@@ -385,7 +333,6 @@
   "settings.plan_institution_feature_3": "Eigene Domain",
   "settings.plan_institution_feature_4": "Logo und Farben der Schule",
   "settings.plan_institution_feature_5": "Nutzungs-Dashboard",
-
   "school.title": "Benutzer — {{name}}",
   "school.subtitle": "Verwalten Sie die Lehrkräfte Ihrer Schule",
   "school.generate_invite": "Einladung erstellen",
@@ -407,7 +354,6 @@
   "school.status_active": "Aktiv",
   "school.status_inactive": "Inaktiv",
   "school.default_name": "Meine Schule",
-
   "admin.dashboard_title": "Dashboard",
   "admin.dashboard_subtitle": "Systemübersicht von GeoTeach",
   "admin.total_tenants": "Tenants gesamt",
@@ -425,7 +371,6 @@
   "admin.table_subject": "Betreff",
   "admin.table_status": "Status",
   "admin.table_priority": "Priorität",
-
   "admin.tenants_title": "Tenants (Schulen)",
   "admin.tenants_subtitle": "Verwalten Sie die im System registrierten Institutionen",
   "admin.new_tenant": "Neuer Tenant",
@@ -449,7 +394,6 @@
   "admin.tenant_confirm_delete": "Sind Sie sicher, dass Sie diesen Tenant löschen möchten?",
   "admin.no_tenants_found": "Keine Tenants gefunden.",
   "admin.search_by_name": "Nach Name suchen...",
-
   "admin.users_title": "Benutzer",
   "admin.users_subtitle": "Verwalten Sie alle Benutzer des Systems",
   "admin.users_search_placeholder": "Nach Name oder E-Mail suchen...",
@@ -466,7 +410,6 @@
   "admin.users_role_error": "Fehler beim Aktualisieren",
   "admin.users_status_updated": "Status aktualisiert",
   "admin.users_status_error": "Fehler beim Aktualisieren",
-
   "admin.subscriptions_title": "Abonnements",
   "admin.subscriptions_subtitle": "Verwalten Sie die Abonnements der Plattformbenutzer",
   "admin.subscriptions_load_error": "Fehler beim Laden der Abonnements",
@@ -480,7 +423,6 @@
   "admin.subscriptions_table_storage_limit": "Speicherlimit",
   "admin.subscriptions_table_created_at": "Erstellt am",
   "admin.subscriptions_table_actions": "Aktionen",
-
   "admin.support_title": "Support",
   "admin.support_subtitle": "Verwalten Sie die Support-Tickets der Plattform",
   "admin.support_open_count": "Offen",
@@ -515,7 +457,6 @@
   "admin.support_reply_sent": "Antwort gesendet",
   "admin.support_no_tickets": "Keine Tickets gefunden",
   "admin.support_user_fallback": "Benutzer",
-
   "admin.system_title": "Systemeinstellungen",
   "admin.system_subtitle": "Verwalten Sie die allgemeinen Plattformeinstellungen",
   "admin.system_save": "Speichern",
@@ -539,7 +480,6 @@
   "admin.system_min_password_description": "Mindestanzahl der Zeichen für Benutzerpasswörter",
   "admin.system_session_timeout": "Sitzungs-Timeout (Stunden)",
   "admin.system_session_timeout_description": "Zeit in Stunden, bevor die Benutzersitzung abläuft",
-
   "common.loading": "Wird geladen...",
   "common.active": "Aktiv",
   "common.inactive": "Inaktiv",
@@ -549,15 +489,12 @@
   "common.search": "Suchen",
   "common.close": "Schließen",
   "common.confirm": "Bestätigen",
-
   "errors.something_went_wrong": "Etwas ist schiefgelaufen",
   "errors.unexpected_error": "Ein unerwarteter Fehler ist aufgetreten. Versuchen Sie, die Seite neu zu laden.",
   "errors.reload_page": "Seite neu laden",
-
   "notfound.title": "404",
   "notfound.message": "Hoppla! Seite nicht gefunden",
   "notfound.back_home": "Zurück zur Startseite",
-
   "label.color": "Farbe:",
   "label.thickness": "Stärke:",
   "label.opacity": "Deckkraft:",
@@ -593,5 +530,7 @@
   "constructions.tangent_line": "Tangente",
   "constructions.line_segment": "Strecke",
   "header.subtitle": "Interaktiver Raumgeometrie-Betrachter",
-  "label.eraser_size": "Radiergröße:"
+  "label.eraser_size": "Radiergröße:",
+  "panel.show": "Panel anzeigen",
+  "panel.hide": "Panel ausblenden"
 }

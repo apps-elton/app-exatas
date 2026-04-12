@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-export function LanguageSelector() {
+export function LanguageSelector({ collapsed = false }: { collapsed?: boolean }) {
   const { i18n } = useTranslation();
 
   const currentLang = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
@@ -24,9 +24,9 @@ export function LanguageSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className={collapsed ? 'w-8 h-8 p-0' : 'gap-2'} title={currentLang.name}>
           <Globe className="h-4 w-4" />
-          <span className="hidden sm:inline">{currentLang.name}</span>
+          {!collapsed && <span>{currentLang.name}</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">

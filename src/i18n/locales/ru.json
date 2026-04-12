@@ -2,10 +2,8 @@
   "app.title": "Space Sculptor",
   "app.subtitle": "Инструмент 3D-геометрии",
   "app.name": "GeoTeach",
-
   "tabs.geometry": "3D-геометрия",
   "tabs.notes": "Доска заметок",
-
   "drawing.interaction": "Взаимодействие",
   "drawing.visualization": "Визуализация",
   "drawing.connect_vertices": "Соединить вершины",
@@ -14,29 +12,23 @@
   "drawing.constructions": "Построения",
   "drawing.activate_drawing": "Активировать рисование",
   "drawing.add_equation": "Добавить уравнение",
-
   "interaction.navigate": "Навигация",
   "interaction.connect_vertices": "Соединить вершины",
   "interaction.create_plane": "Создать плоскость",
   "interaction.constructions": "Построения",
-
   "visualization.cross_section": "Поперечное сечение",
   "visualization.meridian_section": "Меридианное сечение",
   "visualization.dimensions": "Размеры",
   "visualization.shadow": "Тень",
   "visualization.unfolding": "Развёртка",
-
   "vertex_modes.title": "Режимы выбора вершин",
   "vertex_modes.meridian": "Меридиан",
   "vertex_modes.planes": "Плоскости",
   "vertex_modes.connections": "Соединения",
   "vertex_modes.constructions": "Построения",
-
   "plane_definition.title": "Определить плоскость (3 точки)",
-
   "shapes.inscribed_circumscribed": "Вписанные/Описанные формы",
   "shapes.instruction": "Выберите куб, сферу, цилиндр или конус для просмотра опций вписывания/описывания",
-
   "colors.edge_color": "Цвет рёбер",
   "colors.meridian_section_color": "Цвет меридианного сечения",
   "colors.height_color": "Цвет высоты",
@@ -45,50 +37,41 @@
   "colors.circumscribed_circumference_color": "Цвет описанной окружности",
   "colors.inscribed_shapes_color": "Цвет вписанных форм",
   "colors.circumscribed_shapes_color": "Цвет описанных форм",
-
   "controls.title": "Управление",
   "controls.auto_rotation": "Автоматическое вращение",
   "controls.reset_view": "Сбросить вид",
   "controls.download": "Скачать",
-
   "opacity.meridian_section": "Непрозрачность меридианного сечения",
   "opacity.general": "Непрозрачность",
   "speed.rotation": "Скорость",
-
   "tips.teachers": "Советы для преподавателей",
   "tips.pedagogical_strategies": "Педагогические стратегии",
   "tips.video_interaction": "Взаимодействие на видеоуроках",
   "tips.group_dynamics": "Групповая динамика",
   "tips.advanced_resources": "Продвинутые ресурсы",
   "tips.special_tip": "💡 Специальный совет: Используйте Ctrl+Клик для множественного выбора на доске заметок и экспериментируйте с различными комбинациями визуализации для создания более динамичных объяснений.",
-
   "geometric.inscribed_radius": "Радиус вписанной окружности",
   "geometric.circumscribed_radius": "Радиус описанной окружности",
   "geometric.inscribed_circumference": "Вписанная окружность",
   "geometric.circumscribed_circumference": "Описанная окружность",
   "geometric.labels": "Подписи",
   "geometric.mesh": "Сетка",
-
   "strategies.rotation_3d": "• Используйте 3D-вращение для показа различных перспектив одной и той же формы",
   "strategies.volume_comparison": "• Сравнивайте объёмы, используя одновременную визуализацию различных геометрических тел",
   "strategies.color_demonstration": "• Демонстрируйте понятия боковой и полной площади, изменяя цвета",
   "strategies.notes_highlighting": "• Используйте доску заметок для выделения важных элементов во время объяснения",
-
   "video.record_explanations": "• Записывайте объяснения, манипулируя формами в реальном времени",
   "video.digital_tablet": "• Используйте графический планшет для нанесения аннотаций непосредственно на 3D-формы",
   "video.light_dark_mode": "• Переключайтесь между светлым и тёмным режимами в зависимости от условий записи",
   "video.screen_captures": "• Сохраняйте снимки экрана в ключевых моментах объяснения",
-
   "group.project_screen": "• Проецируйте на экран и попросите учеников определить свойства",
   "group.calculation_challenges": "• Создавайте задачи на вычисления, используя отображаемые значения",
   "group.auto_rotation": "• Используйте режим автоматического вращения для групповых обсуждений",
   "group.real_vs_virtual": "• Сравнивайте реальные формы с виртуальными моделями",
-
   "advanced.inscribed_circumscribed": "• Показывайте радиусы вписанных и описанных окружностей для связи с тригонометрией",
   "advanced.apothems": "• Используйте апофемы для объяснения понятий плоской и пространственной геометрии",
   "advanced.prism_sides": "• Варьируйте количество сторон призм для демонстрации математических закономерностей",
   "advanced.formula_connection": "• Связывайте визуализации с математическими формулами в реальном времени",
-
   "button.download": "Скачать",
   "button.clear": "Очистить",
   "button.delete": "Удалить",
@@ -99,7 +82,6 @@
   "button.freeze_view": "Заморозить вид",
   "button.unfreeze_view": "Разморозить вид",
   "button.deactivate": "Деактивировать",
-
   "properties.base_area_label": "Площадь основания:",
   "properties.lateral_area_label": "Боковая площадь:",
   "properties.total_area_label": "Полная площадь:",
@@ -112,19 +94,15 @@
   "properties.volume": "Объём",
   "properties.inscribed_radius": "Радиус вписанной окружности",
   "properties.circumscribed_radius": "Радиус описанной окружности",
-
   "calculations.title": "Геометрические вычисления",
   "calculations.inscribed_radius_apothem": "Радиус вписанной окружности (апофема)",
   "calculations.center_to_edge_midpoint": "от центра до середины ребра",
-
   "geometry_form.title": "Геометрическая форма",
   "geometry_form.type": "Тип",
-
   "params.height": "Высота",
   "params.sides": "Стороны",
   "params.base_edge": "Ребро основания",
   "params.num_sides": "Количество сторон",
-
   "geometry.prism": "Призма",
   "geometry.pyramid": "Пирамида",
   "geometry.cylinder": "Цилиндр",
@@ -135,7 +113,6 @@
   "geometry.octahedron_8_faces": "Октаэдр (8 граней)",
   "geometry.dodecahedron_12_faces": "Додекаэдр (12 граней)",
   "geometry.icosahedron_20_faces": "Икосаэдр (20 граней)",
-
   "options.show_vertices": "Показать вершины",
   "options.show_edges": "Показать рёбра",
   "options.show_faces": "Показать грани",
@@ -145,36 +122,29 @@
   "options.show_inscribed_radius": "Показать радиус вписанной окружности",
   "options.show_circumscribed_radius": "Показать радиус описанной окружности",
   "options.show_base_radius": "Показать радиус основания",
-
   "message.connection_created": "Соединение создано!",
   "message.segment_removed": "Отрезок удалён!",
   "message.plane_created": "Плоскость создана!",
   "message.measurement_added": "Измерение добавлено!",
-
   "vertex_mode.connection": "Соединение",
   "vertex_mode.plane": "Плоскость",
   "vertex_mode.measurement": "Измерение",
-
   "color.vertex": "Вершина",
   "color.edge": "Ребро",
   "color.face": "Грань",
   "color.segment": "Отрезок",
   "color.plane": "Плоскость",
-
   "tool.select": "Выделение",
   "tool.pen": "Перо",
   "tool.eraser": "Ластик",
   "tool.text": "Текст",
   "tool.unknown": "Инструмент",
-
   "panel.parameters": "Параметры",
   "panel.visualization": "Визуализация",
   "panel.style": "Стиль",
   "panel.properties": "Свойства",
-
   "language.portuguese": "Português",
   "language.english": "English",
-
   "sidebar.dashboard": "Панель управления",
   "sidebar.geometry3d": "3D-геометрия",
   "sidebar.my_projects": "Мои проекты",
@@ -192,15 +162,12 @@
   "sidebar.unlimited_projects": "Неограниченное количество проектов и больше возможностей",
   "sidebar.coming_soon": "Скоро",
   "sidebar.user_fallback": "Пользователь",
-
   "roles.superadmin": "Суперадмин",
   "roles.admin": "Админ",
   "roles.teacher": "Преподаватель",
-
   "plans.free": "Бесплатный",
   "plans.professor": "Преподаватель",
   "plans.institution": "Учреждение",
-
   "auth.email": "Электронная почта",
   "auth.password": "Пароль",
   "auth.email_placeholder": "ваш@email.com",
@@ -216,7 +183,6 @@
   "auth.min_chars": "6+ символов",
   "auth.passwords_match": "Пароли совпадают",
   "auth.passwords_dont_match": "Пароли не совпадают",
-
   "login.title": "Войти",
   "login.subtitle": "Войдите в свою учётную запись для продолжения",
   "login.submit": "Войти",
@@ -240,7 +206,6 @@
   "login.dev_creating_account": "Создание учётной записи {{label}}...",
   "login.dev_account_created_verify": "Учётная запись создана! Убедитесь, что подтверждение по электронной почте отключено в Supabase Dashboard → Auth → Email.",
   "login.dev_create_error": "Ошибка при создании {{label}}: {{message}}",
-
   "login.reset_title": "Восстановление пароля",
   "login.reset_subtitle": "Мы отправим вам ссылку для сброса пароля",
   "login.reset_submit": "Отправить ссылку для восстановления",
@@ -248,7 +213,6 @@
   "login.reset_sent_title": "Письмо отправлено!",
   "login.reset_sent_description": "Проверьте свою почту и перейдите по ссылке для сброса пароля.",
   "login.reset_back_to_login": "Вернуться к входу",
-
   "signup.title": "Создать учётную запись",
   "signup.subtitle": "Как вы хотите использовать GeoTeach?",
   "signup.teacher_title": "Я преподаватель",
@@ -263,33 +227,27 @@
   "signup.hero_feature_2": "Используйте графический планшет с чувствительностью к нажатию",
   "signup.hero_feature_3": "Создавайте сечения, развёртки и геометрические построения",
   "signup.hero_feature_4": "Сохраняйте и делитесь своими проектами",
-
   "signup.invite_loading": "Проверка приглашения...",
   "signup.invite_invalid_title": "Недействительное приглашение",
   "signup.invite_invalid_message": "Приглашение недействительно, истекло или уже использовано.",
   "signup.invite_create_without": "Создать учётную запись без приглашения",
   "signup.invite_for_tenant": "Приглашение в {{tenant}}",
   "signup.invite_create_to_access": "Создайте учётную запись для доступа к {{tenant}}",
-
   "signup.school_register_title": "Зарегистрировать школу",
   "signup.teacher_register_title": "Создать учётную запись преподавателя",
   "signup.school_admin_subtitle": "Вы будете администратором школы",
   "signup.teacher_free_subtitle": "Бесплатная индивидуальная учётная запись",
-
   "signup.school_name_label": "Название школы",
   "signup.school_name_placeholder": "Напр.: Средняя школа №1",
   "signup.admin_name_label": "Ваше имя (администратор)",
-
   "signup.submitting": "Создание...",
   "signup.submit_school": "Зарегистрировать школу",
   "signup.submit_teacher": "Создать бесплатную учётную запись",
-
   "signup.success_title": "Учётная запись создана!",
   "signup.success_school": "Ваша школа \"{{schoolName}}\" зарегистрирована. Проверьте свою почту и войдите в систему.",
   "signup.success_invite": "Вы были добавлены в {{tenant}}. Проверьте свою почту и войдите в систему.",
   "signup.success_default": "Проверьте свою почту для подтверждения учётной записи. Затем просто войдите в систему.",
   "signup.go_to_login_button": "Перейти ко входу",
-
   "signup.error_password_min": "Пароль должен содержать не менее 6 символов",
   "signup.error_passwords_mismatch": "Пароли не совпадают",
   "signup.error_school_name_required": "Введите название школы",
@@ -298,7 +256,6 @@
   "signup.error_create_school": "Ошибка при создании школы: {{message}}",
   "signup.error_accept_invite": "Ошибка при принятии приглашения: {{message}}",
   "signup.error_unexpected": "Непредвиденная ошибка. Попробуйте ещё раз.",
-
   "dashboard.greeting": "Здравствуйте, {{name}}!",
   "dashboard.greeting_fallback": "Преподаватель",
   "dashboard.subtitle": "Ваша панель активности в GeoTeach",
@@ -313,7 +270,6 @@
   "dashboard.create_first_project": "Создать первый проект",
   "dashboard.upgrade_title": "Перейдите на платный план, чтобы разблокировать больше возможностей",
   "dashboard.upgrade_description": "Неограниченное количество проектов, больше хранилища и расширенные функции.",
-
   "projects.title": "Мои проекты",
   "projects.used_of": "{{used}} из {{limit}} проектов использовано",
   "projects.new_project": "Новый проект",
@@ -332,13 +288,11 @@
   "projects.make_private": "Сделать приватным",
   "projects.make_public": "Сделать публичным",
   "projects.delete": "Удалить",
-
   "settings.title": "Настройки",
   "settings.subtitle": "Управляйте своим профилем, безопасностью и планом",
   "settings.tab_profile": "Профиль",
   "settings.tab_security": "Безопасность",
   "settings.tab_plan": "Мой план",
-
   "settings.personal_info": "Личная информация",
   "settings.email_readonly": "Адрес электронной почты нельзя изменить",
   "settings.save_changes": "Сохранить изменения",
@@ -346,7 +300,6 @@
   "settings.saved": "Сохранено",
   "settings.save_profile_error": "Ошибка при сохранении профиля",
   "settings.save_profile_success": "Профиль обновлён",
-
   "settings.change_password": "Изменить пароль",
   "settings.change_password_button": "Изменить пароль",
   "settings.changing_password": "Изменение...",
@@ -354,30 +307,25 @@
   "settings.change_password_success": "Пароль успешно изменён",
   "settings.password_min_error": "Пароль должен содержать не менее 6 символов",
   "settings.password_mismatch_error": "Пароли не совпадают",
-
   "settings.active_session": "Активная сессия",
   "settings.logged_since": "Вы вошли в систему {{date}}",
   "settings.current_browser": "Текущий браузер — активен сейчас",
-
   "settings.current_plan": "Текущий план",
   "settings.current_badge": "Текущий",
   "settings.all_plans": "Все планы",
   "settings.projects_used": "Использовано проектов",
   "settings.storage": "Хранилище",
-
   "settings.plan_free_name": "Бесплатный",
   "settings.plan_free_price": "$0",
   "settings.plan_free_feature_1": "3 проекта",
   "settings.plan_free_feature_2": "100 МБ хранилища",
   "settings.plan_free_feature_3": "Все 3D-инструменты",
-
   "settings.plan_professor_name": "Преподаватель",
   "settings.plan_professor_price": "$9/мес.",
   "settings.plan_professor_feature_1": "Неограниченное количество проектов",
   "settings.plan_professor_feature_2": "5 ГБ хранилища",
   "settings.plan_professor_feature_3": "Публичный доступ",
   "settings.plan_professor_feature_4": "Приоритетная поддержка",
-
   "settings.plan_institution_name": "Учреждение",
   "settings.plan_institution_price": "$99/мес.",
   "settings.plan_institution_feature_1": "Всё из плана Преподаватель",
@@ -385,7 +333,6 @@
   "settings.plan_institution_feature_3": "Собственный домен",
   "settings.plan_institution_feature_4": "Логотип и цвета школы",
   "settings.plan_institution_feature_5": "Панель статистики использования",
-
   "school.title": "Пользователи — {{name}}",
   "school.subtitle": "Управляйте преподавателями вашей школы",
   "school.generate_invite": "Создать приглашение",
@@ -407,7 +354,6 @@
   "school.status_active": "Активен",
   "school.status_inactive": "Неактивен",
   "school.default_name": "Моя школа",
-
   "admin.dashboard_title": "Панель управления",
   "admin.dashboard_subtitle": "Обзор системы GeoTeach",
   "admin.total_tenants": "Всего организаций",
@@ -425,7 +371,6 @@
   "admin.table_subject": "Тема",
   "admin.table_status": "Статус",
   "admin.table_priority": "Приоритет",
-
   "admin.tenants_title": "Организации (Школы)",
   "admin.tenants_subtitle": "Управляйте зарегистрированными учреждениями в системе",
   "admin.new_tenant": "Новая организация",
@@ -449,7 +394,6 @@
   "admin.tenant_confirm_delete": "Вы уверены, что хотите удалить эту организацию?",
   "admin.no_tenants_found": "Организации не найдены.",
   "admin.search_by_name": "Поиск по названию...",
-
   "admin.users_title": "Пользователи",
   "admin.users_subtitle": "Управляйте всеми пользователями системы",
   "admin.users_search_placeholder": "Поиск по имени или эл. почте...",
@@ -466,7 +410,6 @@
   "admin.users_role_error": "Ошибка при обновлении",
   "admin.users_status_updated": "Статус обновлён",
   "admin.users_status_error": "Ошибка при обновлении",
-
   "admin.subscriptions_title": "Подписки",
   "admin.subscriptions_subtitle": "Управляйте подписками пользователей платформы",
   "admin.subscriptions_load_error": "Ошибка при загрузке подписок",
@@ -480,7 +423,6 @@
   "admin.subscriptions_table_storage_limit": "Лимит хранилища",
   "admin.subscriptions_table_created_at": "Создано",
   "admin.subscriptions_table_actions": "Действия",
-
   "admin.support_title": "Поддержка",
   "admin.support_subtitle": "Управляйте заявками на поддержку платформы",
   "admin.support_open_count": "Открытые",
@@ -515,7 +457,6 @@
   "admin.support_reply_sent": "Ответ отправлен",
   "admin.support_no_tickets": "Заявки не найдены",
   "admin.support_user_fallback": "Пользователь",
-
   "admin.system_title": "Настройки системы",
   "admin.system_subtitle": "Управляйте общими настройками платформы",
   "admin.system_save": "Сохранить",
@@ -539,7 +480,6 @@
   "admin.system_min_password_description": "Минимальное количество символов для паролей пользователей",
   "admin.system_session_timeout": "Тайм-аут сессии (часы)",
   "admin.system_session_timeout_description": "Время в часах до истечения сессии пользователя",
-
   "common.loading": "Загрузка...",
   "common.active": "Активен",
   "common.inactive": "Неактивен",
@@ -549,15 +489,12 @@
   "common.search": "Поиск",
   "common.close": "Закрыть",
   "common.confirm": "Подтвердить",
-
   "errors.something_went_wrong": "Что-то пошло не так",
   "errors.unexpected_error": "Произошла непредвиденная ошибка. Попробуйте перезагрузить страницу.",
   "errors.reload_page": "Перезагрузить страницу",
-
   "notfound.title": "404",
   "notfound.message": "Ой! Страница не найдена",
   "notfound.back_home": "Вернуться на главную",
-
   "label.color": "Цвет:",
   "label.thickness": "Толщина:",
   "label.opacity": "Прозрачность:",
@@ -593,5 +530,7 @@
   "constructions.tangent_line": "Касательная",
   "constructions.line_segment": "Отрезок",
   "header.subtitle": "Интерактивный Просмотрщик Пространственной Геометрии",
-  "label.eraser_size": "Размер Ластика:"
+  "label.eraser_size": "Размер Ластика:",
+  "panel.show": "Показать панель",
+  "panel.hide": "Скрыть панель"
 }

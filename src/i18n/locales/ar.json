@@ -2,10 +2,8 @@
   "app.title": "Space Sculptor",
   "app.subtitle": "أداة الهندسة ثلاثية الأبعاد",
   "app.name": "GeoTeach",
-
   "tabs.geometry": "الهندسة ثلاثية الأبعاد",
   "tabs.notes": "لوحة الملاحظات",
-
   "drawing.interaction": "التفاعل",
   "drawing.visualization": "العرض المرئي",
   "drawing.connect_vertices": "ربط الرؤوس",
@@ -14,29 +12,23 @@
   "drawing.constructions": "الإنشاءات",
   "drawing.activate_drawing": "تفعيل الرسم",
   "drawing.add_equation": "إضافة معادلة",
-
   "interaction.navigate": "التنقل",
   "interaction.connect_vertices": "ربط الرؤوس",
   "interaction.create_plane": "إنشاء مستوى",
   "interaction.constructions": "الإنشاءات",
-
   "visualization.cross_section": "المقطع العرضي",
   "visualization.meridian_section": "المقطع الطولي",
   "visualization.dimensions": "الأبعاد",
   "visualization.shadow": "الظل",
   "visualization.unfolding": "النشر",
-
   "vertex_modes.title": "أوضاع اختيار الرؤوس",
   "vertex_modes.meridian": "الطولي",
   "vertex_modes.planes": "المستويات",
   "vertex_modes.connections": "الروابط",
   "vertex_modes.constructions": "الإنشاءات",
-
   "plane_definition.title": "تعريف المستوى (3 نقاط)",
-
   "shapes.inscribed_circumscribed": "أشكال محاطة/محيطة",
   "shapes.instruction": "اختر المكعب أو الكرة أو الأسطوانة أو المخروط لرؤية خيارات الإحاطة",
-
   "colors.edge_color": "لون الحافة",
   "colors.meridian_section_color": "لون المقطع الطولي",
   "colors.height_color": "لون الارتفاع",
@@ -45,50 +37,41 @@
   "colors.circumscribed_circumference_color": "لون المحيط المحيط",
   "colors.inscribed_shapes_color": "لون الأشكال المحاطة",
   "colors.circumscribed_shapes_color": "لون الأشكال المحيطة",
-
   "controls.title": "عناصر التحكم",
   "controls.auto_rotation": "الدوران التلقائي",
   "controls.reset_view": "إعادة تعيين العرض",
   "controls.download": "تنزيل",
-
   "opacity.meridian_section": "شفافية المقطع الطولي",
   "opacity.general": "الشفافية",
   "speed.rotation": "السرعة",
-
   "tips.teachers": "نصائح للمعلمين",
   "tips.pedagogical_strategies": "استراتيجيات تربوية",
   "tips.video_interaction": "التفاعل في الدروس المرئية",
   "tips.group_dynamics": "ديناميكيات المجموعات",
   "tips.advanced_resources": "موارد متقدمة",
-  "tips.special_tip": "\ud83d\udca1 نصيحة خاصة: استخدم Ctrl+النقر للتحديدات المتعددة في لوحة الملاحظات وجرّب مجموعات عرض مختلفة لإنشاء شروحات أكثر ديناميكية.",
-
+  "tips.special_tip": "💡 نصيحة خاصة: استخدم Ctrl+النقر للتحديدات المتعددة في لوحة الملاحظات وجرّب مجموعات عرض مختلفة لإنشاء شروحات أكثر ديناميكية.",
   "geometric.inscribed_radius": "نصف القطر المحاط",
   "geometric.circumscribed_radius": "نصف القطر المحيط",
   "geometric.inscribed_circumference": "المحيط المحاط",
   "geometric.circumscribed_circumference": "المحيط المحيط",
   "geometric.labels": "التسميات",
   "geometric.mesh": "الشبكة",
-
-  "strategies.rotation_3d": "\u2022 استخدم الدوران ثلاثي الأبعاد لعرض وجهات نظر مختلفة لنفس الشكل",
-  "strategies.volume_comparison": "\u2022 قارن الأحجام باستخدام العرض المتزامن لأشكال هندسية مختلفة",
-  "strategies.color_demonstration": "\u2022 اشرح مفاهيم المساحة الجانبية والكلية من خلال تغيير الألوان",
-  "strategies.notes_highlighting": "\u2022 استخدم لوحة الملاحظات لتسليط الضوء على العناصر المهمة أثناء الشرح",
-
-  "video.record_explanations": "\u2022 سجّل الشروحات أثناء التعامل مع الأشكال في الوقت الفعلي",
-  "video.digital_tablet": "\u2022 استخدم جهازًا لوحيًا رقميًا لعمل تعليقات مباشرة على الأشكال ثلاثية الأبعاد",
-  "video.light_dark_mode": "\u2022 بدّل بين الوضع الفاتح والداكن حسب بيئة التسجيل",
-  "video.screen_captures": "\u2022 احفظ لقطات الشاشة في اللحظات الرئيسية من الشرح",
-
-  "group.project_screen": "\u2022 اعرض على الشاشة واطلب من الطلاب تحديد الخصائص",
-  "group.calculation_challenges": "\u2022 أنشئ تحديات حسابية باستخدام القيم المعروضة",
-  "group.auto_rotation": "\u2022 استخدم وضع الدوران التلقائي للنقاشات الجماعية",
-  "group.real_vs_virtual": "\u2022 قارن الأشكال الحقيقية مع النماذج الافتراضية",
-
-  "advanced.inscribed_circumscribed": "\u2022 اعرض أنصاف الأقطار المحاطة والمحيطة للربط مع حساب المثلثات",
-  "advanced.apothems": "\u2022 استخدم الأوتار لشرح مفاهيم الهندسة المستوية مقابل الفراغية",
-  "advanced.prism_sides": "\u2022 غيّر عدد أضلاع المنشورات لإظهار الاتجاهات الرياضية",
-  "advanced.formula_connection": "\u2022 اربط العروض المرئية بالصيغ الرياضية في الوقت الفعلي",
-
+  "strategies.rotation_3d": "• استخدم الدوران ثلاثي الأبعاد لعرض وجهات نظر مختلفة لنفس الشكل",
+  "strategies.volume_comparison": "• قارن الأحجام باستخدام العرض المتزامن لأشكال هندسية مختلفة",
+  "strategies.color_demonstration": "• اشرح مفاهيم المساحة الجانبية والكلية من خلال تغيير الألوان",
+  "strategies.notes_highlighting": "• استخدم لوحة الملاحظات لتسليط الضوء على العناصر المهمة أثناء الشرح",
+  "video.record_explanations": "• سجّل الشروحات أثناء التعامل مع الأشكال في الوقت الفعلي",
+  "video.digital_tablet": "• استخدم جهازًا لوحيًا رقميًا لعمل تعليقات مباشرة على الأشكال ثلاثية الأبعاد",
+  "video.light_dark_mode": "• بدّل بين الوضع الفاتح والداكن حسب بيئة التسجيل",
+  "video.screen_captures": "• احفظ لقطات الشاشة في اللحظات الرئيسية من الشرح",
+  "group.project_screen": "• اعرض على الشاشة واطلب من الطلاب تحديد الخصائص",
+  "group.calculation_challenges": "• أنشئ تحديات حسابية باستخدام القيم المعروضة",
+  "group.auto_rotation": "• استخدم وضع الدوران التلقائي للنقاشات الجماعية",
+  "group.real_vs_virtual": "• قارن الأشكال الحقيقية مع النماذج الافتراضية",
+  "advanced.inscribed_circumscribed": "• اعرض أنصاف الأقطار المحاطة والمحيطة للربط مع حساب المثلثات",
+  "advanced.apothems": "• استخدم الأوتار لشرح مفاهيم الهندسة المستوية مقابل الفراغية",
+  "advanced.prism_sides": "• غيّر عدد أضلاع المنشورات لإظهار الاتجاهات الرياضية",
+  "advanced.formula_connection": "• اربط العروض المرئية بالصيغ الرياضية في الوقت الفعلي",
   "button.download": "تنزيل",
   "button.clear": "مسح",
   "button.delete": "حذف",
@@ -99,7 +82,6 @@
   "button.freeze_view": "تجميد العرض",
   "button.unfreeze_view": "إلغاء تجميد العرض",
   "button.deactivate": "إلغاء التفعيل",
-
   "properties.base_area_label": "مساحة القاعدة:",
   "properties.lateral_area_label": "المساحة الجانبية:",
   "properties.total_area_label": "المساحة الكلية:",
@@ -112,19 +94,15 @@
   "properties.volume": "الحجم",
   "properties.inscribed_radius": "نصف القطر المحاط",
   "properties.circumscribed_radius": "نصف القطر المحيط",
-
   "calculations.title": "الحسابات الهندسية",
   "calculations.inscribed_radius_apothem": "نصف القطر المحاط (المسقط العمودي)",
   "calculations.center_to_edge_midpoint": "من المركز إلى منتصف الحافة",
-
   "geometry_form.title": "الشكل الهندسي",
   "geometry_form.type": "النوع",
-
   "params.height": "الارتفاع",
   "params.sides": "الأضلاع",
   "params.base_edge": "حافة القاعدة",
   "params.num_sides": "عدد الأضلاع",
-
   "geometry.prism": "منشور",
   "geometry.pyramid": "هرم",
   "geometry.cylinder": "أسطوانة",
@@ -135,7 +113,6 @@
   "geometry.octahedron_8_faces": "ثماني الأوجه (8 أوجه)",
   "geometry.dodecahedron_12_faces": "اثنا عشري الأوجه (12 وجهًا)",
   "geometry.icosahedron_20_faces": "عشريني الأوجه (20 وجهًا)",
-
   "options.show_vertices": "إظهار الرؤوس",
   "options.show_edges": "إظهار الحواف",
   "options.show_faces": "إظهار الأوجه",
@@ -145,36 +122,29 @@
   "options.show_inscribed_radius": "إظهار نصف القطر المحاط",
   "options.show_circumscribed_radius": "إظهار نصف القطر المحيط",
   "options.show_base_radius": "إظهار نصف قطر القاعدة",
-
   "message.connection_created": "تم إنشاء الرابط!",
   "message.segment_removed": "تم إزالة القطعة!",
   "message.plane_created": "تم إنشاء المستوى!",
   "message.measurement_added": "تمت إضافة القياس!",
-
   "vertex_mode.connection": "رابط",
   "vertex_mode.plane": "مستوى",
   "vertex_mode.measurement": "قياس",
-
   "color.vertex": "رأس",
   "color.edge": "حافة",
   "color.face": "وجه",
   "color.segment": "قطعة",
   "color.plane": "مستوى",
-
   "tool.select": "تحديد",
   "tool.pen": "قلم",
   "tool.eraser": "ممحاة",
   "tool.text": "نص",
   "tool.unknown": "أداة",
-
   "panel.parameters": "المعاملات",
   "panel.visualization": "العرض المرئي",
   "panel.style": "النمط",
   "panel.properties": "الخصائص",
-
-  "language.portuguese": "Portugu\u00eas",
+  "language.portuguese": "Português",
   "language.english": "English",
-
   "sidebar.dashboard": "لوحة التحكم",
   "sidebar.geometry3d": "الهندسة ثلاثية الأبعاد",
   "sidebar.my_projects": "مشاريعي",
@@ -192,15 +162,12 @@
   "sidebar.unlimited_projects": "مشاريع غير محدودة وميزات إضافية",
   "sidebar.coming_soon": "قريبًا",
   "sidebar.user_fallback": "مستخدم",
-
   "roles.superadmin": "مدير عام",
   "roles.admin": "مدير",
   "roles.teacher": "معلم",
-
   "plans.free": "مجاني",
   "plans.professor": "معلم",
   "plans.institution": "مؤسسة",
-
   "auth.email": "البريد الإلكتروني",
   "auth.password": "كلمة المرور",
   "auth.email_placeholder": "your@email.com",
@@ -216,7 +183,6 @@
   "auth.min_chars": "6 أحرف أو أكثر",
   "auth.passwords_match": "كلمتا المرور متطابقتان",
   "auth.passwords_dont_match": "كلمتا المرور غير متطابقتين",
-
   "login.title": "تسجيل الدخول",
   "login.subtitle": "ادخل إلى حسابك للمتابعة",
   "login.submit": "تسجيل الدخول",
@@ -238,9 +204,8 @@
   "login.dev_teacher": "معلم",
   "login.dev_teacher_desc": "مستخدم فردي",
   "login.dev_creating_account": "جارٍ إنشاء الحساب {{label}}...",
-  "login.dev_account_created_verify": "تم إنشاء الحساب! تحقق من تعطيل تأكيد البريد الإلكتروني في لوحة تحكم Supabase \u2190 Auth \u2190 Email.",
+  "login.dev_account_created_verify": "تم إنشاء الحساب! تحقق من تعطيل تأكيد البريد الإلكتروني في لوحة تحكم Supabase ← Auth ← Email.",
   "login.dev_create_error": "خطأ في إنشاء {{label}}: {{message}}",
-
   "login.reset_title": "استعادة كلمة المرور",
   "login.reset_subtitle": "سنرسل لك رابطًا لإعادة تعيين كلمة المرور",
   "login.reset_submit": "إرسال رابط الاستعادة",
@@ -248,7 +213,6 @@
   "login.reset_sent_title": "تم إرسال البريد الإلكتروني!",
   "login.reset_sent_description": "تحقق من بريدك الوارد وانقر على الرابط لإعادة تعيين كلمة المرور.",
   "login.reset_back_to_login": "العودة إلى تسجيل الدخول",
-
   "signup.title": "إنشاء حساب",
   "signup.subtitle": "كيف تريد استخدام GeoTeach؟",
   "signup.teacher_title": "أنا معلم",
@@ -257,39 +221,33 @@
   "signup.school_description": "سجّل مدرستك وادعُ المعلمين",
   "signup.already_have_account": "لديك حساب بالفعل؟",
   "signup.go_to_login": "تسجيل الدخول",
-  "signup.back": "\u2192 رجوع",
+  "signup.back": "→ رجوع",
   "signup.hero_subtitle": "ابدأ مجانًا واستكشف الهندسة ثلاثية الأبعاد كما لم تفعل من قبل",
   "signup.hero_feature_1": "عرض أكثر من 20 شكلًا هندسيًا ثلاثي الأبعاد",
   "signup.hero_feature_2": "استخدام لوحة رسم بحساسية الضغط",
   "signup.hero_feature_3": "إنشاء مقاطع عرضية ونشر وإنشاءات هندسية",
   "signup.hero_feature_4": "حفظ ومشاركة مشاريعك",
-
   "signup.invite_loading": "جارٍ التحقق من الدعوة...",
   "signup.invite_invalid_title": "دعوة غير صالحة",
   "signup.invite_invalid_message": "الدعوة غير صالحة أو منتهية الصلاحية أو مستخدمة بالفعل.",
   "signup.invite_create_without": "إنشاء حساب بدون دعوة",
   "signup.invite_for_tenant": "دعوة إلى {{tenant}}",
   "signup.invite_create_to_access": "أنشئ حسابك للوصول إلى {{tenant}}",
-
   "signup.school_register_title": "تسجيل مدرسة",
   "signup.teacher_register_title": "إنشاء حساب معلم",
   "signup.school_admin_subtitle": "ستكون مدير المدرسة",
   "signup.teacher_free_subtitle": "حساب فردي مجاني",
-
   "signup.school_name_label": "اسم المدرسة",
   "signup.school_name_placeholder": "مثال: مدرسة النور الابتدائية",
   "signup.admin_name_label": "اسمك (المدير)",
-
   "signup.submitting": "جارٍ الإنشاء...",
   "signup.submit_school": "تسجيل المدرسة",
   "signup.submit_teacher": "إنشاء حساب مجاني",
-
   "signup.success_title": "تم إنشاء الحساب!",
   "signup.success_school": "تم تسجيل مدرستك \"{{schoolName}}\". تحقق من بريدك الإلكتروني وسجّل الدخول.",
   "signup.success_invite": "تمت إضافتك إلى {{tenant}}. تحقق من بريدك الإلكتروني وسجّل الدخول.",
   "signup.success_default": "تحقق من بريدك الإلكتروني لتأكيد حسابك. ثم سجّل الدخول.",
   "signup.go_to_login_button": "الذهاب إلى تسجيل الدخول",
-
   "signup.error_password_min": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   "signup.error_passwords_mismatch": "كلمتا المرور غير متطابقتين",
   "signup.error_school_name_required": "يرجى إدخال اسم المدرسة",
@@ -298,7 +256,6 @@
   "signup.error_create_school": "خطأ في إنشاء المدرسة: {{message}}",
   "signup.error_accept_invite": "خطأ في قبول الدعوة: {{message}}",
   "signup.error_unexpected": "خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
-
   "dashboard.greeting": "مرحبًا، {{name}}!",
   "dashboard.greeting_fallback": "معلم",
   "dashboard.subtitle": "لوحة نشاطك على GeoTeach",
@@ -313,7 +270,6 @@
   "dashboard.create_first_project": "إنشاء أول مشروع",
   "dashboard.upgrade_title": "قم بالترقية لفتح المزيد من الميزات",
   "dashboard.upgrade_description": "مشاريع غير محدودة ومساحة تخزين أكبر وميزات متقدمة.",
-
   "projects.title": "مشاريعي",
   "projects.used_of": "{{used}} من {{limit}} مشاريع مستخدمة",
   "projects.new_project": "مشروع جديد",
@@ -332,13 +288,11 @@
   "projects.make_private": "جعله خاصًا",
   "projects.make_public": "جعله عامًا",
   "projects.delete": "حذف",
-
   "settings.title": "الإعدادات",
   "settings.subtitle": "إدارة ملفك الشخصي والأمان والخطة",
   "settings.tab_profile": "الملف الشخصي",
   "settings.tab_security": "الأمان",
   "settings.tab_plan": "خطتي",
-
   "settings.personal_info": "المعلومات الشخصية",
   "settings.email_readonly": "لا يمكن تغيير البريد الإلكتروني",
   "settings.save_changes": "حفظ التغييرات",
@@ -346,7 +300,6 @@
   "settings.saved": "تم الحفظ",
   "settings.save_profile_error": "خطأ في حفظ الملف الشخصي",
   "settings.save_profile_success": "تم تحديث الملف الشخصي",
-
   "settings.change_password": "تغيير كلمة المرور",
   "settings.change_password_button": "تغيير كلمة المرور",
   "settings.changing_password": "جارٍ التغيير...",
@@ -354,30 +307,25 @@
   "settings.change_password_success": "تم تغيير كلمة المرور بنجاح",
   "settings.password_min_error": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   "settings.password_mismatch_error": "كلمتا المرور غير متطابقتين",
-
   "settings.active_session": "الجلسة النشطة",
   "settings.logged_since": "أنت مسجل الدخول منذ {{date}}",
   "settings.current_browser": "المتصفح الحالي — نشط الآن",
-
   "settings.current_plan": "الخطة الحالية",
   "settings.current_badge": "الحالية",
   "settings.all_plans": "جميع الخطط",
   "settings.projects_used": "المشاريع المستخدمة",
   "settings.storage": "التخزين",
-
   "settings.plan_free_name": "مجاني",
   "settings.plan_free_price": "$0",
   "settings.plan_free_feature_1": "3 مشاريع",
   "settings.plan_free_feature_2": "100 ميجابايت تخزين",
   "settings.plan_free_feature_3": "جميع أدوات ثلاثية الأبعاد",
-
   "settings.plan_professor_name": "معلم",
   "settings.plan_professor_price": "$9/شهريًا",
   "settings.plan_professor_feature_1": "مشاريع غير محدودة",
   "settings.plan_professor_feature_2": "5 جيجابايت تخزين",
   "settings.plan_professor_feature_3": "مشاركة عامة",
   "settings.plan_professor_feature_4": "دعم ذو أولوية",
-
   "settings.plan_institution_name": "مؤسسة",
   "settings.plan_institution_price": "$99/شهريًا",
   "settings.plan_institution_feature_1": "كل ما في خطة المعلم",
@@ -385,7 +333,6 @@
   "settings.plan_institution_feature_3": "نطاق مخصص",
   "settings.plan_institution_feature_4": "شعار وألوان المدرسة",
   "settings.plan_institution_feature_5": "لوحة تحكم الاستخدام",
-
   "school.title": "المستخدمون — {{name}}",
   "school.subtitle": "إدارة معلمي مدرستك",
   "school.generate_invite": "إنشاء دعوة",
@@ -407,7 +354,6 @@
   "school.status_active": "نشط",
   "school.status_inactive": "غير نشط",
   "school.default_name": "مدرستي",
-
   "admin.dashboard_title": "لوحة التحكم",
   "admin.dashboard_subtitle": "نظرة عامة على نظام GeoTeach",
   "admin.total_tenants": "إجمالي المستأجرين",
@@ -425,7 +371,6 @@
   "admin.table_subject": "الموضوع",
   "admin.table_status": "الحالة",
   "admin.table_priority": "الأولوية",
-
   "admin.tenants_title": "المستأجرون (المدارس)",
   "admin.tenants_subtitle": "إدارة المؤسسات المسجلة في النظام",
   "admin.new_tenant": "مستأجر جديد",
@@ -449,7 +394,6 @@
   "admin.tenant_confirm_delete": "هل أنت متأكد أنك تريد حذف هذا المستأجر؟",
   "admin.no_tenants_found": "لم يتم العثور على مستأجرين.",
   "admin.search_by_name": "البحث بالاسم...",
-
   "admin.users_title": "المستخدمون",
   "admin.users_subtitle": "إدارة جميع مستخدمي النظام",
   "admin.users_search_placeholder": "البحث بالاسم أو البريد الإلكتروني...",
@@ -466,7 +410,6 @@
   "admin.users_role_error": "خطأ في التحديث",
   "admin.users_status_updated": "تم تحديث الحالة",
   "admin.users_status_error": "خطأ في التحديث",
-
   "admin.subscriptions_title": "الاشتراكات",
   "admin.subscriptions_subtitle": "إدارة اشتراكات مستخدمي المنصة",
   "admin.subscriptions_load_error": "خطأ في تحميل الاشتراكات",
@@ -480,7 +423,6 @@
   "admin.subscriptions_table_storage_limit": "حد التخزين",
   "admin.subscriptions_table_created_at": "تاريخ الإنشاء",
   "admin.subscriptions_table_actions": "الإجراءات",
-
   "admin.support_title": "الدعم",
   "admin.support_subtitle": "إدارة تذاكر دعم المنصة",
   "admin.support_open_count": "مفتوحة",
@@ -515,7 +457,6 @@
   "admin.support_reply_sent": "تم إرسال الرد",
   "admin.support_no_tickets": "لم يتم العثور على تذاكر",
   "admin.support_user_fallback": "مستخدم",
-
   "admin.system_title": "إعدادات النظام",
   "admin.system_subtitle": "إدارة الإعدادات العامة للمنصة",
   "admin.system_save": "حفظ",
@@ -539,7 +480,6 @@
   "admin.system_min_password_description": "الحد الأدنى لعدد أحرف كلمات مرور المستخدمين",
   "admin.system_session_timeout": "مهلة الجلسة (ساعات)",
   "admin.system_session_timeout_description": "المدة بالساعات قبل انتهاء جلسة المستخدم",
-
   "common.loading": "جارٍ التحميل...",
   "common.active": "نشط",
   "common.inactive": "غير نشط",
@@ -549,15 +489,12 @@
   "common.search": "بحث",
   "common.close": "إغلاق",
   "common.confirm": "تأكيد",
-
   "errors.something_went_wrong": "حدث خطأ ما",
   "errors.unexpected_error": "حدث خطأ غير متوقع. حاول إعادة تحميل الصفحة.",
   "errors.reload_page": "إعادة تحميل الصفحة",
-
   "notfound.title": "404",
   "notfound.message": "عذرًا! الصفحة غير موجودة",
   "notfound.back_home": "العودة إلى الصفحة الرئيسية",
-
   "label.color": "اللون:",
   "label.thickness": "السُمك:",
   "label.opacity": "الشفافية:",
@@ -593,5 +530,7 @@
   "constructions.tangent_line": "خط مماس",
   "constructions.line_segment": "قطعة مستقيمة",
   "header.subtitle": "عارض تفاعلي للهندسة الفراغية",
-  "label.eraser_size": "حجم الممحاة:"
+  "label.eraser_size": "حجم الممحاة:",
+  "panel.show": "إظهار اللوحة",
+  "panel.hide": "إخفاء اللوحة"
 }

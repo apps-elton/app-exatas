@@ -8,7 +8,7 @@ import ControlPanel from './ControlPanel';
 import { FabricDrawingCanvas, FabricDrawingCanvasRef } from './FabricDrawingCanvas';
 import { FrozenCanvas } from './FrozenCanvas';
 import { Button } from '@/components/ui/button';
-import { Camera, Unlock, Download, Undo2, Redo2 } from 'lucide-react';
+import { Camera, Unlock, Download, Undo2, Redo2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { ThemeToggle } from './ThemeToggle';
 import EquationRenderer from './EquationRenderer';
@@ -35,6 +35,7 @@ function SpaceSculptorContent() {
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
   
   // Mesa digitalizadora state
   const [isTabletActive, setIsTabletActive] = useState(false);
@@ -1183,7 +1184,7 @@ function SpaceSculptorContent() {
       />
       
       <div className="flex flex-1 min-h-screen">
-        <aside className="w-80 border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-screen overflow-y-auto">
+        <aside className={`${panelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-screen overflow-y-auto transition-all duration-300`}>
           <ControlPanel
             params={params}
             options={options}
@@ -1207,6 +1208,14 @@ function SpaceSculptorContent() {
           />
         </aside>
       
+        <button
+          onClick={() => setPanelCollapsed(!panelCollapsed)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 backdrop-blur border border-border/50 rounded-r-lg p-1.5 hover:bg-accent transition-colors"
+          style={{ marginLeft: panelCollapsed ? 0 : '20rem' }}
+          title={panelCollapsed ? t('panel.show') : t('panel.hide')}
+        >
+          {panelCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
         <section className="flex-1 flex flex-col min-w-0 min-h-0" style={{ marginTop: 0, paddingTop: 0 }}>
           {/* Conteúdo da Geometria */}
           <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0 }}>
