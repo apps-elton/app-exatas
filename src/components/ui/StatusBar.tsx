@@ -1,14 +1,6 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useActiveTool } from '@/context/ActiveToolContext';
-
-const labels: Record<string, string> = {
-  'none': '',
-  'cross-section': 'Seção Transversal',
-  'meridian-section': 'Seção Meridiana',
-  'vertex-connector': 'Conectar Vértices',
-  'plane-definition': 'Criar Plano',
-  'construction': 'Construções',
-};
 
 interface StatusBarProps {
   showCrossSection?: boolean;
@@ -16,12 +8,23 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ showCrossSection = false, showMeridianSection = false }: StatusBarProps) {
+  const { t } = useTranslation();
   const { activeTool } = useActiveTool();
+
+  const labels: Record<string, string> = {
+    'none': '',
+    'cross-section': t('visualization.cross_section'),
+    'meridian-section': t('visualization.meridian_section'),
+    'vertex-connector': t('drawing.connect_vertices'),
+    'plane-definition': t('interaction.create_plane'),
+    'construction': t('drawing.constructions'),
+  };
+
   const interactionLabel = labels[activeTool] ?? activeTool;
-  
+
   const activeVisualizations = [];
-  if (showCrossSection) activeVisualizations.push('Seção Transversal');
-  if (showMeridianSection) activeVisualizations.push('Seção Meridiana');
+  if (showCrossSection) activeVisualizations.push(t('visualization.cross_section'));
+  if (showMeridianSection) activeVisualizations.push(t('visualization.meridian_section'));
 
   return (
     <div style={{

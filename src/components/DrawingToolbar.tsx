@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -42,7 +43,8 @@ export default function DrawingToolbar({
   canUndo,
   canRedo
 }: DrawingToolbarProps) {
-  
+  const { t } = useTranslation();
+
   const handleToolChange = (tool: DrawingTool) => {
     onOptionsChange({ ...options, tool });
   };
@@ -128,7 +130,7 @@ export default function DrawingToolbar({
 
         {/* Colors */}
         <div className="flex items-center gap-2">
-          <Label className="text-xs text-muted-foreground">Cor:</Label>
+          <Label className="text-xs text-muted-foreground">{t('label.color')}</Label>
           <div className="flex items-center gap-1">
             {DRAWING_COLORS.map((color) => (
               <button
@@ -152,7 +154,7 @@ export default function DrawingToolbar({
         {/* Stroke Width */}
         <div className="flex items-center gap-3 min-w-[120px]">
           <Label className="text-xs text-muted-foreground whitespace-nowrap">
-            Espessura: {options.strokeWidth}px
+            {t('label.thickness')} {options.strokeWidth}px
           </Label>
           <Slider
             value={[options.strokeWidth]}
@@ -169,7 +171,7 @@ export default function DrawingToolbar({
         {/* Opacity */}
         <div className="flex items-center gap-3 min-w-[120px]">
           <Label className="text-xs text-muted-foreground whitespace-nowrap">
-            Opacidade: {Math.round(options.opacity * 100)}%
+            {t('label.opacity')} {Math.round(options.opacity * 100)}%
           </Label>
           <Slider
             value={[options.opacity]}
@@ -191,7 +193,7 @@ export default function DrawingToolbar({
             onClick={onUndo}
             disabled={!canUndo}
             className="h-9 w-9 p-0"
-            title="Desfazer"
+            title={t('button.undo')}
           >
             <Undo2 className="h-4 w-4" />
           </Button>
@@ -201,7 +203,7 @@ export default function DrawingToolbar({
             onClick={onRedo}
             disabled={!canRedo}
             className="h-9 w-9 p-0"
-            title="Refazer"
+            title={t('button.redo')}
           >
             <Redo2 className="h-4 w-4" />
           </Button>
@@ -210,7 +212,7 @@ export default function DrawingToolbar({
             size="sm"
             onClick={onClear}
             className="h-9 w-9 p-0 text-destructive hover:text-destructive"
-            title="Limpar tudo"
+            title={t('button.clear_all')}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -219,7 +221,7 @@ export default function DrawingToolbar({
             size="sm"
             onClick={onSave}
             className="h-9 w-9 p-0"
-            title="Salvar"
+            title={t('button.save')}
           >
             <Save className="h-4 w-4" />
           </Button>

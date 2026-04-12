@@ -862,7 +862,7 @@ export default function ControlPanel({
           {options.showCrossSection && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Altura da Seção: {(options.crossSectionHeight * 100).toFixed(0)}%
+                {t('label.section_height')} {(options.crossSectionHeight * 100).toFixed(0)}%
               </Label>
               <Slider
                 value={[options.crossSectionHeight]}
@@ -887,7 +887,7 @@ export default function ControlPanel({
                    // Limpar seleções de outros modos
                    handleStyleChange('selectedVerticesForGeneral', []);
                    handleStyleChange('selectedVerticesForPlane', []);
-                   toast.info('🔶 Seção Meridiana ativada - Modo meridiano ativo');
+                   toast.info(t('message.meridian_mode_activated'));
                  } else if (!checked) {
                    // Desativar o modo quando desliga o switch
                    handleStyleChange('activeVertexMode', 'none');
@@ -931,7 +931,7 @@ export default function ControlPanel({
                         onClick={() => handleStyleChange('selectedVerticesForMeridian', [])}
                         className="h-5 px-2 text-xs"
                       >
-                        Limpar
+                        {t('button.clear')}
                       </Button>
                     </div>
                   )}
@@ -946,13 +946,13 @@ export default function ControlPanel({
                     </div>
                   )}
                   {style.selectedVerticesForMeridian.length === 2 && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       className="mt-2"
                       onClick={() => handleStyleChange('selectedVerticesForMeridian', [] as number[])}
                     >
-                      Limpar Seleção
+                      {t('button.clear_selection')}
                     </Button>
                   )}
                 </div>
@@ -964,7 +964,7 @@ export default function ControlPanel({
           {options.showMeridianSection && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Altura da Seção Meridiana: {(options.meridianSectionHeight * 100).toFixed(0)}%
+                {t('label.meridian_section_height')} {(options.meridianSectionHeight * 100).toFixed(0)}%
               </Label>
               <Slider
                 value={[options.meridianSectionHeight]}
@@ -1016,7 +1016,7 @@ export default function ControlPanel({
                       // Limpar seleções de outros modos
                       handleStyleChange('selectedVerticesForMeridian', []);
                       handleStyleChange('selectedVerticesForPlane', []);
-                      toast.info('🔗 Conectar Vértices ativado - Modo conexão ativo');
+                      toast.info(t('message.connection_mode_activated'));
                     } else {
                       // Desativar o modo quando desliga o switch
                       handleStyleChange('activeVertexMode', 'none');
@@ -1055,7 +1055,7 @@ export default function ControlPanel({
                           }}
                           className="h-5 px-2 text-xs"
                         >
-                          Limpar
+                          {t('button.clear')}
                         </Button>
                       </div>
                     )}
@@ -1088,7 +1088,7 @@ export default function ControlPanel({
                             className="mt-2"
                             onClick={() => handleStyleChange('selectedVerticesForGeneral', [] as number[])}
                           >
-                            Limpar Conexões
+                            {t('button.clear_selection')}
                           </Button>
                         )}
                       </div>
@@ -1261,7 +1261,7 @@ export default function ControlPanel({
                       // Limpar seleções de outros modos
                       handleStyleChange('selectedVerticesForMeridian', []);
                       handleStyleChange('selectedVerticesForGeneral', []);
-                      toast.info('📐 Definição de Planos ativada - Modo planos ativo');
+                      toast.info(t('message.click_create_plane'));
                     } else {
                       // Desativar o modo quando desliga o switch
                       handleStyleChange('activeVertexMode', 'none');
@@ -1294,7 +1294,7 @@ export default function ControlPanel({
                           onClick={() => handleStyleChange('selectedVerticesForPlane', [])}
                           className="h-5 px-2 text-xs"
                         >
-                          Limpar
+                          {t('button.clear')}
                         </Button>
                       </div>
                     )}
@@ -1414,7 +1414,7 @@ export default function ControlPanel({
                           }
                         }}
                       >
-                        Criar Plano ({style.planes.length}/5)
+                        {t('interaction.create_plane')} ({style.planes.length}/5)
                       </Button>
                     )}
                     
@@ -1465,7 +1465,7 @@ export default function ControlPanel({
                             toast.success('Todos os planos removidos');
                           }}
                         >
-                          Limpar Todos os Planos
+                          {t('button.clear_planes')}
                         </Button>
                       </div>
                     )}
@@ -1477,7 +1477,7 @@ export default function ControlPanel({
                         className="w-full"
                         onClick={() => handleStyleChange('selectedVerticesForPlane', [] as number[])}
                       >
-                        Limpar Seleção
+                        {t('button.clear_selection')}
                       </Button>
                     )}
                   </div>
@@ -1560,7 +1560,7 @@ export default function ControlPanel({
                           toast.success('Todos os planos foram removidos!');
                         }}
                       >
-                        Remover Todos os Planos
+                        {t('button.clear_planes')}
                       </Button>
                     </div>
                   )}

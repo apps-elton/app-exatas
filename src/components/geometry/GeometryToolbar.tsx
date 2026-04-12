@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { 
   Navigation, 
@@ -22,18 +23,19 @@ interface GeometryToolbarProps {
 }
 
 export default function GeometryToolbar({ options, onOptionsChange }: GeometryToolbarProps) {
+  const { t } = useTranslation();
   const tools = [
     {
       id: 'none',
       icon: <Navigation className="w-4 h-4" />,
-      label: 'Seleção',
-      description: 'Ferramenta de seleção padrão'
+      label: t('tool.select'),
+      description: t('tooltip.select_tool')
     },
     {
       id: 'midpoint',
       icon: <Circle className="w-4 h-4" />,
-      label: 'Ponto Médio',
-      description: 'Criar ponto médio entre dois vértices'
+      label: t('constructions.midpoint'),
+      description: t('tooltip.midpoint')
     },
     {
       id: 'parallel',

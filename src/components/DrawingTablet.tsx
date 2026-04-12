@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const MIN_DISTANCE = 2;
 const FRAME_TIME = 16;
@@ -18,6 +19,7 @@ interface DrawingTabletProps {
 }
 
 export default function DrawingTablet({ isActive, onToggle, className = '' }: DrawingTabletProps) {
+  const { t: tr } = useTranslation();
   console.log('🎨 DrawingTablet renderizado - isActive:', isActive);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textInputRef = useRef<HTMLTextAreaElement>(null);
@@ -709,7 +711,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
         <div className="px-6 py-2 flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <div className={`${t.text} font-semibold text-base tracking-tight`}>
-              Mesa Digitalizadora
+              {tr('tablet.name')}
             </div>
 
             <div className={`h-5 w-px ${t.border}`}></div>
@@ -824,8 +826,8 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={() => setStrokes(prev => prev.slice(0, -1))} disabled={strokes.length === 0} className={`p-1.5 rounded-lg transition-all duration-200 hover:scale-105 ${strokes.length === 0 ? 'opacity-40 cursor-not-allowed ' + t.buttonInactive : 'bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/30'}`} title="Desfazer">↶</button>
-            <button onClick={() => setStrokes([])} className="p-1.5 rounded-lg bg-red-500 hover:bg-red-400 text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-red-500/30" title="Limpar">🗑️</button>
+            <button onClick={() => setStrokes(prev => prev.slice(0, -1))} disabled={strokes.length === 0} className={`p-1.5 rounded-lg transition-all duration-200 hover:scale-105 ${strokes.length === 0 ? 'opacity-40 cursor-not-allowed ' + t.buttonInactive : 'bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/30'}`} title={tr('button.undo')}>↶</button>
+            <button onClick={() => setStrokes([])} className="p-1.5 rounded-lg bg-red-500 hover:bg-red-400 text-white transition-all duration-200 hover:scale-105 shadow-lg shadow-red-500/30" title={tr('button.clear')}>🗑️</button>
           </div>
         </div>
 
@@ -839,7 +841,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
               </div>
               <div className={`h-4 w-px ${t.border}`}></div>
               <div className="flex items-center gap-2">
-                <span className={`${t.textMuted} font-medium`}>Cor:</span>
+                <span className={`${t.textMuted} font-medium`}>{tr('label.color')}</span>
                 {[{ color: '#ff0000', name: 'Vermelho' }, { color: '#ffff00', name: 'Amarelo' }, { color: '#0064ff', name: 'Azul' }, { color: '#00ff00', name: 'Verde' }].map(l => (
                   <button key={l.color} onClick={() => setLaserColor(l.color)} className={`w-7 h-7 rounded-lg transition-all duration-200 hover:scale-110 ${laserColor === l.color ? 'ring-2 ring-offset-1 ring-blue-500' : 'ring-1 ring-gray-400'}`} style={{ backgroundColor: l.color }} title={l.name} />
                 ))}
@@ -880,7 +882,7 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
           {tool !== 'laser' && tool !== 'select' && (
             <>
               <div className="flex items-center gap-1.5">
-                <span className={`${t.textMuted} font-medium`}>Cor:</span>
+                <span className={`${t.textMuted} font-medium`}>{tr('label.color')}</span>
                 {(theme === 'dark' ? QUICK_COLORS_DARK : QUICK_COLORS_LIGHT).map(c => (
                   <button key={c} onClick={() => setColor(c)} className={`w-6 h-6 rounded-lg transition-all duration-200 hover:scale-110 ${color === c ? 'ring-2 ring-offset-1 ring-blue-500' : 'ring-1 ring-gray-300'}`} style={{ backgroundColor: c }} />
                 ))}
@@ -888,13 +890,13 @@ export default function DrawingTablet({ isActive, onToggle, className = '' }: Dr
               </div>
 
               <div className="flex items-center gap-2">
-                <span className={`${t.textMuted} font-medium`}>Espessura:</span>
+                <span className={`${t.textMuted} font-medium`}>{tr('label.thickness')}</span>
                 <input type="range" min="0.5" max="30" step="0.5" value={thickness} onChange={(e) => setThickness(parseFloat(e.target.value))} className="w-20" />
                 <span className={`${t.text} font-semibold w-8`}>{thickness}px</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className={`${t.textMuted} font-medium`}>Opacidade:</span>
+                <span className={`${t.textMuted} font-medium`}>{tr('label.opacity')}</span>
                 <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} className="w-20" />
                 <span className={`${t.text} font-semibold w-8`}>{Math.round(opacity * 100)}%</span>
               </div>

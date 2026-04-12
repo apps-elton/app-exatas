@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { GeometryParams, StyleOptions } from '@/types/geometry';
@@ -279,6 +280,7 @@ export function PlaneDefinition({
   showVerticesAlways = true, // Por padrão sempre mostra
   midpoints = [] // Pontos médios para incluir como vértices
 }: PlaneDefinitionProps) {
+  const { t } = useTranslation();
   const vertexPositions = useMemo(() => getVertexPositions(params, style, isEquilateral, midpoints), [params, style, isEquilateral, midpoints]);
   
   const selectedPoints = useMemo(() => {
@@ -599,13 +601,13 @@ export function PlaneDefinition({
           anchorY="middle"
           renderOrder={10}
         >
-          {planes.length >= 5 
-            ? 'Limite máximo de 5 planos atingido'
-            : selectedVertices.length === 0 
-              ? 'Selecione 3 vértices para criar um plano'
+          {planes.length >= 5
+            ? 'Limit: 5 planes'
+            : selectedVertices.length === 0
+              ? `${t('plane_definition.title')}`
               : selectedVertices.length < 3
-                ? `Selecione mais ${3 - selectedVertices.length} vértice(s)`
-                : 'Clique em "Criar Plano" para finalizar'
+                ? `${3 - selectedVertices.length} more`
+                : t('message.click_create_plane')
           }
         </Text>
       )}
@@ -632,7 +634,7 @@ export function PlaneDefinition({
             anchorY="middle"
             renderOrder={11}
           >
-            Criar Plano
+            {t('interaction.create_plane')}
           </Text>
         </group>
       )}
@@ -658,7 +660,7 @@ export function PlaneDefinition({
             anchorY="middle"
             renderOrder={11}
           >
-            Limpar
+            {t('button.clear')}
           </Text>
         </group>
       )}

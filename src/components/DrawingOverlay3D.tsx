@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ==========================================
 // TIPOS E INTERFACES
@@ -144,6 +145,7 @@ export default function DrawingOverlay3D({
   className = ''
 }: DrawingOverlay3DProps) {
   
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -845,10 +847,10 @@ export default function DrawingOverlay3D({
       {/* Legenda de atalhos */}
       {isActive && (
         <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-2 rounded-lg text-xs space-y-1">
-          <div><kbd>Ctrl+Z</kbd> Desfazer</div>
+          <div><kbd>Ctrl+Z</kbd> {t('button.undo')}</div>
           <div><kbd>Ctrl+G</kbd> Grade</div>
           <div><kbd>Ctrl+Shift+G</kbd> Snap</div>
-          <div><kbd>Delete</kbd> Limpar</div>
+          <div><kbd>Delete</kbd> {t('button.clear')}</div>
         </div>
       )}
       

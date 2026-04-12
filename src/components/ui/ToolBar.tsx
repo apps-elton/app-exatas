@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MousePointer, Palette, Pen, Pencil, Eraser, Undo, Redo, RotateCcw, Square, Circle, Minus, ArrowRight, Highlighter, Ruler, Grid3x3 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -112,6 +113,7 @@ export function ToolBar({
   onToggleSnap
 }: ToolBarProps) {
   
+  const { t } = useTranslation();
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
@@ -128,7 +130,7 @@ export function ToolBar({
             <div className="flex items-center gap-2">
               <Palette className="w-4 h-4 text-green-400" />
               <Label htmlFor="tablet-toggle" className="text-xs text-green-300 font-medium">
-                Mesa Ativa
+                {t('tablet.active')}
               </Label>
               <Switch
                 id="tablet-toggle"
@@ -145,9 +147,9 @@ export function ToolBar({
               <Button
                 variant={tabletTool.type === 'select' ? "default" : "outline"}
                 size="sm"
-                onClick={() => onTabletToolChange?.({ type: 'select', name: 'Seleção' })}
+                onClick={() => onTabletToolChange?.({ type: 'select', name: t('tool.select') })}
                 className={`h-8 w-8 p-0 ${tabletTool.type === 'select' ? 'bg-green-500 text-white' : 'bg-white/5 text-white/70'}`}
-                title="Seleção"
+                title={t('tool.select')}
               >
                 <MousePointer className="w-3 h-3" />
               </Button>
@@ -180,7 +182,7 @@ export function ToolBar({
 
             {/* Ferramentas Geométricas */}
             <div className="flex items-center gap-1 max-w-[300px] overflow-x-auto">
-              <span className="text-xs text-green-300 mr-1">Geometria:</span>
+              <span className="text-xs text-green-300 mr-1">{t('toolbar.geometry')}</span>
               {GEOMETRIC_TOOLS.map(tool => {
                 const Icon = tool.icon;
                 return (
@@ -208,7 +210,7 @@ export function ToolBar({
               size="sm"
               className="h-8 w-8 p-0 bg-white/5 text-white/70 border-green-500/30 hover:bg-white/10"
               onClick={() => setShowColorPicker(true)}
-              title="Selecionar Cor"
+              title={t('label.select_color')}
             >
               <div 
                 className="w-4 h-4 rounded border border-white/30"
@@ -220,7 +222,7 @@ export function ToolBar({
 
             {/* Espessura */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-green-300">Esp:</span>
+              <span className="text-xs text-green-300">{t('label.thickness_short')}</span>
               <input
                 type="range"
                 min="0.5"
@@ -240,7 +242,7 @@ export function ToolBar({
 
             {/* Opacidade */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-green-300">Opac:</span>
+              <span className="text-xs text-green-300">{t('label.opacity_short')}</span>
               <input
                 type="range"
                 min="0.1"
@@ -352,7 +354,7 @@ export function ToolBar({
                 onClick={onTabletUndo}
                 disabled={!canTabletUndo}
                 className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20 disabled:opacity-30"
-                title="Desfazer (Ctrl+Z)"
+                title={`${t('button.undo')} (Ctrl+Z)`}
               >
                 <Undo className="w-3 h-3" />
               </Button>
@@ -362,7 +364,7 @@ export function ToolBar({
                 onClick={onTabletRedo}
                 disabled={!canTabletRedo}
                 className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20 disabled:opacity-30"
-                title="Refazer (Ctrl+Y)"
+                title={`${t('button.redo')} (Ctrl+Y)`}
               >
                 <Redo className="w-3 h-3" />
               </Button>
@@ -371,7 +373,7 @@ export function ToolBar({
                 size="sm"
                 onClick={onTabletClear}
                 className="h-8 w-8 p-0 border-green-500/30 text-green-300 hover:bg-green-500/20"
-                title="Limpar (Delete)"
+                title={`${t('button.clear')} (Delete)`}
               >
                 <RotateCcw className="w-3 h-3" />
               </Button>
@@ -383,7 +385,7 @@ export function ToolBar({
             <Palette className="w-4 h-4 text-white/60" />
             <div className="flex items-center gap-2">
               <Label htmlFor="tablet-toggle" className="text-xs text-white/70">
-                Mesa Digitalizadora
+                {t('tablet.name')}
               </Label>
               <Switch
                 id="tablet-toggle"
@@ -407,7 +409,7 @@ export function ToolBar({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-white">Selecionar Cor</h3>
+              <h3 className="text-sm font-medium text-white">{t('label.select_color')}</h3>
               <button
                 onClick={() => setShowColorPicker(false)}
                 className="text-white/50 hover:text-white"

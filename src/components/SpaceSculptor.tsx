@@ -912,14 +912,14 @@ function SpaceSculptorContent() {
     }));
     
     if (construction) {
-      const constructionNames = {
-        'reta-perpendicular': 'Reta Perpendicular',
-        'reta-paralela': 'Reta Paralela',
-        'mediatriz': 'Mediatriz',
-        'bissetriz': 'Bissetriz',
-        'reta-tangente': 'Reta Tangente',
-        'ponto-medio': 'Ponto Médio',
-        'segmento-reta': 'Segmento de Reta'
+      const constructionNames: Record<string, string> = {
+        'reta-perpendicular': t('constructions.perpendicular_line'),
+        'reta-paralela': t('constructions.parallel_line'),
+        'mediatriz': t('constructions.perpendicular_bisector'),
+        'bissetriz': t('constructions.angle_bisector'),
+        'reta-tangente': t('constructions.tangent_line'),
+        'ponto-medio': t('constructions.midpoint'),
+        'segmento-reta': t('constructions.line_segment')
       };
       toast.success(`${constructionNames[construction]} selecionada - clique nos vértices`);
     }
@@ -930,7 +930,7 @@ function SpaceSculptorContent() {
       ...prev,
       selectedVerticesForConstruction: []
     }));
-    toast.success('Seleção de vértices limpa');
+    toast.success(t('message.vertex_selection_cleared'));
   }, []);
 
   // Handler melhorado para construções - não interfere com planos
@@ -1041,7 +1041,7 @@ function SpaceSculptorContent() {
       ...prev,
       activeVertexMode: 'meridian'
     }));
-    toast.info('🔶 Modo Seção Meridiana ativado');
+    toast.info(t('message.meridian_mode_activated'));
   }, []);
 
   const activatePlaneMode = useCallback(() => {
@@ -1057,7 +1057,7 @@ function SpaceSculptorContent() {
       ...prev,
       activeVertexMode: 'connection'
     }));
-    toast.info('🔗 Modo Conexão de Vértices ativado');
+    toast.info(t('message.connection_mode_activated'));
   }, []);
 
   const activateConstructionMode = useCallback(() => {
@@ -1131,7 +1131,7 @@ function SpaceSculptorContent() {
             GeoTeach
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Visualizador Interativo de Geometria Espacial
+            {t('header.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -1144,7 +1144,7 @@ function SpaceSculptorContent() {
             onClick={handleResetView}
             className="reset-view-button"
           >
-            🎯 Centralizar Vista
+            {t('button.center_view')}
           </Button>
           <Button
             variant={options.isFrozen ? "default" : "outline"} 

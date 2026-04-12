@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConstructionType } from './GeometricConstructions';
@@ -10,64 +11,66 @@ interface GeometricConstructionPanelProps {
   selectedVerticesCount: number;
 }
 
-const constructionOptions = [
-  {
-    type: 'segmento-reta' as ConstructionType,
-    label: 'Segmento de Reta',
-    description: 'Conectar dois pontos com um segmento',
-    icon: '━',
-    requiredPoints: 2
-  },
-  {
-    type: 'ponto-medio' as ConstructionType,
-    label: 'Ponto Médio',
-    description: 'Encontrar o ponto médio entre dois pontos',
-    icon: '⬤',
-    requiredPoints: 2
-  },
-  {
-    type: 'reta-perpendicular' as ConstructionType,
-    label: 'Reta Perpendicular',
-    description: 'Reta perpendicular a uma linha passando por um ponto',
-    icon: '⊥',
-    requiredPoints: 3
-  },
-  {
-    type: 'reta-paralela' as ConstructionType,
-    label: 'Reta Paralela',
-    description: 'Reta paralela a uma linha passando por um ponto',
-    icon: '||',
-    requiredPoints: 3
-  },
-  {
-    type: 'mediatriz' as ConstructionType,
-    label: 'Mediatriz',
-    description: 'Reta perpendicular que passa pelo ponto médio de um segmento',
-    icon: '⊥⌐',
-    requiredPoints: 2
-  },
-  {
-    type: 'bissetriz' as ConstructionType,
-    label: 'Bissetriz',
-    description: 'Reta que divide um ângulo ao meio',
-    icon: '∠÷',
-    requiredPoints: 3
-  },
-  {
-    type: 'reta-tangente' as ConstructionType,
-    label: 'Reta Tangente',
-    description: 'Reta tangente passando por um ponto',
-    icon: '⟱',
-    requiredPoints: 2
-  }
-];
-
 export function GeometricConstructionPanel({
   selectedConstruction,
   onConstructionSelect,
   onClearSelection,
   selectedVerticesCount
 }: GeometricConstructionPanelProps) {
+  const { t } = useTranslation();
+
+  const constructionOptions = [
+    {
+      type: 'segmento-reta' as ConstructionType,
+      label: t('constructions.line_segment'),
+      description: 'Conectar dois pontos com um segmento',
+      icon: '━',
+      requiredPoints: 2
+    },
+    {
+      type: 'ponto-medio' as ConstructionType,
+      label: t('constructions.midpoint'),
+      description: 'Encontrar o ponto médio entre dois pontos',
+      icon: '⬤',
+      requiredPoints: 2
+    },
+    {
+      type: 'reta-perpendicular' as ConstructionType,
+      label: t('constructions.perpendicular_line'),
+      description: 'Reta perpendicular a uma linha passando por um ponto',
+      icon: '⊥',
+      requiredPoints: 3
+    },
+    {
+      type: 'reta-paralela' as ConstructionType,
+      label: t('constructions.parallel_line'),
+      description: 'Reta paralela a uma linha passando por um ponto',
+      icon: '||',
+      requiredPoints: 3
+    },
+    {
+      type: 'mediatriz' as ConstructionType,
+      label: t('constructions.perpendicular_bisector'),
+      description: 'Reta perpendicular que passa pelo ponto médio de um segmento',
+      icon: '⊥⌐',
+      requiredPoints: 2
+    },
+    {
+      type: 'bissetriz' as ConstructionType,
+      label: t('constructions.angle_bisector'),
+      description: 'Reta que divide um ângulo ao meio',
+      icon: '∠÷',
+      requiredPoints: 3
+    },
+    {
+      type: 'reta-tangente' as ConstructionType,
+      label: t('constructions.tangent_line'),
+      description: 'Reta tangente passando por um ponto',
+      icon: '⟱',
+      requiredPoints: 2
+    }
+  ];
+
   const getButtonVariant = (constructionType: ConstructionType) => {
     return selectedConstruction === constructionType ? 'default' : 'outline';
   };
@@ -80,7 +83,7 @@ export function GeometricConstructionPanel({
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
-          Construções Geométricas
+          {t('drawing.constructions')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -130,7 +133,7 @@ export function GeometricConstructionPanel({
               onClick={onClearSelection}
               className="w-full"
             >
-              Limpar Seleção
+              {t('button.clear_selection')}
             </Button>
           )}
           

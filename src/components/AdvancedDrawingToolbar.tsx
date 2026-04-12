@@ -178,7 +178,7 @@ export default function AdvancedDrawingToolbar({
             size="sm"
             onClick={() => onToolChange('select')}
             disabled={!isDrawingMode}
-            title="Seleção - Clique para selecionar e mover elementos"
+            title={t('tooltip.selection')}
           >
             <MousePointer className="w-4 h-4" />
           </Button>
@@ -219,7 +219,7 @@ export default function AdvancedDrawingToolbar({
             <div className="flex items-center gap-2">
               <Label className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <Palette className="w-3 h-3" />
-                Cor:
+                {t('label.color')}
               </Label>
               <div className="flex gap-1">
                 {DRAWING_COLORS.map((color) => (
@@ -324,7 +324,7 @@ export default function AdvancedDrawingToolbar({
             <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-3 min-w-[120px]">
               <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                Opacidade: {Math.round(opacity * 100)}%
+                {t('label.opacity')} {Math.round(opacity * 100)}%
               </Label>
               <Slider
                 value={[opacity]}
@@ -348,7 +348,7 @@ export default function AdvancedDrawingToolbar({
             size="sm"
             onClick={onUndo}
             disabled={!canUndo || !isDrawingMode}
-            title="Desfazer (Ctrl+Z)"
+            title={`${t('button.undo')} (Ctrl+Z)`}
             className="hover:bg-accent/10"
           >
             <Undo2 className="w-4 h-4" />
@@ -359,7 +359,7 @@ export default function AdvancedDrawingToolbar({
             size="sm"
             onClick={onRedo}
             disabled={!canRedo || !isDrawingMode}
-            title="Refazer (Ctrl+Y)"
+            title={`${t('button.redo')} (Ctrl+Y)`}
             className="hover:bg-accent/10"
           >
             <Redo2 className="w-4 h-4" />
@@ -370,7 +370,7 @@ export default function AdvancedDrawingToolbar({
             size="sm"
             onClick={onClear}
             disabled={!isDrawingMode}
-            title="Limpar tudo"
+            title={t('button.clear_all')}
             className="hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="w-4 h-4" />
@@ -424,7 +424,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'reta-perpendicular' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('reta-perpendicular')}
-                    title="Reta Perpendicular"
+                    title={t('constructions.perpendicular_line')}
                     className="h-8 px-2"
                   >
                     <span className="text-sm font-mono">⊥</span>
@@ -434,7 +434,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'reta-paralela' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('reta-paralela')}
-                    title="Reta Paralela"
+                    title={t('constructions.parallel_line')}
                     className="h-8 px-2"
                   >
                     <span className="text-sm font-mono">||</span>
@@ -444,7 +444,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'mediatriz' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('mediatriz')}
-                    title="Mediatriz"
+                    title={t('constructions.perpendicular_bisector')}
                     className="h-8 px-2"
                   >
                     <Ruler className="w-4 h-4" />
@@ -454,7 +454,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'bissetriz' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('bissetriz')}
-                    title="Bissetriz"
+                    title={t('constructions.angle_bisector')}
                     className="h-8 px-2"
                   >
                     <Triangle className="w-4 h-4" />
@@ -464,7 +464,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'reta-tangente' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('reta-tangente')}
-                    title="Reta Tangente"
+                    title={t('constructions.tangent_line')}
                     className="h-8 px-2"
                   >
                     <span className="text-sm font-mono">⟱</span>
@@ -474,7 +474,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'ponto-medio' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('ponto-medio')}
-                    title="Ponto Médio"
+                    title={t('constructions.midpoint')}
                     className="h-8 px-2"
                   >
                     <span className="text-sm font-mono">•</span>
@@ -484,7 +484,7 @@ export default function AdvancedDrawingToolbar({
                     variant={selectedConstruction === 'segmento-reta' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onConstructionSelect('segmento-reta')}
-                    title="Segmento de Reta"
+                    title={t('constructions.line_segment')}
                     className="h-8 px-2"
                   >
                     <span className="text-sm font-mono">—</span>
@@ -510,7 +510,7 @@ export default function AdvancedDrawingToolbar({
                           variant="destructive"
                           size="sm"
                           onClick={onClearConstructions}
-                          title={`Limpar todas as construções (${constructionsCount})`}
+                          title={`${t('button.clear_constructions')} (${constructionsCount})`}
                           className="h-8 px-2"
                         >
                           <Trash2 className="w-3 h-3 mr-1" />
@@ -523,7 +523,7 @@ export default function AdvancedDrawingToolbar({
                           variant="destructive"
                           size="sm"
                           onClick={onClearPlanes}
-                          title={`Limpar todos os planos (${planesCount})`}
+                          title={`${t('button.clear_planes')} (${planesCount})`}
                           className="h-8 px-2"
                         >
                           <Square className="w-3 h-3 mr-1" />
@@ -542,7 +542,7 @@ export default function AdvancedDrawingToolbar({
       {/* Tool Info */}
       {isDrawingMode && (
         <div className="mt-2 p-2 bg-muted/20 rounded text-xs text-muted-foreground">
-          <strong>Ferramenta Ativa:</strong> {getToolName(tool)} 
+          <strong>{t('label.active_tool')}</strong> {getToolName(tool)} 
           {tool === 'select' && ' - Clique nos elementos para selecioná-los. Use Delete para remover.'}
           {tool === 'pen' && ' - Clique e arraste para desenhar.'}
           {tool === 'eraser' && ' - Clique nos elementos ou arraste para apagar.'}

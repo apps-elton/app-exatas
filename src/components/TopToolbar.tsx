@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -63,18 +64,19 @@ export default function TopToolbar({
   tabletStyle = { color: '#ffffff', thickness: 3, opacity: 1, pressure: true, smoothing: 0.8 },
   onTabletStyleChange
 }: TopToolbarProps) {
+  const { t } = useTranslation();
   const tools = [
     {
       id: 'none',
       icon: <Navigation className="w-5 h-5" />,
-      label: 'Seleção',
-      description: 'Ferramenta de seleção padrão'
+      label: t('tool.select'),
+      description: t('tooltip.select_tool')
     },
     {
       id: 'midpoint',
       icon: <Circle className="w-5 h-5" />,
-      label: 'Ponto Médio',
-      description: 'Criar ponto médio entre dois vértices'
+      label: t('constructions.midpoint'),
+      description: t('tooltip.midpoint')
     },
     {
       id: 'cross-section',
@@ -82,8 +84,8 @@ export default function TopToolbar({
         <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         <path d="M2 12s3-9 10-9 10 9 10 9-3 9-10 9-10-9-10-9z" />
       </svg>,
-      label: 'Seção Transversal',
-      description: 'Cortar o sólido horizontalmente'
+      label: t('visualization.cross_section'),
+      description: t('visualization.cross_section')
     },
     {
       id: 'meridian-section',
@@ -91,20 +93,20 @@ export default function TopToolbar({
         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
         <line x1="1" y1="1" x2="23" y2="23" />
       </svg>,
-      label: 'Seção Meridiana',
-      description: 'Cortar o sólido verticalmente'
+      label: t('visualization.meridian_section'),
+      description: t('visualization.meridian_section')
     },
     {
       id: 'vertex-connector',
       icon: <Link className="w-5 h-5" />,
-      label: 'Conectar Vértices',
-      description: 'Criar segmentos entre vértices'
+      label: t('drawing.connect_vertices'),
+      description: t('drawing.connect_vertices')
     },
     {
       id: 'plane-definition',
       icon: <Plane className="w-5 h-5" />,
-      label: 'Criar Plano',
-      description: 'Definir planos por 3 pontos'
+      label: t('interaction.create_plane'),
+      description: t('plane_definition.title')
     }
   ];
 
@@ -126,7 +128,7 @@ export default function TopToolbar({
           {/* Seção de Ferramentas Principais */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-wide">Ferramentas</span>
+              <span className="text-sm font-medium text-slate-400 uppercase tracking-wide">{t('toolbar.tools')}</span>
               <div className="w-8 h-px bg-slate-600"></div>
             </div>
             
@@ -187,7 +189,7 @@ export default function TopToolbar({
               }`}
             >
               <Undo2 className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">Desfazer</span>
+              <span className="text-sm font-medium">{t('button.undo')}</span>
             </Button>
 
             <Button
@@ -196,13 +198,13 @@ export default function TopToolbar({
               onClick={onRedo}
               disabled={!canRedo}
               className={`h-10 px-4 rounded-lg transition-all duration-200 ${
-                canRedo 
-                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-600 hover:border-slate-500' 
+                canRedo
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-600 hover:border-slate-500'
                   : 'bg-slate-900 text-slate-500 border-slate-700 cursor-not-allowed'
               }`}
             >
               <Redo2 className="w-4 h-4 mr-2" />
-              <span className="text-sm font-medium">Refazer</span>
+              <span className="text-sm font-medium">{t('button.redo')}</span>
             </Button>
 
             {/* Botão para limpar pontos médios */}

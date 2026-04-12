@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { GeometryParams } from '@/types/geometry';
@@ -43,6 +44,7 @@ export function VertexConnector({
   connections = [],
   midpoints = []
 }: VertexConnectorProps) {
+  const { t } = useTranslation();
   const [intersectionPoints, setIntersectionPoints] = useState<THREE.Vector3[]>([]);
   const [persistentIntersections, setPersistentIntersections] = useState<THREE.Vector3[]>([]);
 
@@ -521,7 +523,7 @@ export function VertexConnector({
           anchorY="middle"
           renderOrder={11}
         >
-          Limpar Seleção
+          {t('button.clear_selection')}
         </Text>
       </group>
     );

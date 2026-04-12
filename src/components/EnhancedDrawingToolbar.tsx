@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
@@ -62,6 +63,7 @@ export default function EnhancedDrawingToolbar({
   onExportCombined,
   onEquationAdd
 }: EnhancedDrawingToolbarProps) {
+  const { t } = useTranslation();
   return (
     <Card className="p-3 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">
       <div className="flex items-center gap-3 flex-wrap">
@@ -78,7 +80,7 @@ export default function EnhancedDrawingToolbar({
         >
           {isDrawingMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           <PenTool className="w-4 h-4" />
-          {isDrawingMode ? 'Desativar Caneta' : 'Ativar Caneta'}
+          {isDrawingMode ? t('button.deactivate') : t('drawing.activate_drawing')}
         </Button>
         {/* Ferramentas */}
         <div className="flex items-center gap-2">
@@ -108,7 +110,7 @@ export default function EnhancedDrawingToolbar({
         <div className="flex items-center gap-2">
           <Label className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
             <Palette className="w-3 h-3" />
-            Cor:
+            {t('label.color')}
           </Label>
           <div className="flex gap-1">
             {DRAWING_COLORS.map((color) => (
@@ -133,7 +135,7 @@ export default function EnhancedDrawingToolbar({
         {/* Stroke Width */}
         <div className="flex items-center gap-3 min-w-[120px]">
           <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-            {tool === 'eraser' ? 'Tam. Borracha:' : 'Espessura:'} {strokeWidth}px
+            {tool === 'eraser' ? t('label.eraser_size') : t('label.thickness')} {strokeWidth}px
           </Label>
           <Slider
             value={[strokeWidth]}
@@ -151,7 +153,7 @@ export default function EnhancedDrawingToolbar({
         {/* Opacity */}
         <div className="flex items-center gap-3 min-w-[120px]">
           <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-            Opacidade: {Math.round(opacity * 100)}%
+            {t('label.opacity')} {Math.round(opacity * 100)}%
           </Label>
           <Slider
             value={[opacity]}
@@ -173,7 +175,7 @@ export default function EnhancedDrawingToolbar({
             size="sm"
             onClick={onUndo}
             disabled={!canUndo || !isDrawingMode}
-            title="Desfazer (Ctrl+Z)"
+            title={`${t('button.undo')} (Ctrl+Z)`}
             className="hover:bg-accent/10"
           >
             <Undo2 className="w-4 h-4" />
@@ -184,7 +186,7 @@ export default function EnhancedDrawingToolbar({
             size="sm"
             onClick={onRedo}
             disabled={!canRedo || !isDrawingMode}
-            title="Refazer (Ctrl+Y)"
+            title={`${t('button.redo')} (Ctrl+Y)`}
             className="hover:bg-accent/10"
           >
             <Redo2 className="w-4 h-4" />
@@ -220,7 +222,7 @@ export default function EnhancedDrawingToolbar({
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Download className="w-4 h-4 mr-2" />
-            Exportar Completo
+            {t('controls.download')}
           </Button>
 
           {/* Editor de Equações */}
