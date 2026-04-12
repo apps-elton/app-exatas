@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import {
   Box,
   ChevronLeft,
@@ -196,6 +197,11 @@ export function AppSidebar() {
           </Button>
         </div>
       )}
+
+      {/* Language Selector */}
+      <div className={`px-2 pt-2 ${collapsed ? 'flex justify-center' : ''}`}>
+        <LanguageSelector />
+      </div>
 
       {/* Logout */}
       <div className="p-2 border-t border-border/30">

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, LogIn, Box, Shield, School, GraduationCap, Wrench } from 'lucide-react';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 const TEST_ACCOUNTS = [
   {
@@ -134,7 +135,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background relative">
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector />
+      </div>
       {/* Left side - branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/10 to-background">
         <div className="relative z-10 text-center px-12">

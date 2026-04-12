@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School } from 'lucide-react';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 type AccountType = 'teacher' | 'school' | null;
 
@@ -183,7 +184,10 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background relative">
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector />
+      </div>
       {/* Left side - branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center bg-gradient-to-br from-secondary/20 via-primary/10 to-background">
         <div className="relative z-10 text-center px-12">
