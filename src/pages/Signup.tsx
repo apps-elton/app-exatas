@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ interface InviteData {
 }
 
 export default function Signup() {
+  const { t } = useTranslation();
   const { session, loading } = useAuth();
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('invite');
@@ -52,7 +54,7 @@ export default function Signup() {
         .single();
 
       if (error || !data) {
-        setInviteError('Convite inválido, expirado ou já utilizado.');
+        setInviteError(t('signup.invite_invalid_message'));
         setInviteLoading(false);
         return;
       }
@@ -84,15 +86,15 @@ export default function Signup() {
     setError('');
 
     if (!passwordChecks.length) {
-      setError('A senha deve ter pelo menos 6 caracteres');
+      setError(t('signup.error_password_min'));
       return;
     }
     if (!passwordChecks.match) {
-      setError('As senhas não coincidem');
+      setError(t('signup.error_passwords_mismatch'));
       return;
     }
     if (accountType === 'school' && !schoolName.trim()) {
-      setError('Informe o nome da escola');
+      setError(t('signup.error_school_name_required'));
       return;
     }
 
@@ -113,7 +115,7 @@ export default function Signup() {
       if (signUpError) {
         setError(
           signUpError.message.includes('already registered')
-            ? 'Este email já está cadastrado'
+            ? t('signup.error_already_registered')
             : signUpError.message
         );
         setSubmitting(false);
@@ -122,7 +124,7 @@ export default function Signup() {
 
       const userId = authData.user?.id;
       if (!userId) {
-        setError('Erro ao criar conta. Tente novamente.');
+        setError(t('signup.error_create_account'));
         setSubmitting(false);
         return;
       }
@@ -142,7 +144,7 @@ export default function Signup() {
         });
 
         if (rpcError) {
-          setError('Erro ao criar escola: ' + rpcError.message);
+          setError(t('signup.error_create_school', { message: rpcError.message }));
           setSubmitting(false);
           return;
         }
@@ -155,7 +157,7 @@ export default function Signup() {
         });
 
         if (rpcError) {
-          setError('Erro ao aceitar convite: ' + rpcError.message);
+          setError(t('signup.error_accept_invite', { message: rpcError.message }));
           setSubmitting(false);
           return;
         }
@@ -166,7 +168,7 @@ export default function Signup() {
 
       setSuccess(true);
     } catch (err) {
-      setError('Erro inesperado. Tente novamente.');
+      setError(t('signup.error_unexpected'));
     }
     setSubmitting(false);
   };
@@ -177,7 +179,7 @@ export default function Signup() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground font-poppins">Verificando convite...</p>
+          <p className="text-muted-foreground font-poppins">{t('signup.invite_loading')}</p>
         </div>
       </div>
     );
@@ -198,15 +200,15 @@ export default function Signup() {
             GeoTeach
           </h1>
           <p className="text-xl text-muted-foreground font-nunito max-w-md">
-            Comece grátis e explore geometria 3D como nunca antes
+            {t('signup.hero_subtitle')}
           </p>
           <div className="mt-12 space-y-4 text-left max-w-sm mx-auto">
-            {[
-              'Visualize 20+ sólidos geométricos em 3D',
-              'Use mesa digitalizadora com sensibilidade à pressão',
-              'Crie cortes, planificações e construções geométricas',
-              'Salve e compartilhe seus projetos',
-            ].map((item, i) => (
+            {([
+              t('signup.hero_feature_1'),
+              t('signup.hero_feature_2'),
+              t('signup.hero_feature_3'),
+              t('signup.hero_feature_4'),
+            ]).map((item, i) => (
               <div key={i} className="flex items-start gap-3">
                 <Check className="w-5 h-5 text-accent mt-0.5 shrink-0" />
                 <span className="text-muted-foreground font-nunito text-sm">{item}</span>
@@ -234,12 +236,12 @@ export default function Signup() {
                 <span className="text-3xl">!</span>
               </div>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
-                Convite inválido
+                {t('signup.invite_invalid_title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-6">{inviteError}</p>
               <Link to="/signup">
                 <Button variant="outline" className="h-12 px-8 font-poppins font-semibold">
-                  Criar conta sem convite
+                  {t('signup.invite_create_without')}
                 </Button>
               </Link>
             </div>
@@ -252,18 +254,18 @@ export default function Signup() {
                 <Check className="w-8 h-8 text-primary" />
               </div>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
-                Conta criada!
+                {t('signup.success_title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-6">
                 {accountType === 'school'
-                  ? `Sua escola "${schoolName}" foi cadastrada. Verifique seu email e faça login.`
+                  ? t('signup.success_school', { schoolName })
                   : inviteData
-                  ? `Você foi adicionado à ${inviteData.tenant_name}. Verifique seu email e faça login.`
-                  : 'Verifique seu email para confirmar sua conta. Depois é só fazer login.'}
+                  ? t('signup.success_invite', { tenant: inviteData.tenant_name })
+                  : t('signup.success_default')}
               </p>
               <Link to="/login">
                 <Button className="h-12 px-8 font-poppins font-semibold">
-                  Ir para o login
+                  {t('signup.go_to_login_button')}
                 </Button>
               </Link>
             </div>
@@ -273,10 +275,10 @@ export default function Signup() {
           {!success && !inviteError && !accountType && (
             <>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
-                Criar conta
+                {t('signup.title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
-                Como você quer usar o GeoTeach?
+                {t('signup.subtitle')}
               </p>
 
               <div className="space-y-4">
@@ -288,9 +290,9 @@ export default function Signup() {
                     <GraduationCap className="w-6 h-6 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="font-poppins font-semibold text-foreground">Sou Professor</p>
+                    <p className="font-poppins font-semibold text-foreground">{t('signup.teacher_title')}</p>
                     <p className="text-sm text-muted-foreground font-nunito">
-                      Conta individual gratuita para usar geometria 3D
+                      {t('signup.teacher_description')}
                     </p>
                   </div>
                 </button>
@@ -303,9 +305,9 @@ export default function Signup() {
                     <School className="w-6 h-6 text-amber-400" />
                   </div>
                   <div>
-                    <p className="font-poppins font-semibold text-foreground">Sou Escola</p>
+                    <p className="font-poppins font-semibold text-foreground">{t('signup.school_title')}</p>
                     <p className="text-sm text-muted-foreground font-nunito">
-                      Cadastre sua escola e convide professores
+                      {t('signup.school_description')}
                     </p>
                   </div>
                 </button>
@@ -313,9 +315,9 @@ export default function Signup() {
 
               <div className="mt-8 text-center">
                 <p className="text-muted-foreground font-nunito text-sm">
-                  Já tem conta?{' '}
+                  {t('signup.already_have_account')}{' '}
                   <Link to="/login" className="text-primary font-semibold hover:underline">
-                    Fazer login
+                    {t('signup.go_to_login')}
                   </Link>
                 </p>
               </div>
@@ -331,35 +333,35 @@ export default function Signup() {
                     onClick={() => setAccountType(null)}
                     className="text-sm text-muted-foreground hover:text-foreground font-nunito"
                   >
-                    &larr; Voltar
+                    {t('signup.back')}
                   </button>
                 )}
               </div>
 
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
                 {inviteData
-                  ? `Convite para ${inviteData.tenant_name}`
+                  ? t('signup.invite_for_tenant', { tenant: inviteData.tenant_name })
                   : accountType === 'school'
-                  ? 'Cadastrar Escola'
-                  : 'Criar conta de Professor'}
+                  ? t('signup.school_register_title')
+                  : t('signup.teacher_register_title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
                 {inviteData
-                  ? `Crie sua conta para acessar a ${inviteData.tenant_name}`
+                  ? t('signup.invite_create_to_access', { tenant: inviteData.tenant_name })
                   : accountType === 'school'
-                  ? 'Você será o administrador da escola'
-                  : 'Conta individual gratuita'}
+                  ? t('signup.school_admin_subtitle')
+                  : t('signup.teacher_free_subtitle')}
               </p>
 
               <form onSubmit={handleSignup} className="space-y-5">
                 {/* School name (only for school signup) */}
                 {accountType === 'school' && !inviteData && (
                   <div className="space-y-2">
-                    <Label htmlFor="school" className="font-poppins text-sm">Nome da Escola</Label>
+                    <Label htmlFor="school" className="font-poppins text-sm">{t('signup.school_name_label')}</Label>
                     <Input
                       id="school"
                       type="text"
-                      placeholder="Ex: Colégio São Paulo"
+                      placeholder={t('signup.school_name_placeholder')}
                       value={schoolName}
                       onChange={(e) => setSchoolName(e.target.value)}
                       required
@@ -370,12 +372,12 @@ export default function Signup() {
 
                 <div className="space-y-2">
                   <Label htmlFor="name" className="font-poppins text-sm">
-                    {accountType === 'school' ? 'Seu nome (administrador)' : 'Nome completo'}
+                    {accountType === 'school' ? t('signup.admin_name_label') : t('auth.full_name')}
                   </Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Seu nome"
+                    placeholder={t('auth.full_name_placeholder')}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -384,11 +386,11 @@ export default function Signup() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-poppins text-sm">Email</Label>
+                  <Label htmlFor="email" className="font-poppins text-sm">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder={t('auth.email_placeholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -397,12 +399,12 @@ export default function Signup() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="font-poppins text-sm">Senha</Label>
+                  <Label htmlFor="password" className="font-poppins text-sm">{t('auth.password')}</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder={t('auth.new_password_placeholder')}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -420,18 +422,18 @@ export default function Signup() {
                     <div className="flex items-center gap-2 text-xs mt-1">
                       <div className={`w-2 h-2 rounded-full ${passwordChecks.length ? 'bg-green-500' : 'bg-muted-foreground'}`} />
                       <span className={passwordChecks.length ? 'text-green-500' : 'text-muted-foreground'}>
-                        6+ caracteres
+                        {t('auth.min_chars')}
                       </span>
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirm" className="font-poppins text-sm">Confirmar senha</Label>
+                  <Label htmlFor="confirm" className="font-poppins text-sm">{t('auth.confirm_password')}</Label>
                   <Input
                     id="confirm"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Repita a senha"
+                    placeholder={t('auth.confirm_password_placeholder')}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -441,7 +443,7 @@ export default function Signup() {
                     <div className="flex items-center gap-2 text-xs mt-1">
                       <div className={`w-2 h-2 rounded-full ${passwordChecks.match ? 'bg-green-500' : 'bg-destructive'}`} />
                       <span className={passwordChecks.match ? 'text-green-500' : 'text-destructive'}>
-                        {passwordChecks.match ? 'Senhas coincidem' : 'Senhas não coincidem'}
+                        {passwordChecks.match ? t('auth.passwords_match') : t('auth.passwords_dont_match')}
                       </span>
                     </div>
                   )}
@@ -464,18 +466,18 @@ export default function Signup() {
                     <UserPlus className="w-5 h-5" />
                   )}
                   {submitting
-                    ? 'Criando...'
+                    ? t('signup.submitting')
                     : accountType === 'school'
-                    ? 'Cadastrar Escola'
-                    : 'Criar conta grátis'}
+                    ? t('signup.submit_school')
+                    : t('signup.submit_teacher')}
                 </Button>
               </form>
 
               <div className="mt-8 text-center">
                 <p className="text-muted-foreground font-nunito text-sm">
-                  Já tem conta?{' '}
+                  {t('signup.already_have_account')}{' '}
                   <Link to="/login" className="text-primary font-semibold hover:underline">
-                    Fazer login
+                    {t('signup.go_to_login')}
                   </Link>
                 </p>
               </div>
