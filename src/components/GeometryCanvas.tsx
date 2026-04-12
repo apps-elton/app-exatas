@@ -2172,40 +2172,6 @@ export default function GeometryCanvas({ params, options, style, onVertexSelect,
       </Canvas>
       
       {/* Botão de Reset que aparece durante navegação - TESTE: sempre visível */}
-      {(showResetButton || true) && (
-        <div 
-          className="reset-view-button"
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            zIndex: 1000,
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            border: '2px solid #3b82f6',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onClick={handleResetView}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.9)';
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.animation = 'none';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.animation = 'pulse-glow 2s infinite';
-          }}
-        >
-          🎯 Centralizar Vista
-        </div>
-      )}
       
     </div>
   );

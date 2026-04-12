@@ -1148,7 +1148,7 @@ function SpaceSculptorContent() {
   }, [isDrawingMode, handleUndo, handleRedo, handleToggleDrawing, canUndoGeometry, canRedoGeometry, handleUndoGeometry, handleRedoGeometry]);
 
   return (
-    <div className="h-full bg-gradient-nebula text-foreground flex">
+    <div className="h-screen bg-gradient-nebula text-foreground flex overflow-hidden">
       {/* Icon Sidebar */}
       <IconSidebar
         activePanel={activePanel}
@@ -1308,14 +1308,16 @@ function SpaceSculptorContent() {
                 </div>
               )}
 
-              {/* 5. MESA DIGITALIZADORA - SEMPRE VISÍVEL */}
-              <div className="absolute inset-0 w-full h-full" style={{ zIndex: isTabletActive ? 10 : 5, pointerEvents: isTabletActive ? 'auto' : 'none', marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0, top: 0, left: 0, right: 0, bottom: 0 }}>
-                <DrawingTablet
-                  isActive={isTabletActive}
-                  onToggle={() => setIsTabletActive(!isTabletActive)}
-                  className="w-full h-full"
-                />
-              </div>
+              {/* 5. MESA DIGITALIZADORA - SÓ QUANDO ATIVA */}
+              {isTabletActive && (
+                <div className="absolute inset-0 w-full h-full z-10 pointer-events-auto">
+                  <DrawingTablet
+                    isActive={isTabletActive}
+                    onToggle={() => setIsTabletActive(!isTabletActive)}
+                    className="w-full h-full"
+                  />
+                </div>
+              )}
 
             </div>
         </div>

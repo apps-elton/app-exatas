@@ -41,7 +41,7 @@ export function IconSidebar({ activePanel, onPanelToggle, isDrawingActive, onDra
   ];
 
   return (
-    <div id="icon-sidebar" className="w-16 h-full bg-background border-r border-border/30 flex flex-col items-center py-3 flex-shrink-0">
+    <div id="icon-sidebar" className="w-16 h-full bg-background border-r border-border/30 flex flex-col items-center py-3 flex-shrink-0 z-40">
       {/* Tool icons */}
       <div className="flex flex-col items-center gap-1">
         {toolIcons.map((item) => {
