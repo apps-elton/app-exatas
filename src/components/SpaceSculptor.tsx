@@ -1,28 +1,23 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { GeometryParams, VisualizationOptions, StyleOptions, GeometryType } from '@/types/geometry';
 import { GeometryCalculator } from '@/lib/geometry-calculations';
-import { useGeometryState } from '@/hooks/useGeometryState';
 import { useHistory } from '@/hooks/useHistory';
 import GeometryCanvas from './GeometryCanvas';
-import ControlPanel from './ControlPanel';
 import { FabricDrawingCanvas, FabricDrawingCanvasRef } from './FabricDrawingCanvas';
 import { FrozenCanvas } from './FrozenCanvas';
-import { Button } from '@/components/ui/button';
-import { Camera, Unlock, Download, Undo2, Redo2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { toast } from 'sonner';
-import { ThemeToggle } from './ThemeToggle';
-import EquationRenderer from './EquationRenderer';
-import ImageDownloadMenu from './ImageDownloadMenu';
 import { ConstructionType } from './geometry/GeometricConstructions';
 import { ActiveToolProvider, useActiveTool } from '@/context/ActiveToolContext';
 import { useTranslation } from 'react-i18next';
-import ToolBar from '@/components/ui/ToolBar';
-import StatusBar from '@/components/ui/StatusBar';
 import DrawingOverlayWrapper from './DrawingOverlayWrapper';
-import TopToolbar from './TopToolbar';
 import DrawingTablet from './DrawingTablet';
-import DrawingTabletSimple from './DrawingTabletSimple';
-import TestTablet from './TestTablet';
+import { IconSidebar, PanelId } from './IconSidebar';
+import { FloatingPanel } from './FloatingPanel';
+import GeometryPanel from './panels/GeometryPanel';
+import VisualizationPanel from './panels/VisualizationPanel';
+import StylePanel from './panels/StylePanel';
+import PropertiesPanel from './panels/PropertiesPanel';
+import { CompactStatusBar } from './CompactStatusBar';
 
 // Componente interno que usa o contexto de ferramenta ativa
 function SpaceSculptorContent() {
@@ -35,7 +30,19 @@ function SpaceSculptorContent() {
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [activePanel, setActivePanel] = useState<PanelId>(null);
+
+  const handlePanelToggle = useCallback((panel: PanelId) => {
+    setActivePanel(prev => prev === panel ? null : panel);
+  }, []);
+
+  const handleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  }, []);
   
   // Mesa digitalizadora state
   const [isTabletActive, setIsTabletActive] = useState(false);
@@ -100,7 +107,7 @@ function SpaceSculptorContent() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevenir atalhos quando estiver digitando em inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
         return;
       }
 
@@ -1085,6 +1092,23 @@ function SpaceSculptorContent() {
     // This is now handled by Fabric.js directly through drag and drop
   }, []);
 
+  // Keyboard shortcuts for panels and fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      switch (e.key) {
+        case '1': handlePanelToggle('geometry'); break;
+        case '2': handlePanelToggle('visualization'); break;
+        case '3': handlePanelToggle('style'); break;
+        case '4': handlePanelToggle('properties'); break;
+        case '5': setIsTabletActive(prev => !prev); break;
+        case 'f': case 'F': if (!e.ctrlKey && !e.metaKey) handleFullscreen(); break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePanelToggle, handleFullscreen]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1124,105 +1148,56 @@ function SpaceSculptorContent() {
   }, [isDrawingMode, handleUndo, handleRedo, handleToggleDrawing, canUndoGeometry, canRedoGeometry, handleUndoGeometry, handleRedoGeometry]);
 
   return (
-    <div className="h-full bg-gradient-nebula text-foreground flex flex-col">
-      {/* Header com controles no lado direito */}
-      <header className="border-b border-border/30 bg-background/95 backdrop-blur flex items-center justify-between px-6 py-2" style={{ marginBottom: 0, paddingBottom: 0 }}>
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-cosmic bg-clip-text text-transparent">
-            GeoTeach
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {t('header.subtitle')}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <ImageDownloadMenu 
-            onExport={handleExportCombined}
-          />
-          <Button
-            variant="outline"
-            size="sm" 
-            onClick={handleResetView}
-            className="reset-view-button"
-          >
-            {t('button.center_view')}
-          </Button>
-          <Button
-            variant={options.isFrozen ? "default" : "outline"} 
-            size="sm" 
-            onClick={options.isFrozen ? handleUnfreezeView : handleFreezeView}
-          >
-            {options.isFrozen ? (
-              <>
-                <Unlock className="w-4 h-4 mr-2" />
-{t('button.unfreeze_view')}
-              </>
-            ) : (
-              <>
-                <Camera className="w-4 h-4 mr-2" />
-{t('button.freeze_view')}
-              </>
-            )}
-          </Button>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
-
-      {/* Top Toolbar */}
-      <TopToolbar 
-        options={options}
-        onOptionsChange={setOptions}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={canUndoAction}
-        canRedo={canRedoAction}
-        onStyleChange={(key, value) => {
-          setStyle(prev => ({ ...prev, [key]: value }));
-        }}
+    <div className="h-full bg-gradient-nebula text-foreground flex">
+      {/* Icon Sidebar */}
+      <IconSidebar
+        activePanel={activePanel}
+        onPanelToggle={handlePanelToggle}
+        isDrawingActive={isTabletActive}
+        onDrawingToggle={() => setIsTabletActive(!isTabletActive)}
+        onExportImage={() => handleExportImage('png', 'hd')}
       />
-      
-      <div className="flex flex-1 min-h-screen">
-        <aside className={`${panelCollapsed ? 'w-0 overflow-hidden' : 'w-80'} border-r border-border/30 bg-background/50 backdrop-blur flex-shrink-0 h-screen overflow-y-auto transition-all duration-300`}>
-          <ControlPanel
-            params={params}
-            options={options}
-            style={style}
-            properties={properties}
-            onParamsChange={updateParams}
-            onOptionsChange={(newOptions) => {
-              addToHistory('options_change', options);
-              setOptions(newOptions);
-            }}
-            onStyleChange={(newStyle) => {
-              addToHistory('style_change', style);
-              setStyle(newStyle);
-            }}
-            onExportImage={handleExportImage}
-            onVertexSelect={(vertexIndex) => {
-              // Esta função agora é apenas para compatibilidade
-              // A seleção real é feita pelos handlers específicos em GeometryCanvas
-              console.log('Vertex selected (legacy handler):', vertexIndex);
-            }}
-          />
-        </aside>
-      
-        <button
-          onClick={() => setPanelCollapsed(!panelCollapsed)}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 backdrop-blur border border-border/50 rounded-r-lg p-1.5 hover:bg-accent transition-colors"
-          style={{ marginLeft: panelCollapsed ? 0 : '20rem' }}
-          title={panelCollapsed ? t('panel.show') : t('panel.hide')}
-        >
-          {panelCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </button>
-        <section className="flex-1 flex flex-col min-w-0 min-h-0" style={{ marginTop: 0, paddingTop: 0 }}>
-          {/* Conteúdo da Geometria */}
-          <div className="flex-1 m-0 p-0 h-full relative" style={{ marginTop: 0, paddingTop: 0, marginBottom: 0, paddingBottom: 0 }}>
+
+      {/* Floating Panels */}
+      <FloatingPanel title={t('geometry_form.title')} isOpen={activePanel === 'geometry'} onClose={() => setActivePanel(null)}>
+        <GeometryPanel params={params} options={options} style={style} properties={properties}
+          onParamsChange={updateParams}
+          onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+          onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+        />
+      </FloatingPanel>
+
+      <FloatingPanel title={t('panel.visualization')} isOpen={activePanel === 'visualization'} onClose={() => setActivePanel(null)}>
+        <VisualizationPanel params={params} options={options} style={style} properties={properties}
+          onParamsChange={updateParams}
+          onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+          onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+        />
+      </FloatingPanel>
+
+      <FloatingPanel title={t('panel.style')} isOpen={activePanel === 'style'} onClose={() => setActivePanel(null)}>
+        <StylePanel params={params} options={options} style={style} properties={properties}
+          onParamsChange={updateParams}
+          onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+          onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+        />
+      </FloatingPanel>
+
+      <FloatingPanel title={t('panel.properties')} isOpen={activePanel === 'properties'} onClose={() => setActivePanel(null)}>
+        <PropertiesPanel params={params} options={options} style={style} properties={properties}
+          onParamsChange={updateParams}
+          onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+          onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+        />
+      </FloatingPanel>
+
+      {/* Main Canvas Area */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <div className="flex-1 relative" style={{ marginTop: 0, paddingTop: 0 }}>
 
             {/* ESTRUTURA SEMPRE VISÍVEL - AMBOS OS COMPONENTES RENDERIZADOS */}
             <div className="w-full h-full relative">
-              
+
               {/* 1. SÓLIDO 3D - SEMPRE VISÍVEL (FUNDO) */}
               <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto">
                 <div ref={geometryCanvasRef} className="w-full h-full relative flex-1 min-h-0">
@@ -1233,18 +1208,18 @@ function SpaceSculptorContent() {
                       onControlsRef={(ref) => { orbitControlsRef.current = ref; }}
                       onVertexSelect={(vertexIndex) => {
                         // Sistema de seleção baseado em modo ativo - cada funcionalidade opera independentemente
-                        
+
                         switch (style.activeVertexMode) {
                           case 'construction':
                             if (style.constructionType) {
                               handleConstructionVertexSelect(vertexIndex);
                             }
                             break;
-                            
+
                           case 'plane':
                             handlePlaneVertexSelect(vertexIndex);
                             break;
-                            
+
                           case 'meridian':
                             if ((params.type === 'prism' || params.type === 'cube' || params.type === 'tetrahedron' || params.type === 'pyramid' || params.type === 'cylinder' || params.type === 'cone')) {
                               const current = style.selectedVerticesForMeridian || [];
@@ -1263,7 +1238,7 @@ function SpaceSculptorContent() {
                               }
                             }
                             break;
-                            
+
                           case 'connection':
                             if (['cube', 'prism', 'pyramid', 'tetrahedron', 'octahedron', 'dodecahedron', 'icosahedron', 'cylinder', 'cone'].includes(params.type)) {
                               const current = style.selectedVerticesForGeneral || [];
@@ -1274,7 +1249,7 @@ function SpaceSculptorContent() {
                               toast.success(`🔸 Vértice ${vertexIndex} conectado (total: ${current.length + 1})`);
                             }
                             break;
-                            
+
                           case 'none':
                           default:
                             toast.info('Selecione um modo de trabalho primeiro');
@@ -1287,8 +1262,6 @@ function SpaceSculptorContent() {
                     />
                   </div>
                 </div>
-                
-              </div>
 
               {/* 2. DRAWING OVERLAY 3D - SEMPRE VISÍVEL (CAMADA INTERMEDIÁRIA) */}
               {!options.isFrozen && (
@@ -1345,15 +1318,24 @@ function SpaceSculptorContent() {
               </div>
 
             </div>
-        </section>
+        </div>
+
+        {/* Compact Status Bar */}
+        <CompactStatusBar
+          params={params}
+          isFrozen={!!frozenImage}
+          onCenterView={() => orbitControlsRef.current?.reset?.()}
+          onToggleFreeze={() => {
+            if (frozenImage) {
+              handleUnfreezeView();
+              setFrozenImage(null);
+            } else {
+              handleFreezeView();
+            }
+          }}
+          onFullscreen={handleFullscreen}
+        />
       </div>
-      
-      {/* StatusBar */}
-      <StatusBar 
-        showCrossSection={options.showCrossSection}
-        showMeridianSection={options.showMeridianSection}
-      />
-      
     </div>
   );
 }
