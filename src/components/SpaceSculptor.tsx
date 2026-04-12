@@ -31,17 +31,15 @@ function SpaceSculptorContent() {
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelId>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handlePanelToggle = useCallback((panel: PanelId) => {
     setActivePanel(prev => prev === panel ? null : panel);
   }, []);
 
   const handleFullscreen = useCallback(() => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      document.documentElement.requestFullscreen();
-    }
+    setIsFullscreen(prev => !prev);
+    setActivePanel(null);
   }, []);
   
   // Mesa digitalizadora state
@@ -1103,11 +1101,12 @@ function SpaceSculptorContent() {
         case '4': handlePanelToggle('properties'); break;
         case '5': setIsTabletActive(prev => !prev); break;
         case 'f': case 'F': if (!e.ctrlKey && !e.metaKey) handleFullscreen(); break;
+        case 'Escape': if (isFullscreen) { setIsFullscreen(false); e.preventDefault(); } break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handlePanelToggle, handleFullscreen]);
+  }, [handlePanelToggle, handleFullscreen, isFullscreen]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1149,17 +1148,19 @@ function SpaceSculptorContent() {
 
   return (
     <div className="h-screen bg-gradient-nebula text-foreground flex overflow-hidden">
-      {/* Icon Sidebar */}
-      <IconSidebar
-        activePanel={activePanel}
-        onPanelToggle={handlePanelToggle}
-        isDrawingActive={isTabletActive}
-        onDrawingToggle={() => setIsTabletActive(!isTabletActive)}
-        onExportImage={() => handleExportImage('png', 'hd')}
-      />
+      {/* Icon Sidebar - hidden in fullscreen */}
+      {!isFullscreen && (
+        <IconSidebar
+          activePanel={activePanel}
+          onPanelToggle={handlePanelToggle}
+          isDrawingActive={isTabletActive}
+          onDrawingToggle={() => setIsTabletActive(!isTabletActive)}
+          onExportImage={() => handleExportImage('png', 'hd')}
+        />
+      )}
 
       {/* Floating Panels */}
-      <FloatingPanel title={t('geometry_form.title')} isOpen={activePanel === 'geometry'} onClose={() => setActivePanel(null)}>
+      <FloatingPanel title={t('geometry_form.title')} isOpen={!isFullscreen && activePanel === 'geometry'} onClose={() => setActivePanel(null)}>
         <GeometryPanel params={params} options={options} style={style} properties={properties}
           onParamsChange={updateParams}
           onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
@@ -1167,7 +1168,7 @@ function SpaceSculptorContent() {
         />
       </FloatingPanel>
 
-      <FloatingPanel title={t('panel.visualization')} isOpen={activePanel === 'visualization'} onClose={() => setActivePanel(null)}>
+      <FloatingPanel title={t('panel.visualization')} isOpen={!isFullscreen && activePanel === 'visualization'} onClose={() => setActivePanel(null)}>
         <VisualizationPanel params={params} options={options} style={style} properties={properties}
           onParamsChange={updateParams}
           onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
@@ -1175,7 +1176,7 @@ function SpaceSculptorContent() {
         />
       </FloatingPanel>
 
-      <FloatingPanel title={t('panel.style')} isOpen={activePanel === 'style'} onClose={() => setActivePanel(null)}>
+      <FloatingPanel title={t('panel.style')} isOpen={!isFullscreen && activePanel === 'style'} onClose={() => setActivePanel(null)}>
         <StylePanel params={params} options={options} style={style} properties={properties}
           onParamsChange={updateParams}
           onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
@@ -1183,7 +1184,7 @@ function SpaceSculptorContent() {
         />
       </FloatingPanel>
 
-      <FloatingPanel title={t('panel.properties')} isOpen={activePanel === 'properties'} onClose={() => setActivePanel(null)}>
+      <FloatingPanel title={t('panel.properties')} isOpen={!isFullscreen && activePanel === 'properties'} onClose={() => setActivePanel(null)}>
         <PropertiesPanel params={params} options={options} style={style} properties={properties}
           onParamsChange={updateParams}
           onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
@@ -1322,21 +1323,32 @@ function SpaceSculptorContent() {
             </div>
         </div>
 
+        {/* Fullscreen exit button */}
+        {isFullscreen && (
+          <button
+            onClick={handleFullscreen}
+            className="absolute top-4 right-4 z-50 bg-background/60 backdrop-blur border border-border/30 rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-background/90 transition-all opacity-30 hover:opacity-100"
+          >
+            Esc
+          </button>
+        )}
         {/* Compact Status Bar */}
-        <CompactStatusBar
-          params={params}
-          isFrozen={!!frozenImage}
-          onCenterView={() => orbitControlsRef.current?.reset?.()}
-          onToggleFreeze={() => {
-            if (frozenImage) {
-              handleUnfreezeView();
-              setFrozenImage(null);
-            } else {
-              handleFreezeView();
-            }
-          }}
-          onFullscreen={handleFullscreen}
-        />
+        {!isFullscreen && (
+          <CompactStatusBar
+            params={params}
+            isFrozen={!!frozenImage}
+            onCenterView={() => orbitControlsRef.current?.reset?.()}
+            onToggleFreeze={() => {
+              if (frozenImage) {
+                handleUnfreezeView();
+                setFrozenImage(null);
+              } else {
+                handleFreezeView();
+              }
+            }}
+            onFullscreen={handleFullscreen}
+          />
+        )}
       </div>
     </div>
   );
