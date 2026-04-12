@@ -1,12 +1,7 @@
-import { AppLayout } from '@/components/AppLayout';
 import SpaceSculptor from '@/components/SpaceSculptor';
 
 const Index = () => {
-  return (
-    <AppLayout>
-      <SpaceSculptor />
-    </AppLayout>
-  );
+  return <SpaceSculptor />;
 };
 
 export default Index;
