@@ -1,22 +1,16 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { GeometryParams, VisualizationOptions, StyleOptions, GeometryType } from '@/types/geometry';
 import { GeometryCalculator } from '@/lib/geometry-calculations';
-import { useGeometryState } from '@/hooks/useGeometryState';
 import { useHistory } from '@/hooks/useHistory';
 import GeometryCanvas from './GeometryCanvas';
 import { FabricDrawingCanvas, FabricDrawingCanvasRef } from './FabricDrawingCanvas';
 import { FrozenCanvas } from './FrozenCanvas';
-import { Button } from '@/components/ui/button';
-import { Camera, Unlock, Download, Undo2, Redo2 } from 'lucide-react';
 import { toast } from 'sonner';
-import EquationRenderer from './EquationRenderer';
 import { ConstructionType } from './geometry/GeometricConstructions';
 import { ActiveToolProvider, useActiveTool } from '@/context/ActiveToolContext';
 import { useTranslation } from 'react-i18next';
 import DrawingOverlayWrapper from './DrawingOverlayWrapper';
 import DrawingTablet from './DrawingTablet';
-import DrawingTabletSimple from './DrawingTabletSimple';
-import TestTablet from './TestTablet';
 import { IconSidebar, PanelId } from './IconSidebar';
 import { FloatingPanel } from './FloatingPanel';
 import GeometryPanel from './panels/GeometryPanel';
@@ -113,7 +107,7 @@ function SpaceSculptorContent() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevenir atalhos quando estiver digitando em inputs
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
         return;
       }
 
@@ -1097,6 +1091,23 @@ function SpaceSculptorContent() {
   const handleMoveEquation = useCallback((id: string, position: { x: number; y: number }) => {
     // This is now handled by Fabric.js directly through drag and drop
   }, []);
+
+  // Keyboard shortcuts for panels and fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      switch (e.key) {
+        case '1': handlePanelToggle('geometry'); break;
+        case '2': handlePanelToggle('visualization'); break;
+        case '3': handlePanelToggle('style'); break;
+        case '4': handlePanelToggle('properties'); break;
+        case '5': setIsTabletActive(prev => !prev); break;
+        case 'f': case 'F': if (!e.ctrlKey && !e.metaKey) handleFullscreen(); break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePanelToggle, handleFullscreen]);
 
   // Keyboard shortcuts
   useEffect(() => {
