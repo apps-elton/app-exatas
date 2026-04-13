@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,21 +12,22 @@ import { CookieConsent } from "./components/CookieConsent";
 import { RTL_LANGUAGES } from "@/i18n";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SuperAdminRoute } from "@/components/admin/SuperAdminRoute";
-import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Projects from "./pages/Projects";
 import Dashboard from "./pages/Dashboard";
 import SchoolUsers from "./pages/SchoolUsers";
 import Settings from "./pages/Settings";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminTenants from "./pages/admin/AdminTenants";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-import AdminSupport from "./pages/admin/AdminSupport";
-import AdminSystemSettings from "./pages/admin/AdminSystemSettings";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+
+const Index = lazy(() => import("./pages/Index"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminTenants = lazy(() => import("./pages/admin/AdminTenants"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
+const AdminSystemSettings = lazy(() => import("./pages/admin/AdminSystemSettings"));
 
 function DirectionManager() {
   const { i18n } = useTranslation();
@@ -50,6 +51,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <DirectionManager />
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
@@ -157,6 +159,7 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
             <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
