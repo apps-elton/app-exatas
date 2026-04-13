@@ -132,9 +132,9 @@ export default function Settings() {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto p-6">
+          <div className="max-w-3xl mx-auto p-4 md:p-6">
             {/* Tabs */}
-            <div className="flex gap-1 bg-muted/30 rounded-lg p-1 mb-6">
+            <div className="flex flex-col md:flex-row gap-1 bg-muted/30 rounded-lg p-1 mb-6">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
