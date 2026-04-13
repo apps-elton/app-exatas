@@ -18,6 +18,8 @@ import VisualizationPanel from './panels/VisualizationPanel';
 import StylePanel from './panels/StylePanel';
 import PropertiesPanel from './panels/PropertiesPanel';
 import { CompactStatusBar } from './CompactStatusBar';
+import { MobileBottomBar } from './MobileBottomBar';
+import { MobilePanelSheet } from './MobilePanelSheet';
 
 // Componente interno que usa o contexto de ferramenta ativa
 function SpaceSculptorContent() {
@@ -1147,7 +1149,7 @@ function SpaceSculptorContent() {
   }, [isDrawingMode, handleUndo, handleRedo, handleToggleDrawing, canUndoGeometry, canRedoGeometry, handleUndoGeometry, handleRedoGeometry]);
 
   return (
-    <div className="h-screen bg-gradient-nebula text-foreground flex overflow-hidden">
+    <div className="h-dvh bg-gradient-nebula text-foreground flex overflow-hidden">
       {/* Icon Sidebar - hidden in fullscreen */}
       {!isFullscreen && (
         <IconSidebar
@@ -1349,6 +1351,47 @@ function SpaceSculptorContent() {
             onFullscreen={handleFullscreen}
           />
         )}
+        {/* Mobile Bottom Bar */}
+        {!isFullscreen && (
+          <MobileBottomBar
+            activePanel={activePanel}
+            onPanelToggle={handlePanelToggle}
+            isDrawingActive={isTabletActive}
+            onDrawingToggle={() => setIsTabletActive(!isTabletActive)}
+          />
+        )}
+        {/* Mobile Panel Sheets */}
+        <MobilePanelSheet title={t('geometry_form.title')} isOpen={activePanel === 'geometry'} onClose={() => setActivePanel(null)}>
+          <GeometryPanel params={params} options={options} style={style} properties={properties}
+            onParamsChange={updateParams}
+            onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+            onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+          />
+        </MobilePanelSheet>
+
+        <MobilePanelSheet title={t('panel.visualization')} isOpen={activePanel === 'visualization'} onClose={() => setActivePanel(null)}>
+          <VisualizationPanel params={params} options={options} style={style} properties={properties}
+            onParamsChange={updateParams}
+            onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+            onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+          />
+        </MobilePanelSheet>
+
+        <MobilePanelSheet title={t('panel.style')} isOpen={activePanel === 'style'} onClose={() => setActivePanel(null)}>
+          <StylePanel params={params} options={options} style={style} properties={properties}
+            onParamsChange={updateParams}
+            onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+            onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+          />
+        </MobilePanelSheet>
+
+        <MobilePanelSheet title={t('panel.properties')} isOpen={activePanel === 'properties'} onClose={() => setActivePanel(null)}>
+          <PropertiesPanel params={params} options={options} style={style} properties={properties}
+            onParamsChange={updateParams}
+            onOptionsChange={(o) => { addToHistory('options_change', options); setOptions(o); }}
+            onStyleChange={(s) => { addToHistory('style_change', style); setStyle(s); }}
+          />
+        </MobilePanelSheet>
       </div>
     </div>
   );

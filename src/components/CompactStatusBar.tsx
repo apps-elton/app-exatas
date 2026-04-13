@@ -22,7 +22,7 @@ export function CompactStatusBar({ params, isFrozen, onCenterView, onToggleFreez
   ].filter(Boolean).join(' · ');
 
   return (
-    <div className="h-8 bg-background/80 backdrop-blur border-t border-border/30 flex items-center justify-between px-3 text-xs text-muted-foreground flex-shrink-0">
+    <div className="h-8 bg-background/80 backdrop-blur border-t border-border/30 hidden md:flex items-center justify-between px-3 text-xs text-muted-foreground flex-shrink-0">
       <span className="font-medium">{info}</span>
       <div className="flex items-center gap-1">
         <button onClick={onCenterView} title={t('button.center_view')} className="p-1 hover:text-foreground transition-colors">
