@@ -90,7 +90,7 @@ export function AppSidebar() {
 
   return (
     <div
-      className={`h-screen flex flex-col border-r border-border/30 bg-background/95 backdrop-blur transition-all duration-300 ${
+      className={`h-screen hidden md:flex flex-col border-r border-border/30 bg-background/95 backdrop-blur transition-all duration-300 ${
         collapsed ? 'w-16' : 'w-64'
       }`}
     >
