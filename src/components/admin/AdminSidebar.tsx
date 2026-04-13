@@ -28,7 +28,7 @@ export function AdminSidebar() {
   ];
 
   return (
-    <div className="h-screen w-64 flex flex-col border-r border-red-400/20 bg-background/95 backdrop-blur">
+    <div className="h-screen w-64 hidden md:flex flex-col border-r border-red-400/20 bg-background/95 backdrop-blur">
       {/* Header */}
       <div className="flex items-center gap-2 p-4 border-b border-red-400/20">
         <Shield className="w-6 h-6 text-red-400" />
