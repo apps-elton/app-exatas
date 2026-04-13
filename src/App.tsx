@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CookieConsent } from "./components/CookieConsent";
 import { RTL_LANGUAGES } from "@/i18n";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SuperAdminRoute } from "@/components/admin/SuperAdminRoute";
@@ -24,6 +25,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminSupport from "./pages/admin/AdminSupport";
 import AdminSystemSettings from "./pages/admin/AdminSystemSettings";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 function DirectionManager() {
@@ -152,8 +154,10 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
