@@ -28,21 +28,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    setProfile(data);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (error) {
+        console.error('[AuthContext] Failed to fetch profile:', error.message);
+        return;
+      }
+      setProfile(data);
+    } catch (err) {
+      console.error('[AuthContext] Profile fetch error:', err);
+    }
   };
 
   const fetchSubscription = async (userId: string) => {
-    const { data } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-    setSubscription(data);
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      if (error) {
+        console.error('[AuthContext] Failed to fetch subscription:', error.message);
+        return;
+      }
+      setSubscription(data);
+    } catch (err) {
+      console.error('[AuthContext] Subscription fetch error:', err);
+    }
   };
 
   useEffect(() => {
