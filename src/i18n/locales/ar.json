@@ -162,6 +162,7 @@
   "sidebar.unlimited_projects": "مشاريع غير محدودة وميزات إضافية",
   "sidebar.coming_soon": "قريبًا",
   "sidebar.user_fallback": "مستخدم",
+  "sidebar.admin": "الإدارة",
   "roles.superadmin": "مدير عام",
   "roles.admin": "مدير",
   "roles.teacher": "معلم",

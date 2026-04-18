@@ -162,6 +162,7 @@
   "sidebar.unlimited_projects": "無制限のプロジェクトとその他の機能",
   "sidebar.coming_soon": "近日公開",
   "sidebar.user_fallback": "ユーザー",
+  "sidebar.admin": "管理",
   "roles.superadmin": "スーパー管理者",
   "roles.admin": "管理者",
   "roles.teacher": "教師",

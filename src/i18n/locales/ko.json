@@ -162,6 +162,7 @@
   "sidebar.unlimited_projects": "무제한 프로젝트 및 더 많은 기능",
   "sidebar.coming_soon": "곧 출시",
   "sidebar.user_fallback": "사용자",
+  "sidebar.admin": "관리",
   "roles.superadmin": "슈퍼 관리자",
   "roles.admin": "관리자",
   "roles.teacher": "교사",

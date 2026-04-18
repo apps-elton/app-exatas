@@ -162,6 +162,7 @@
   "sidebar.unlimited_projects": "Projets illimités et plus de fonctionnalités",
   "sidebar.coming_soon": "Bientôt disponible",
   "sidebar.user_fallback": "Utilisateur",
+  "sidebar.admin": "Administration",
   "roles.superadmin": "Super Admin",
   "roles.admin": "Admin",
   "roles.teacher": "Enseignant",
