@@ -68,10 +68,16 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Deploy to Vercel production
+        env:
+          VERCEL_TOKEN_RAW: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID_RAW: ${{ secrets.VERCEL_ORG_ID }}
         run: |
+          # Trim whitespace/newlines from secrets (common paste error)
+          VERCEL_TOKEN_CLEAN=$(echo -n "$VERCEL_TOKEN_RAW" | tr -d '[:space:]')
+          VERCEL_SCOPE_CLEAN=$(echo -n "$VERCEL_ORG_ID_RAW" | tr -d '[:space:]')
           vercel deploy \
             --prod \
             --yes \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --scope="${{ secrets.VERCEL_ORG_ID }}" \
+            --token="$VERCEL_TOKEN_CLEAN" \
+            --scope="$VERCEL_SCOPE_CLEAN" \
             --cwd="$GITHUB_WORKSPACE"
