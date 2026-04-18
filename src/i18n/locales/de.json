@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "E-Mail des Lehrers (optional)",
   "school.invite_email_helper": "Wenn angegeben, senden wir die Einladung automatisch per E-Mail",
   "school.invite_sent_with_email": "Einladung gesendet an {{email}}",
-  "school.invite_created_no_email": "Einladung erstellt. Kopieren Sie den Link unten."
+  "school.invite_created_no_email": "Einladung erstellt. Kopieren Sie den Link unten.",
+  "sidebar.trial_days_remaining": "Testphase · {{count}} Tage übrig",
+  "sidebar.trial_expired": "Testphase abgelaufen"
 }

@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "بريد المعلم الإلكتروني (اختياري)",
   "school.invite_email_helper": "إذا تم إدخاله، سنرسل الدعوة عبر البريد الإلكتروني تلقائياً",
   "school.invite_sent_with_email": "تم إرسال الدعوة إلى {{email}}",
-  "school.invite_created_no_email": "تم إنشاء الدعوة. انسخ الرابط أدناه."
+  "school.invite_created_no_email": "تم إنشاء الدعوة. انسخ الرابط أدناه.",
+  "sidebar.trial_days_remaining": "تجريبي · متبقي {{count}} يوم",
+  "sidebar.trial_expired": "انتهت الفترة التجريبية"
 }

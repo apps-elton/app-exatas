@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "Email преподавателя (необязательно)",
   "school.invite_email_helper": "Если указано, мы отправим приглашение на email автоматически",
   "school.invite_sent_with_email": "Приглашение отправлено на {{email}}",
-  "school.invite_created_no_email": "Приглашение создано. Скопируйте ссылку ниже."
+  "school.invite_created_no_email": "Приглашение создано. Скопируйте ссылку ниже.",
+  "sidebar.trial_days_remaining": "Пробная версия · осталось {{count}} дн.",
+  "sidebar.trial_expired": "Пробная версия истекла"
 }

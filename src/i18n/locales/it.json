@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "Email dell'insegnante (opzionale)",
   "school.invite_email_helper": "Se indicato, invieremo l'invito via email automaticamente",
   "school.invite_sent_with_email": "Invito inviato a {{email}}",
-  "school.invite_created_no_email": "Invito creato. Copia il link qui sotto."
+  "school.invite_created_no_email": "Invito creato. Copia il link qui sotto.",
+  "sidebar.trial_days_remaining": "Prova · {{count}} giorni rimanenti",
+  "sidebar.trial_expired": "Prova scaduta"
 }

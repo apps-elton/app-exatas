@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "교사 이메일 (선택)",
   "school.invite_email_helper": "입력하시면 이메일로 초대장을 자동 발송합니다",
   "school.invite_sent_with_email": "{{email}}(으)로 초대장을 보냈습니다",
-  "school.invite_created_no_email": "초대장이 생성되었습니다. 아래 링크를 복사하세요."
+  "school.invite_created_no_email": "초대장이 생성되었습니다. 아래 링크를 복사하세요.",
+  "sidebar.trial_days_remaining": "체험판 · {{count}}일 남음",
+  "sidebar.trial_expired": "체험판 만료"
 }

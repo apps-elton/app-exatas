@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "Email del profesor (opcional)",
   "school.invite_email_helper": "Si lo indicas, enviaremos la invitación por email automáticamente",
   "school.invite_sent_with_email": "Invitación enviada a {{email}}",
-  "school.invite_created_no_email": "Invitación creada. Copia el enlace a continuación."
+  "school.invite_created_no_email": "Invitación creada. Copia el enlace a continuación.",
+  "sidebar.trial_days_remaining": "Trial · {{count}} días restantes",
+  "sidebar.trial_expired": "Trial expirado"
 }

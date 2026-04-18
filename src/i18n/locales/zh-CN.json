@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "教师邮箱(可选)",
   "school.invite_email_helper": "如填写,我们将自动通过邮件发送邀请",
   "school.invite_sent_with_email": "邀请已发送至 {{email}}",
-  "school.invite_created_no_email": "邀请已创建。请复制下方链接。"
+  "school.invite_created_no_email": "邀请已创建。请复制下方链接。",
+  "sidebar.trial_days_remaining": "试用 · 剩余 {{count}} 天",
+  "sidebar.trial_expired": "试用已过期"
 }

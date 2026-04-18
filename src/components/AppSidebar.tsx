@@ -21,6 +21,7 @@ import {
   BookOpen,
   Crown,
   MessageSquare,
+  Clock,
 } from 'lucide-react';
 
 const ROLE_STYLE = {
@@ -72,6 +73,13 @@ export function AppSidebar() {
   const roleStyle = ROLE_STYLE[role];
   const planStyle = PLAN_STYLE[plan];
   const RoleIcon = roleStyle.icon;
+
+  // Trial countdown
+  const trialEndsAt = (subscription as { trial_ends_at?: string | null } | null)?.trial_ends_at ?? null;
+  const isTrialing = subscription?.status === 'trialing' && !!trialEndsAt;
+  const trialDaysRemaining = isTrialing && trialEndsAt
+    ? Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)
+    : null;
 
   const roleLabel =
     role === 'superadmin'
@@ -184,6 +192,23 @@ export function AppSidebar() {
                   <span className={`text-xs truncate ${planStyle.color}`}>{planLabel}</span>
                 </div>
               </div>
+              {isTrialing && trialDaysRemaining !== null && (
+                trialDaysRemaining > 0 ? (
+                  <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 border border-primary/30">
+                    <Clock className="w-3 h-3 shrink-0 text-primary" />
+                    <span className="text-[11px] font-poppins font-semibold text-primary">
+                      {t('sidebar.trial_days_remaining', { count: trialDaysRemaining })}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted/40 border border-border/40">
+                    <Clock className="w-3 h-3 shrink-0 text-muted-foreground" />
+                    <span className="text-[11px] font-poppins font-semibold text-muted-foreground">
+                      {t('sidebar.trial_expired')}
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}

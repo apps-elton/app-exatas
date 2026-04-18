@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "教師のメールアドレス(任意)",
   "school.invite_email_helper": "入力すると、自動的にメールで招待を送信します",
   "school.invite_sent_with_email": "{{email}} に招待を送信しました",
-  "school.invite_created_no_email": "招待を作成しました。下のリンクをコピーしてください。"
+  "school.invite_created_no_email": "招待を作成しました。下のリンクをコピーしてください。",
+  "sidebar.trial_days_remaining": "トライアル · 残り {{count}} 日",
+  "sidebar.trial_expired": "トライアル期限切れ"
 }

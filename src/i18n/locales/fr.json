@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "E-mail de l'enseignant (optionnel)",
   "school.invite_email_helper": "Si renseigné, nous enverrons l'invitation par e-mail automatiquement",
   "school.invite_sent_with_email": "Invitation envoyée à {{email}}",
-  "school.invite_created_no_email": "Invitation créée. Copiez le lien ci-dessous."
+  "school.invite_created_no_email": "Invitation créée. Copiez le lien ci-dessous.",
+  "sidebar.trial_days_remaining": "Essai · {{count}} jours restants",
+  "sidebar.trial_expired": "Essai expiré"
 }

@@ -566,5 +566,7 @@
   "school.invite_email_placeholder": "शिक्षक का ईमेल (वैकल्पिक)",
   "school.invite_email_helper": "यदि दिया जाए, तो हम स्वचालित रूप से ईमेल द्वारा निमंत्रण भेजेंगे",
   "school.invite_sent_with_email": "{{email}} को निमंत्रण भेजा गया",
-  "school.invite_created_no_email": "निमंत्रण बनाया गया। नीचे दिया गया लिंक कॉपी करें।"
+  "school.invite_created_no_email": "निमंत्रण बनाया गया। नीचे दिया गया लिंक कॉपी करें।",
+  "sidebar.trial_days_remaining": "ट्रायल · {{count}} दिन शेष",
+  "sidebar.trial_expired": "ट्रायल समाप्त"
 }
