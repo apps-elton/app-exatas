@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School, BookOpen } from 'lucide-react';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { validateSignupInput } from '@/lib/signup-validation';
+import { sendEmail } from '@/lib/email';
 
 type AccountType = 'teacher' | 'school' | 'student' | null;
 
@@ -197,6 +198,27 @@ export default function Signup() {
           await supabase.auth.signOut();
           return;
         }
+      }
+
+      // 5. Send welcome email (fire-and-forget; failures must not block UX).
+      // Must run while the session is still active (Edge Function requires JWT).
+      if (!inviteData) {
+        const welcomeTemplate =
+          accountType === 'school'
+            ? 'welcome_school'
+            : accountType === 'student'
+              ? 'welcome_student'
+              : 'welcome_teacher';
+        sendEmail({
+          template: welcomeTemplate,
+          to: email,
+          data: {
+            name: fullName,
+            ...(accountType === 'school' ? { schoolName } : {}),
+          },
+        }).catch(() => {
+          // Silently swallow — welcome email is nice-to-have, not critical.
+        });
       }
 
       // Sign out so user goes through login flow
