@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
-import { School, Users, FolderKanban, TicketCheck, Loader2 } from 'lucide-react';
+import {
+  School,
+  Users,
+  FolderKanban,
+  TicketCheck,
+  Loader2,
+  GraduationCap,
+  BookOpen,
+  UserCog,
+  Building2,
+} from 'lucide-react';
 
 interface KPI {
   label: string;
@@ -78,10 +88,34 @@ export default function AdminDashboard() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [tenantsRes, profilesRes, projectsRes] = await Promise.all([
+        const [
+          tenantsRes,
+          profilesRes,
+          projectsRes,
+          teachersRes,
+          studentsRes,
+          schoolsRes,
+          soloRes,
+        ] = await Promise.all([
           supabase.from('tenants').select('id', { count: 'exact', head: true }),
           supabase.from('profiles').select('id', { count: 'exact', head: true }),
           supabase.from('projects').select('id', { count: 'exact', head: true }),
+          supabase
+            .from('profiles')
+            .select('id', { count: 'exact', head: true })
+            .eq('role', 'teacher'),
+          supabase
+            .from('profiles')
+            .select('id', { count: 'exact', head: true })
+            .eq('role', 'student'),
+          supabase
+            .from('tenants')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_solo', false),
+          supabase
+            .from('tenants')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_solo', true),
         ]);
 
         // Try support_tickets - may not exist yet
@@ -132,6 +166,34 @@ export default function AdminDashboard() {
             icon: TicketCheck,
             color: 'text-amber-400',
             bgColor: 'bg-amber-400/10',
+          },
+          {
+            label: t('admin.stats.total_teachers'),
+            value: teachersRes.count ?? 0,
+            icon: GraduationCap,
+            color: 'text-emerald-400',
+            bgColor: 'bg-emerald-400/10',
+          },
+          {
+            label: t('admin.stats.total_students'),
+            value: studentsRes.count ?? 0,
+            icon: BookOpen,
+            color: 'text-sky-400',
+            bgColor: 'bg-sky-400/10',
+          },
+          {
+            label: t('admin.stats.total_schools'),
+            value: schoolsRes.count ?? 0,
+            icon: Building2,
+            color: 'text-indigo-400',
+            bgColor: 'bg-indigo-400/10',
+          },
+          {
+            label: t('admin.stats.total_solo_teachers'),
+            value: soloRes.count ?? 0,
+            icon: UserCog,
+            color: 'text-rose-400',
+            bgColor: 'bg-rose-400/10',
           },
         ]);
 
