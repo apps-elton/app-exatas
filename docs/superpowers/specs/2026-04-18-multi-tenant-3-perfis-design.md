@@ -5,7 +5,7 @@
 **Autor:** Design colaborativo (usuário + Claude)
 **Projeto:** CLIQUE EXATAS / GeoTeach SaaS
 **Supabase project ID:** `duqrveawgopqohrfiogz`
-**Domínio principal:** `cliqueexatas.com.br` / `app.cliqueexatas.com.br`
+**Domínio principal:** `clickexatas.com.br` / `app.clickexatas.com.br`
 
 ---
 
@@ -45,11 +45,11 @@ Stripe (BRL + USD, webhooks → Supabase Edge Functions)
 
 | Domínio | Conteúdo | Branding |
 |---|---|---|
-| `cliqueexatas.com.br` | Landing pública (marketing, pricing, blog) | CLIQUE EXATAS sempre |
-| `app.cliqueexatas.com.br` | App principal (login + dashboard) | Default para tenants sem branding e sempre para Aluno B2C |
-| `{slug}.cliqueexatas.com.br` | Tenants Pro (Escola e Professor) com subdomínio | Branding do tenant |
+| `clickexatas.com.br` | Landing pública (marketing, pricing, blog) | CLIQUE EXATAS sempre |
+| `app.clickexatas.com.br` | App principal (login + dashboard) | Default para tenants sem branding e sempre para Aluno B2C |
+| `{slug}.clickexatas.com.br` | Tenants Pro (Escola e Professor) com subdomínio | Branding do tenant |
 | `portal.escola.com.br` (etc) | Tenants Premium com domínio próprio, via Cloudflare for SaaS | Branding do tenant |
-| `customers.cliqueexatas.com.br` | Fallback origin do Cloudflare for SaaS (não é acessado diretamente pelo usuário) | N/A |
+| `customers.clickexatas.com.br` | Fallback origin do Cloudflare for SaaS (não é acessado diretamente pelo usuário) | N/A |
 
 ---
 
@@ -120,7 +120,7 @@ A tabela `subscriptions` passa a ter `plan_id text REFERENCES plans(id)` em vez 
   "storage_mb": 500,
   "branding": true,       // logo + cor customizáveis
   "custom_domain": false, // domínio próprio via Cloudflare for SaaS
-  "subdomain": true,      // {slug}.cliqueexatas.com.br
+  "subdomain": true,      // {slug}.clickexatas.com.br
   "ads": false,
   "export": true
 }
@@ -147,7 +147,7 @@ CREATE UNIQUE INDEX tenants_cloudflare_hostname_id_idx
 ```
 
 Observações:
-- `slug` (já unique) serve de subdomínio: `{slug}.cliqueexatas.com.br`.
+- `slug` (já unique) serve de subdomínio: `{slug}.clickexatas.com.br`.
 - `display_name` é opcional; se NULL, UI usa `name`.
 
 ### 5.2 Resolução de tenant (frontend)
@@ -156,7 +156,7 @@ No bootstrap do app:
 
 1. `const host = window.location.host`
 2. RPC pública `get_tenant_by_host(host)` retorna `{ id, display_name, logo_url, primary_color, secondary_color }` ou `null`
-3. Se host ∈ `['app.cliqueexatas.com.br', 'cliqueexatas.com.br']` → sem tenant (branding default)
+3. Se host ∈ `['app.clickexatas.com.br', 'clickexatas.com.br']` → sem tenant (branding default)
 4. Senão, match por `subdomain` extraído do host ou por `custom_domain`
 5. ThemeProvider injeta CSS vars `--primary` e `--accent` antes do primeiro render (evita FOUC)
 
@@ -170,23 +170,23 @@ A RPC retorna só campos públicos (não expõe `id` interno em queries subseque
    { "hostname": "portal.escola.com.br", "ssl": { "method": "http", "type": "dv", "settings": { "min_tls_version": "1.2" } } }
    ```
 3. Resposta inclui `id` (salvo em `tenants.cloudflare_hostname_id`), status inicial = `pending`
-4. UI mostra instrução: "Adicione um CNAME `portal` → `customers.cliqueexatas.com.br` no provedor DNS da escola"
+4. UI mostra instrução: "Adicione um CNAME `portal` → `customers.clickexatas.com.br` no provedor DNS da escola"
 5. Edge Function `check-custom-domain-status` (cron 5min) faz GET `/custom_hostnames/{id}` e atualiza `tenants.custom_domain_status` quando Cloudflare validar
-6. Quando ativo, Cloudflare roteia: `portal.escola.com.br` → cert SSL emitido pela Cloudflare → origin `customers.cliqueexatas.com.br` → Vercel. Vercel precisa aceitar hostname arbitrário; middleware do app resolve tenant via `get_tenant_by_host(host)`
+6. Quando ativo, Cloudflare roteia: `portal.escola.com.br` → cert SSL emitido pela Cloudflare → origin `customers.clickexatas.com.br` → Vercel. Vercel precisa aceitar hostname arbitrário; middleware do app resolve tenant via `get_tenant_by_host(host)`
 
 **Custo:** Cloudflare for SaaS cobra ~$2/hostname/mês (embutido no preço Premium). Conta Cloudflare precisa ter SaaS habilitado.
 
 ### 5.4 Config Vercel / Cloudflare
 
 **Vercel (Domains):**
-- Adicionar: `cliqueexatas.com.br`, `app.cliqueexatas.com.br`, `*.cliqueexatas.com.br`, `customers.cliqueexatas.com.br`
+- Adicionar: `clickexatas.com.br`, `app.clickexatas.com.br`, `*.clickexatas.com.br`, `customers.clickexatas.com.br`
 - Todos proxied via Cloudflare (SSL/TLS mode "Full (strict)")
 
-**Cloudflare (zone `cliqueexatas.com.br`):**
-- Wildcard CNAME `*.cliqueexatas.com.br` → `cname.vercel-dns.com` (proxied)
-- CNAME `app.cliqueexatas.com.br` → `cname.vercel-dns.com` (proxied)
+**Cloudflare (zone `clickexatas.com.br`):**
+- Wildcard CNAME `*.clickexatas.com.br` → `cname.vercel-dns.com` (proxied)
+- CNAME `app.clickexatas.com.br` → `cname.vercel-dns.com` (proxied)
 - SSL/TLS mode: Full (strict)
-- Cloudflare for SaaS habilitado com fallback origin `customers.cliqueexatas.com.br`
+- Cloudflare for SaaS habilitado com fallback origin `customers.clickexatas.com.br`
 - API token com escopos `Zone:Edit`, `SSL and Certificates:Edit`, `Custom Hostnames:Edit` salvo em Supabase Edge Function secret (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`)
 
 ---
@@ -301,7 +301,7 @@ Detectada pelo locale do i18n (se `pt-BR` → BRL, se `en` ou `es` → USD, conf
 - Signup: adicionar botão "Sou Aluno / Estudar em casa"
 - RPC `create_student_account()`
 - Cloudflare zone setup, DNS, SSL, proxy
-- Deploy `app.cliqueexatas.com.br` como URL principal
+- Deploy `app.clickexatas.com.br` como URL principal
 
 **Deliverable:** amigos professores, escolas, e alunos se cadastram no tier Free e usam o app.
 
@@ -342,7 +342,7 @@ Detectada pelo locale do i18n (se `pt-BR` → BRL, se `en` ou `es` → USD, conf
 - 2FA superadmin (opcional)
 - Performance audit
 - Rate limiting Supabase
-- Landing `cliqueexatas.com.br` polida
+- Landing `clickexatas.com.br` polida
 
 ---
 

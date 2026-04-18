@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Colocar no ar o sistema com os 3 perfis de signup (Escola, Professor autônomo, Aluno B2C) no tier Free, rodando em `app.cliqueexatas.com.br` com Cloudflare na frente da Vercel e banco Supabase preparado para as fases seguintes (monetização, white-label, super admin).
+**Goal:** Colocar no ar o sistema com os 3 perfis de signup (Escola, Professor autônomo, Aluno B2C) no tier Free, rodando em `app.clickexatas.com.br` com Cloudflare na frente da Vercel e banco Supabase preparado para as fases seguintes (monetização, white-label, super admin).
 
 **Architecture:** Usa a stack existente (Vite + React + Supabase + Vercel) sem migração. Adiciona schema novo no Supabase (role `student`, tabela `plans`, tabela `classes`, tabela `class_enrollments`, colunas em `tenants`, 2 RPCs novas). Adiciona 3º botão "Sou Aluno" no Signup.tsx. Configura Cloudflare zone e proxies na frente de Vercel.
 
@@ -16,7 +16,7 @@
 **Pré-requisitos antes de começar:**
 - MCP Supabase autenticado e funcionando (testar com `list_tables`)
 - Conta Vercel com acesso de admin ao projeto
-- Conta Cloudflare com zone `cliqueexatas.com.br` ou capacidade de criá-la
+- Conta Cloudflare com zone `clickexatas.com.br` ou capacidade de criá-la
 - `git` limpo em `main` com working tree limpo (faça commit/stash antes de começar)
 
 ---
@@ -958,8 +958,8 @@ Create `supabase/migrations/20260418010_rpc_get_tenant_by_host.sql`:
 -- RPC pública (sem auth) para o frontend resolver tenant pelo host atual.
 -- Retorna apenas dados públicos de branding, não expõe info sensível.
 -- Casos:
---   host = 'app.cliqueexatas.com.br' ou 'cliqueexatas.com.br' → retorna null
---   host = '{slug}.cliqueexatas.com.br' → match por tenants.slug
+--   host = 'app.clickexatas.com.br' ou 'clickexatas.com.br' → retorna null
+--   host = '{slug}.clickexatas.com.br' → match por tenants.slug
 --   host = 'portal.escola.com.br' → match por tenants.custom_domain
 
 CREATE OR REPLACE FUNCTION public.get_tenant_by_host(p_host text)
@@ -970,8 +970,8 @@ SET search_path = public
 STABLE
 AS $$
 DECLARE
-  v_main_domain text := 'cliqueexatas.com.br';
-  v_app_host text := 'app.cliqueexatas.com.br';
+  v_main_domain text := 'clickexatas.com.br';
+  v_app_host text := 'app.clickexatas.com.br';
   v_slug text;
   v_tenant record;
 BEGIN
@@ -1004,7 +1004,7 @@ BEGIN
     );
   END IF;
 
-  -- Tentar match por subdomínio: {slug}.cliqueexatas.com.br
+  -- Tentar match por subdomínio: {slug}.clickexatas.com.br
   IF p_host LIKE '%.' || v_main_domain THEN
     v_slug := split_part(p_host, '.', 1);
 
@@ -1052,15 +1052,15 @@ Execute via MCP:
 
 ```sql
 -- Host principal deve retornar null
-SELECT public.get_tenant_by_host('app.cliqueexatas.com.br') AS result_app;
-SELECT public.get_tenant_by_host('cliqueexatas.com.br') AS result_main;
+SELECT public.get_tenant_by_host('app.clickexatas.com.br') AS result_app;
+SELECT public.get_tenant_by_host('clickexatas.com.br') AS result_main;
 
 -- Subdomínio inexistente deve retornar null
-SELECT public.get_tenant_by_host('inexistente.cliqueexatas.com.br') AS result_no_match;
+SELECT public.get_tenant_by_host('inexistente.clickexatas.com.br') AS result_no_match;
 
 -- Se existir algum tenant, testar com o slug dele
 SELECT slug FROM public.tenants LIMIT 1;
--- Rode: SELECT public.get_tenant_by_host('<slug>.cliqueexatas.com.br');
+-- Rode: SELECT public.get_tenant_by_host('<slug>.clickexatas.com.br');
 ```
 
 Expected: primeiras 3 retornam `NULL`. Se houver tenant, o 4º retorna JSON com `match_type = 'subdomain'`.
@@ -1505,13 +1505,13 @@ Create `docs/infra/cloudflare-setup.md`:
 
 Colocar Cloudflare na frente da Vercel para:
 - CDN global + DDoS + WAF
-- Wildcard SSL em `*.cliqueexatas.com.br`
+- Wildcard SSL em `*.clickexatas.com.br`
 - Preparar Cloudflare for SaaS (custom domains dos tenants Premium — Fase 3)
 
 ## Passo 1 — Adicionar zone
 
 1. Acesse https://dash.cloudflare.com → **Add a Site**
-2. Digite `cliqueexatas.com.br`
+2. Digite `clickexatas.com.br`
 3. Plano: **Free** funciona para CDN/DDoS. Para Cloudflare for SaaS (Fase 3) será necessário **SaaS plan** pago.
 4. Cloudflare dá 2 nameservers — atualize no seu registrar (onde comprou o domínio) para apontar para os NS da Cloudflare.
 5. Aguarde propagação DNS (até 24h, normalmente 5-30 min).
@@ -1526,7 +1526,7 @@ No painel da zone, em **DNS → Records**, adicionar:
 | CNAME | `*` | `cname.vercel-dns.com` | **Proxied (laranja)** |
 | CNAME | `@` | `cname.vercel-dns.com` | **Proxied (laranja)** |
 
-O wildcard CNAME cobre `{slug}.cliqueexatas.com.br`.
+O wildcard CNAME cobre `{slug}.clickexatas.com.br`.
 
 ## Passo 3 — SSL/TLS
 
@@ -1542,7 +1542,7 @@ Em **SSL/TLS → Edge Certificates**:
 
 Em **SSL/TLS → Custom Hostnames**:
 - Ativar Cloudflare for SaaS (requer plano SaaS pago, ~$0 base + $2/hostname/mês)
-- Fallback origin: `customers.cliqueexatas.com.br` (você cria esse record CNAME apontando para Vercel na Fase 3)
+- Fallback origin: `customers.clickexatas.com.br` (você cria esse record CNAME apontando para Vercel na Fase 3)
 - Não adicionar custom hostnames agora — será feito via API na Fase 3
 
 ## Passo 5 — Criar API Token para Edge Functions
@@ -1553,22 +1553,22 @@ Em **My Profile → API Tokens → Create Token**:
   - Zone.Zone.Read
   - Zone.SSL and Certificates.Edit
   - Zone.Custom Hostnames.Edit
-- Zone Resources: Include → `cliqueexatas.com.br`
+- Zone Resources: Include → `clickexatas.com.br`
 - TTL: sem expiração ou 1 ano
 
 **Guarde o token como secret na Supabase:**
 - Supabase Dashboard → Project Settings → Edge Functions → Secrets
 - Key: `CLOUDFLARE_API_TOKEN`, Value: o token gerado
-- Também adicione: `CLOUDFLARE_ZONE_ID` = o Zone ID da zone cliqueexatas.com.br (mostrado no Overview da zone)
+- Também adicione: `CLOUDFLARE_ZONE_ID` = o Zone ID da zone clickexatas.com.br (mostrado no Overview da zone)
 
 ## Verificação
 
 Depois que DNS propagar:
 
 ```bash
-curl -I https://cliqueexatas.com.br
-curl -I https://app.cliqueexatas.com.br
-curl -I https://qualquer-slug.cliqueexatas.com.br
+curl -I https://clickexatas.com.br
+curl -I https://app.clickexatas.com.br
+curl -I https://qualquer-slug.clickexatas.com.br
 ```
 
 Expected: respostas com header `server: cloudflare` e `cf-ray: ...`.
@@ -1583,7 +1583,7 @@ git commit -m "docs(infra): add Cloudflare setup guide"
 
 - [ ] **Step 3: Executar o setup manualmente (você, o engenheiro humano)**
 
-Siga o guia `docs/infra/cloudflare-setup.md` passo a passo. Não pule para Task 16 até confirmar que `curl -I https://app.cliqueexatas.com.br` retorna `server: cloudflare`.
+Siga o guia `docs/infra/cloudflare-setup.md` passo a passo. Não pule para Task 16 até confirmar que `curl -I https://app.clickexatas.com.br` retorna `server: cloudflare`.
 
 Marque esta task como concluída apenas depois da verificação.
 
@@ -1603,7 +1603,7 @@ Create `docs/infra/vercel-domains.md`:
 
 ## Pré-requisitos
 
-- Cloudflare zone `cliqueexatas.com.br` ativa e DNS propagado (Task 15 concluída)
+- Cloudflare zone `clickexatas.com.br` ativa e DNS propagado (Task 15 concluída)
 - Acesso admin ao projeto Vercel do CLIQUE EXATAS
 
 ## Passo 1 — Adicionar domínios no projeto Vercel
@@ -1612,17 +1612,17 @@ Vercel Dashboard → seu projeto → **Settings → Domains**.
 
 Adicionar:
 
-1. `cliqueexatas.com.br` — Vercel vai pedir pra adicionar registro TXT/CNAME no DNS. Como Cloudflare já tá com CNAME `@` → `cname.vercel-dns.com`, a Vercel deve verificar automaticamente. Pode levar 1-2 min.
+1. `clickexatas.com.br` — Vercel vai pedir pra adicionar registro TXT/CNAME no DNS. Como Cloudflare já tá com CNAME `@` → `cname.vercel-dns.com`, a Vercel deve verificar automaticamente. Pode levar 1-2 min.
 
-2. `app.cliqueexatas.com.br` — idem, CNAME já existe.
+2. `app.clickexatas.com.br` — idem, CNAME já existe.
 
-3. `*.cliqueexatas.com.br` — Vercel pode pedir TXT record adicional (`_vercel` com valor específico). Se pedir, adicione no Cloudflare DNS como **DNS only (cinza)**, não proxied.
+3. `*.clickexatas.com.br` — Vercel pode pedir TXT record adicional (`_vercel` com valor específico). Se pedir, adicione no Cloudflare DNS como **DNS only (cinza)**, não proxied.
 
-4. **NÃO adicione `customers.cliqueexatas.com.br` agora** — é pra Fase 3 (Cloudflare for SaaS fallback).
+4. **NÃO adicione `customers.clickexatas.com.br` agora** — é pra Fase 3 (Cloudflare for SaaS fallback).
 
 ## Passo 2 — Configurar redirects (opcional)
 
-Se quiser que `cliqueexatas.com.br` redirecione para `app.cliqueexatas.com.br` ou separar landing/app, configure redirects no `vercel.json` em um PR separado.
+Se quiser que `clickexatas.com.br` redirecione para `app.clickexatas.com.br` ou separar landing/app, configure redirects no `vercel.json` em um PR separado.
 
 **Por ora, deixe ambos apontando para o mesmo app** — landing e app no mesmo bundle. Separação vem na Fase 5.
 
@@ -1638,13 +1638,13 @@ Se algum ficar em **Invalid Configuration**:
 
 ```bash
 # Deve retornar 200 e html do app
-curl https://app.cliqueexatas.com.br
+curl https://app.clickexatas.com.br
 
 # Headers devem ter:
 # server: cloudflare
 # cf-ray: ...
 # x-vercel-id: ... (prova que Vercel é origin)
-curl -I https://app.cliqueexatas.com.br
+curl -I https://app.clickexatas.com.br
 ```
 ````
 
@@ -1657,7 +1657,7 @@ git commit -m "docs(infra): add Vercel domains setup guide"
 
 - [ ] **Step 3: Executar o setup manualmente**
 
-Siga `docs/infra/vercel-domains.md`. Confirme via `curl -I` que o app responde em `app.cliqueexatas.com.br` via Cloudflare → Vercel.
+Siga `docs/infra/vercel-domains.md`. Confirme via `curl -I` que o app responde em `app.clickexatas.com.br` via Cloudflare → Vercel.
 
 ---
 
@@ -1708,7 +1708,7 @@ Esperar ~2-3 min para Vercel terminar o deploy. Acompanhar em https://vercel.com
 
 - [ ] **Step 5: Smoke test manual em produção**
 
-Abrir `https://app.cliqueexatas.com.br/signup` no navegador.
+Abrir `https://app.clickexatas.com.br/signup` no navegador.
 
 Verificar checklist:
 - [ ] 3 cards aparecem: "Sou Professor", "Sou Escola", "Sou Aluno"
@@ -1744,7 +1744,7 @@ Idem com "Sou Escola" → criar tenant novo → confirmar `/school/users` funcio
 Run:
 
 ```bash
-git tag -a fase-1-foundation -m "Fase 1 Foundation shipped: 3 profile signup at app.cliqueexatas.com.br"
+git tag -a fase-1-foundation -m "Fase 1 Foundation shipped: 3 profile signup at app.clickexatas.com.br"
 git push origin fase-1-foundation
 ```
 
