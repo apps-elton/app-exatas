@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School, BookOpen } from 'lucide-react';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { validateSignupInput } from '@/lib/signup-validation';
 
 type AccountType = 'teacher' | 'school' | 'student' | null;
 
@@ -85,16 +86,16 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
-    if (!passwordChecks.length) {
-      setError(t('signup.error_password_min'));
-      return;
-    }
-    if (!passwordChecks.match) {
-      setError(t('signup.error_passwords_mismatch'));
-      return;
-    }
-    if (accountType === 'school' && !schoolName.trim()) {
-      setError(t('signup.error_school_name_required'));
+    const validation = validateSignupInput({
+      accountType: accountType!,
+      fullName,
+      email,
+      password,
+      confirmPassword,
+      schoolName,
+    });
+    if (!validation.ok) {
+      setError(t(validation.errorKey));
       return;
     }
 
