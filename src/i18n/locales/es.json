@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Revisa tu bandeja de entrada en {{email}} y haz clic en el enlace. Puede tardar unos segundos.",
   "login.magic_submitting": "Enviando enlace...",
   "login.magic_submit": "Enviar enlace mágico",
-  "login.magic_back_to_password": "Volver a inicio con contraseña"
+  "login.magic_back_to_password": "Volver a inicio con contraseña",
+  "admin.users.filter_all": "Todos",
+  "admin.users.filter_superadmin": "Superadmin",
+  "admin.users.filter_admin": "Admin",
+  "admin.users.filter_teacher": "Profesor",
+  "admin.users.filter_student": "Estudiante",
+  "admin.users.change_role": "Cambiar rol",
+  "admin.users.role_changed": "Rol cambiado",
+  "admin.users.role_change_error": "Error al cambiar el rol",
+  "admin.stats.total_teachers": "Profesores",
+  "admin.stats.total_students": "Estudiantes",
+  "admin.stats.total_schools": "Escuelas",
+  "admin.stats.total_solo_teachers": "Profesores Autónomos",
+  "roles.student": "Estudiante"
 }

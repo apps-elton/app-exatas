@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Prüfen Sie Ihren Posteingang unter {{email}} und klicken Sie auf den Link.",
   "login.magic_submitting": "Link wird gesendet...",
   "login.magic_submit": "Magischen Link senden",
-  "login.magic_back_to_password": "Zurück zum Passwort-Login"
+  "login.magic_back_to_password": "Zurück zum Passwort-Login",
+  "admin.users.filter_all": "Alle",
+  "admin.users.filter_superadmin": "Superadmin",
+  "admin.users.filter_admin": "Admin",
+  "admin.users.filter_teacher": "Lehrer",
+  "admin.users.filter_student": "Schüler",
+  "admin.users.change_role": "Rolle ändern",
+  "admin.users.role_changed": "Rolle geändert",
+  "admin.users.role_change_error": "Rollenänderung fehlgeschlagen",
+  "admin.stats.total_teachers": "Lehrer",
+  "admin.stats.total_students": "Schüler",
+  "admin.stats.total_schools": "Schulen",
+  "admin.stats.total_solo_teachers": "Selbstständige Lehrer",
+  "roles.student": "Schüler"
 }

@@ -549,5 +549,18 @@
   "login.magic_sent_description": "अपना इनबॉक्स {{email}} पर जांचें और लिंक पर क्लिक करें।",
   "login.magic_submitting": "भेजा जा रहा है...",
   "login.magic_submit": "मैजिक लिंक भेजें",
-  "login.magic_back_to_password": "पासवर्ड लॉगिन पर वापस"
+  "login.magic_back_to_password": "पासवर्ड लॉगिन पर वापस",
+  "admin.users.filter_all": "सभी",
+  "admin.users.filter_superadmin": "सुपर एडमिन",
+  "admin.users.filter_admin": "एडमिन",
+  "admin.users.filter_teacher": "शिक्षक",
+  "admin.users.filter_student": "छात्र",
+  "admin.users.change_role": "भूमिका बदलें",
+  "admin.users.role_changed": "भूमिका बदल दी गई",
+  "admin.users.role_change_error": "भूमिका बदलने में त्रुटि",
+  "admin.stats.total_teachers": "शिक्षक",
+  "admin.stats.total_students": "छात्र",
+  "admin.stats.total_schools": "स्कूल",
+  "admin.stats.total_solo_teachers": "स्वतंत्र शिक्षक",
+  "roles.student": "छात्र"
 }

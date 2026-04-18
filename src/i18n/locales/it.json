@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Controlla la tua casella {{email}} e clicca sul link per accedere.",
   "login.magic_submitting": "Invio in corso...",
   "login.magic_submit": "Invia link magico",
-  "login.magic_back_to_password": "Torna al login con password"
+  "login.magic_back_to_password": "Torna al login con password",
+  "admin.users.filter_all": "Tutti",
+  "admin.users.filter_superadmin": "Superadmin",
+  "admin.users.filter_admin": "Admin",
+  "admin.users.filter_teacher": "Insegnante",
+  "admin.users.filter_student": "Studente",
+  "admin.users.change_role": "Cambia ruolo",
+  "admin.users.role_changed": "Ruolo cambiato",
+  "admin.users.role_change_error": "Errore nel cambio ruolo",
+  "admin.stats.total_teachers": "Insegnanti",
+  "admin.stats.total_students": "Studenti",
+  "admin.stats.total_schools": "Scuole",
+  "admin.stats.total_solo_teachers": "Insegnanti Autonomi",
+  "roles.student": "Studente"
 }

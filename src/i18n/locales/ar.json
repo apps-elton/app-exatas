@@ -549,5 +549,18 @@
   "login.magic_sent_description": "تحقق من صندوق الوارد في {{email}} وانقر على الرابط.",
   "login.magic_submitting": "جاري الإرسال...",
   "login.magic_submit": "إرسال الرابط السحري",
-  "login.magic_back_to_password": "العودة إلى تسجيل الدخول بكلمة المرور"
+  "login.magic_back_to_password": "العودة إلى تسجيل الدخول بكلمة المرور",
+  "admin.users.filter_all": "الكل",
+  "admin.users.filter_superadmin": "مدير عام",
+  "admin.users.filter_admin": "مدير",
+  "admin.users.filter_teacher": "معلم",
+  "admin.users.filter_student": "طالب",
+  "admin.users.change_role": "تغيير الدور",
+  "admin.users.role_changed": "تم تغيير الدور",
+  "admin.users.role_change_error": "فشل تغيير الدور",
+  "admin.stats.total_teachers": "المعلمون",
+  "admin.stats.total_students": "الطلاب",
+  "admin.stats.total_schools": "المدارس",
+  "admin.stats.total_solo_teachers": "معلمون مستقلون",
+  "roles.student": "طالب"
 }

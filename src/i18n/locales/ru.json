@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Проверьте почту {{email}} и нажмите на ссылку для входа.",
   "login.magic_submitting": "Отправка...",
   "login.magic_submit": "Отправить магическую ссылку",
-  "login.magic_back_to_password": "Вернуться ко входу с паролем"
+  "login.magic_back_to_password": "Вернуться ко входу с паролем",
+  "admin.users.filter_all": "Все",
+  "admin.users.filter_superadmin": "Суперадмин",
+  "admin.users.filter_admin": "Админ",
+  "admin.users.filter_teacher": "Учитель",
+  "admin.users.filter_student": "Ученик",
+  "admin.users.change_role": "Изменить роль",
+  "admin.users.role_changed": "Роль изменена",
+  "admin.users.role_change_error": "Не удалось изменить роль",
+  "admin.stats.total_teachers": "Учителя",
+  "admin.stats.total_students": "Ученики",
+  "admin.stats.total_schools": "Школы",
+  "admin.stats.total_solo_teachers": "Учителя на себя",
+  "roles.student": "Ученик"
 }

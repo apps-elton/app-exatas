@@ -549,5 +549,18 @@
   "login.magic_sent_description": "{{email}} 받은편지함을 확인하고 링크를 클릭하세요.",
   "login.magic_submitting": "전송 중...",
   "login.magic_submit": "매직 링크 전송",
-  "login.magic_back_to_password": "비밀번호 로그인으로 돌아가기"
+  "login.magic_back_to_password": "비밀번호 로그인으로 돌아가기",
+  "admin.users.filter_all": "전체",
+  "admin.users.filter_superadmin": "슈퍼 관리자",
+  "admin.users.filter_admin": "관리자",
+  "admin.users.filter_teacher": "교사",
+  "admin.users.filter_student": "학생",
+  "admin.users.change_role": "역할 변경",
+  "admin.users.role_changed": "역할이 변경되었습니다",
+  "admin.users.role_change_error": "역할 변경 실패",
+  "admin.stats.total_teachers": "교사",
+  "admin.stats.total_students": "학생",
+  "admin.stats.total_schools": "학교",
+  "admin.stats.total_solo_teachers": "개인 교사",
+  "roles.student": "학생"
 }

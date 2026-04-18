@@ -549,5 +549,18 @@
   "login.magic_sent_description": "请查看 {{email}} 的收件箱并点击链接登录。",
   "login.magic_submitting": "发送中...",
   "login.magic_submit": "发送魔法链接",
-  "login.magic_back_to_password": "返回密码登录"
+  "login.magic_back_to_password": "返回密码登录",
+  "admin.users.filter_all": "全部",
+  "admin.users.filter_superadmin": "超级管理员",
+  "admin.users.filter_admin": "管理员",
+  "admin.users.filter_teacher": "教师",
+  "admin.users.filter_student": "学生",
+  "admin.users.change_role": "更改角色",
+  "admin.users.role_changed": "角色已更改",
+  "admin.users.role_change_error": "无法更改角色",
+  "admin.stats.total_teachers": "教师",
+  "admin.stats.total_students": "学生",
+  "admin.stats.total_schools": "学校",
+  "admin.stats.total_solo_teachers": "独立教师",
+  "roles.student": "学生"
 }

@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Check your inbox at {{email}} and click the link to sign in. It may take a few seconds.",
   "login.magic_submitting": "Sending link...",
   "login.magic_submit": "Send magic link",
-  "login.magic_back_to_password": "Back to password login"
+  "login.magic_back_to_password": "Back to password login",
+  "admin.users.filter_all": "All",
+  "admin.users.filter_superadmin": "Superadmin",
+  "admin.users.filter_admin": "Admin",
+  "admin.users.filter_teacher": "Teacher",
+  "admin.users.filter_student": "Student",
+  "admin.users.change_role": "Change role",
+  "admin.users.role_changed": "Role changed",
+  "admin.users.role_change_error": "Could not change role",
+  "admin.stats.total_teachers": "Teachers",
+  "admin.stats.total_students": "Students",
+  "admin.stats.total_schools": "Schools",
+  "admin.stats.total_solo_teachers": "Solo Teachers",
+  "roles.student": "Student"
 }

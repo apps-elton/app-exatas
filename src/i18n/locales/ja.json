@@ -549,5 +549,18 @@
   "login.magic_sent_description": "{{email}} の受信箱を確認し、リンクをクリックしてください。",
   "login.magic_submitting": "送信中...",
   "login.magic_submit": "マジックリンクを送信",
-  "login.magic_back_to_password": "パスワードログインに戻る"
+  "login.magic_back_to_password": "パスワードログインに戻る",
+  "admin.users.filter_all": "すべて",
+  "admin.users.filter_superadmin": "スーパー管理者",
+  "admin.users.filter_admin": "管理者",
+  "admin.users.filter_teacher": "教師",
+  "admin.users.filter_student": "生徒",
+  "admin.users.change_role": "役割を変更",
+  "admin.users.role_changed": "役割を変更しました",
+  "admin.users.role_change_error": "役割の変更に失敗しました",
+  "admin.stats.total_teachers": "教師",
+  "admin.stats.total_students": "生徒",
+  "admin.stats.total_schools": "学校",
+  "admin.stats.total_solo_teachers": "個人教師",
+  "roles.student": "生徒"
 }

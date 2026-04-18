@@ -549,5 +549,18 @@
   "login.magic_sent_description": "Consultez votre boîte {{email}} et cliquez sur le lien pour vous connecter.",
   "login.magic_submitting": "Envoi en cours...",
   "login.magic_submit": "Envoyer le lien magique",
-  "login.magic_back_to_password": "Retour à la connexion par mot de passe"
+  "login.magic_back_to_password": "Retour à la connexion par mot de passe",
+  "admin.users.filter_all": "Tous",
+  "admin.users.filter_superadmin": "Superadmin",
+  "admin.users.filter_admin": "Admin",
+  "admin.users.filter_teacher": "Enseignant",
+  "admin.users.filter_student": "Élève",
+  "admin.users.change_role": "Changer le rôle",
+  "admin.users.role_changed": "Rôle modifié",
+  "admin.users.role_change_error": "Erreur lors du changement de rôle",
+  "admin.stats.total_teachers": "Enseignants",
+  "admin.stats.total_students": "Élèves",
+  "admin.stats.total_schools": "Écoles",
+  "admin.stats.total_solo_teachers": "Enseignants Autonomes",
+  "roles.student": "Élève"
 }

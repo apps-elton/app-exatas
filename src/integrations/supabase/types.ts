@@ -591,7 +591,7 @@ export type Database = {
             foreignKeyName: "ticket_messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
           {
@@ -609,6 +609,13 @@ export type Database = {
     }
     Functions: {
       accept_invite: { Args: { invite_token: string }; Returns: undefined }
+      admin_change_user_role: {
+        Args: {
+          p_new_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
       create_school_and_link_admin: {
         Args: { school_name: string; school_slug: string }
         Returns: string
