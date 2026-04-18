@@ -540,5 +540,14 @@
   "header.subtitle": "Visualizador Interativo de Geometria Espacial",
   "label.eraser_size": "Tam. Borracha:",
   "panel.show": "Mostrar painel",
-  "panel.hide": "Ocultar painel"
+  "panel.hide": "Ocultar painel",
+  "login.or": "ou",
+  "login.magic_link_button": "Entrar com link no email",
+  "login.magic_title": "Login sem senha",
+  "login.magic_subtitle": "Digite seu email e enviaremos um link de acesso direto.",
+  "login.magic_sent_title": "Link enviado!",
+  "login.magic_sent_description": "Confira sua caixa de entrada em {{email}} e clique no link para entrar. Pode levar alguns segundos.",
+  "login.magic_submitting": "Enviando link...",
+  "login.magic_submit": "Enviar link mágico",
+  "login.magic_back_to_password": "Voltar para login com senha"
 }

@@ -540,5 +540,14 @@
   "header.subtitle": "इंटरैक्टिव स्थानिक ज्यामिति दर्शक",
   "label.eraser_size": "रबड़ का आकार:",
   "panel.show": "पैनल दिखाएं",
-  "panel.hide": "पैनल छुपाएं"
+  "panel.hide": "पैनल छुपाएं",
+  "login.or": "या",
+  "login.magic_link_button": "ईमेल लिंक से लॉगिन करें",
+  "login.magic_title": "बिना पासवर्ड लॉगिन",
+  "login.magic_subtitle": "अपना ईमेल दर्ज करें, हम सीधे एक्सेस लिंक भेजेंगे।",
+  "login.magic_sent_title": "लिंक भेज दिया!",
+  "login.magic_sent_description": "अपना इनबॉक्स {{email}} पर जांचें और लिंक पर क्लिक करें।",
+  "login.magic_submitting": "भेजा जा रहा है...",
+  "login.magic_submit": "मैजिक लिंक भेजें",
+  "login.magic_back_to_password": "पासवर्ड लॉगिन पर वापस"
 }

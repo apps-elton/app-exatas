@@ -540,5 +540,14 @@
   "header.subtitle": "Visualizzatore Interattivo di Geometria Spaziale",
   "label.eraser_size": "Dim. Gomma:",
   "panel.show": "Mostra pannello",
-  "panel.hide": "Nascondi pannello"
+  "panel.hide": "Nascondi pannello",
+  "login.or": "oppure",
+  "login.magic_link_button": "Accedi con link email",
+  "login.magic_title": "Accesso senza password",
+  "login.magic_subtitle": "Inserisci la tua email e ti invieremo un link di accesso diretto.",
+  "login.magic_sent_title": "Link inviato!",
+  "login.magic_sent_description": "Controlla la tua casella {{email}} e clicca sul link per accedere.",
+  "login.magic_submitting": "Invio in corso...",
+  "login.magic_submit": "Invia link magico",
+  "login.magic_back_to_password": "Torna al login con password"
 }

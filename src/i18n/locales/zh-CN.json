@@ -540,5 +540,14 @@
   "header.subtitle": "交互式空间几何查看器",
   "label.eraser_size": "橡皮大小:",
   "panel.show": "显示面板",
-  "panel.hide": "隐藏面板"
+  "panel.hide": "隐藏面板",
+  "login.or": "或",
+  "login.magic_link_button": "通过邮件链接登录",
+  "login.magic_title": "无密码登录",
+  "login.magic_subtitle": "输入您的邮箱，我们将发送直接访问链接。",
+  "login.magic_sent_title": "链接已发送！",
+  "login.magic_sent_description": "请查看 {{email}} 的收件箱并点击链接登录。",
+  "login.magic_submitting": "发送中...",
+  "login.magic_submit": "发送魔法链接",
+  "login.magic_back_to_password": "返回密码登录"
 }

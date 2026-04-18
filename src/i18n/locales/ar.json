@@ -540,5 +540,14 @@
   "header.subtitle": "عارض تفاعلي للهندسة الفراغية",
   "label.eraser_size": "حجم الممحاة:",
   "panel.show": "إظهار اللوحة",
-  "panel.hide": "إخفاء اللوحة"
+  "panel.hide": "إخفاء اللوحة",
+  "login.or": "أو",
+  "login.magic_link_button": "تسجيل الدخول برابط البريد",
+  "login.magic_title": "تسجيل دخول بدون كلمة مرور",
+  "login.magic_subtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابط وصول مباشر.",
+  "login.magic_sent_title": "تم إرسال الرابط!",
+  "login.magic_sent_description": "تحقق من صندوق الوارد في {{email}} وانقر على الرابط.",
+  "login.magic_submitting": "جاري الإرسال...",
+  "login.magic_submit": "إرسال الرابط السحري",
+  "login.magic_back_to_password": "العودة إلى تسجيل الدخول بكلمة المرور"
 }

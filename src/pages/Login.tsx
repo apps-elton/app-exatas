@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, LogIn, Box, Shield, School, GraduationCap, Wrench } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Box, Shield, School, GraduationCap, Wrench, Mail, Sparkles } from 'lucide-react';
 import { LanguageSelector } from '@/components/LanguageSelector';
 
 const TEST_ACCOUNTS = [
@@ -48,7 +48,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const [mode, setMode] = useState<'login' | 'reset'>('login');
+  const [mode, setMode] = useState<'login' | 'reset' | 'magic'>('login');
+  const [magicSent, setMagicSent] = useState(false);
   const [devMessage, setDevMessage] = useState('');
 
   if (loading) return null;
@@ -137,6 +138,27 @@ export default function Login() {
     setSubmitting(false);
   };
 
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        shouldCreateUser: false,
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setMagicSent(true);
+    }
+    setSubmitting(false);
+  };
+
   return (
     <div className="min-h-screen flex bg-background relative">
       <div className="absolute top-4 right-4 z-10">
@@ -184,7 +206,77 @@ export default function Login() {
             <h1 className="text-3xl font-bold font-poppins text-foreground">GeoTeach</h1>
           </div>
 
-          {mode === 'login' ? (
+          {mode === 'magic' ? (
+            <>
+              <h2 className="text-2xl font-bold font-poppins text-foreground mb-2 flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-primary" />
+                {t('login.magic_title')}
+              </h2>
+              <p className="text-muted-foreground font-nunito mb-8">
+                {t('login.magic_subtitle')}
+              </p>
+
+              {magicSent ? (
+                <div className="p-5 rounded-lg bg-primary/10 border border-primary/20">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                      <Mail className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="font-nunito">
+                      <p className="font-semibold text-foreground mb-1">{t('login.magic_sent_title')}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('login.magic_sent_description', { email })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleMagicLink} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="magic-email" className="font-poppins text-sm">{t('auth.email')}</Label>
+                    <Input
+                      id="magic-email"
+                      type="email"
+                      placeholder={t('auth.email_placeholder')}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                      className="h-12 bg-card border-border/50 font-nunito"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-nunito">
+                      {error}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full h-12 font-poppins font-semibold text-base gap-2"
+                  >
+                    {submitting ? (
+                      <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                    {submitting ? t('login.magic_submitting') : t('login.magic_submit')}
+                  </Button>
+                </form>
+              )}
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => { setMode('login'); setError(''); setMagicSent(false); }}
+                  className="text-sm text-primary hover:underline font-nunito"
+                >
+                  {t('login.magic_back_to_password')}
+                </button>
+              </div>
+            </>
+          ) : mode === 'login' ? (
             <>
               <h2 className="text-2xl font-bold font-poppins text-foreground mb-2">
                 {t('login.title')}
@@ -248,6 +340,28 @@ export default function Login() {
                   {submitting ? t('login.submitting') : t('login.submit')}
                 </Button>
               </form>
+
+              {/* Divisor + botão Magic Link */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/40" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground font-nunito tracking-wider">
+                    {t('login.or')}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { setMode('magic'); setError(''); setMagicSent(false); }}
+                className="w-full h-12 font-poppins font-semibold text-base gap-2"
+              >
+                <Sparkles className="w-5 h-5" />
+                {t('login.magic_link_button')}
+              </Button>
 
               <div className="mt-4 text-center">
                 <button

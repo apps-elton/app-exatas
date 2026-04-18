@@ -540,5 +540,14 @@
   "header.subtitle": "Interaktiver Raumgeometrie-Betrachter",
   "label.eraser_size": "Radiergröße:",
   "panel.show": "Panel anzeigen",
-  "panel.hide": "Panel ausblenden"
+  "panel.hide": "Panel ausblenden",
+  "login.or": "oder",
+  "login.magic_link_button": "Mit E-Mail-Link anmelden",
+  "login.magic_title": "Passwortloses Login",
+  "login.magic_subtitle": "Geben Sie Ihre E-Mail ein und wir senden einen direkten Zugriffslink.",
+  "login.magic_sent_title": "Link gesendet!",
+  "login.magic_sent_description": "Prüfen Sie Ihren Posteingang unter {{email}} und klicken Sie auf den Link.",
+  "login.magic_submitting": "Link wird gesendet...",
+  "login.magic_submit": "Magischen Link senden",
+  "login.magic_back_to_password": "Zurück zum Passwort-Login"
 }

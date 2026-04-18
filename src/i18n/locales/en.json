@@ -540,5 +540,14 @@
   "header.subtitle": "Interactive Spatial Geometry Viewer",
   "label.eraser_size": "Eraser Size:",
   "panel.show": "Show panel",
-  "panel.hide": "Hide panel"
+  "panel.hide": "Hide panel",
+  "login.or": "or",
+  "login.magic_link_button": "Sign in with email link",
+  "login.magic_title": "Passwordless login",
+  "login.magic_subtitle": "Enter your email and we will send you a direct access link.",
+  "login.magic_sent_title": "Link sent!",
+  "login.magic_sent_description": "Check your inbox at {{email}} and click the link to sign in. It may take a few seconds.",
+  "login.magic_submitting": "Sending link...",
+  "login.magic_submit": "Send magic link",
+  "login.magic_back_to_password": "Back to password login"
 }

@@ -540,5 +540,14 @@
   "header.subtitle": "Интерактивный Просмотрщик Пространственной Геометрии",
   "label.eraser_size": "Размер Ластика:",
   "panel.show": "Показать панель",
-  "panel.hide": "Скрыть панель"
+  "panel.hide": "Скрыть панель",
+  "login.or": "или",
+  "login.magic_link_button": "Войти по ссылке в email",
+  "login.magic_title": "Вход без пароля",
+  "login.magic_subtitle": "Введите email и мы отправим ссылку для входа.",
+  "login.magic_sent_title": "Ссылка отправлена!",
+  "login.magic_sent_description": "Проверьте почту {{email}} и нажмите на ссылку для входа.",
+  "login.magic_submitting": "Отправка...",
+  "login.magic_submit": "Отправить магическую ссылку",
+  "login.magic_back_to_password": "Вернуться ко входу с паролем"
 }

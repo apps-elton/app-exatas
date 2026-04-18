@@ -540,5 +540,14 @@
   "header.subtitle": "インタラクティブ空間幾何ビューア",
   "label.eraser_size": "消しゴムサイズ:",
   "panel.show": "パネルを表示",
-  "panel.hide": "パネルを非表示"
+  "panel.hide": "パネルを非表示",
+  "login.or": "または",
+  "login.magic_link_button": "メールのリンクでログイン",
+  "login.magic_title": "パスワード不要のログイン",
+  "login.magic_subtitle": "メールアドレスを入力するとアクセスリンクをお送りします。",
+  "login.magic_sent_title": "リンクを送信しました！",
+  "login.magic_sent_description": "{{email}} の受信箱を確認し、リンクをクリックしてください。",
+  "login.magic_submitting": "送信中...",
+  "login.magic_submit": "マジックリンクを送信",
+  "login.magic_back_to_password": "パスワードログインに戻る"
 }

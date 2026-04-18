@@ -540,5 +540,14 @@
   "header.subtitle": "대화형 공간 기하학 뷰어",
   "label.eraser_size": "지우개 크기:",
   "panel.show": "패널 표시",
-  "panel.hide": "패널 숨기기"
+  "panel.hide": "패널 숨기기",
+  "login.or": "또는",
+  "login.magic_link_button": "이메일 링크로 로그인",
+  "login.magic_title": "비밀번호 없이 로그인",
+  "login.magic_subtitle": "이메일을 입력하면 접속 링크를 보내드립니다.",
+  "login.magic_sent_title": "링크 전송됨!",
+  "login.magic_sent_description": "{{email}} 받은편지함을 확인하고 링크를 클릭하세요.",
+  "login.magic_submitting": "전송 중...",
+  "login.magic_submit": "매직 링크 전송",
+  "login.magic_back_to_password": "비밀번호 로그인으로 돌아가기"
 }

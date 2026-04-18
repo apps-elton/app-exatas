@@ -540,5 +540,14 @@
   "header.subtitle": "Visualiseur Interactif de Géométrie Spatiale",
   "label.eraser_size": "Taille Gomme :",
   "panel.show": "Afficher le panneau",
-  "panel.hide": "Masquer le panneau"
+  "panel.hide": "Masquer le panneau",
+  "login.or": "ou",
+  "login.magic_link_button": "Connexion par lien email",
+  "login.magic_title": "Connexion sans mot de passe",
+  "login.magic_subtitle": "Entrez votre email et recevez un lien d'accès direct.",
+  "login.magic_sent_title": "Lien envoyé !",
+  "login.magic_sent_description": "Consultez votre boîte {{email}} et cliquez sur le lien pour vous connecter.",
+  "login.magic_submitting": "Envoi en cours...",
+  "login.magic_submit": "Envoyer le lien magique",
+  "login.magic_back_to_password": "Retour à la connexion par mot de passe"
 }
