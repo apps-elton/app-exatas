@@ -18,14 +18,40 @@ import {
   Shield,
   School,
   GraduationCap,
+  BookOpen,
   Crown,
   MessageSquare,
 } from 'lucide-react';
 
 const ROLE_STYLE = {
-  superadmin: { icon: Shield, color: 'text-red-400', bg: 'bg-red-400/10' },
-  admin: { icon: School, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-  teacher: { icon: GraduationCap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+  superadmin: {
+    icon: Shield,
+    color: 'text-red-400',
+    bg: 'bg-red-400/10',
+    border: 'border-red-400/40',
+    tint: 'bg-red-400/5',
+  },
+  admin: {
+    icon: School,
+    color: 'text-amber-400',
+    bg: 'bg-amber-400/10',
+    border: 'border-amber-400/40',
+    tint: 'bg-amber-400/5',
+  },
+  teacher: {
+    icon: GraduationCap,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-400/10',
+    border: 'border-emerald-400/40',
+    tint: 'bg-emerald-400/5',
+  },
+  student: {
+    icon: BookOpen,
+    color: 'text-sky-400',
+    bg: 'bg-sky-400/10',
+    border: 'border-sky-400/40',
+    tint: 'bg-sky-400/5',
+  },
 };
 
 const PLAN_STYLE = {
@@ -47,7 +73,14 @@ export function AppSidebar() {
   const planStyle = PLAN_STYLE[plan];
   const RoleIcon = roleStyle.icon;
 
-  const roleLabel = role === 'superadmin' ? t('roles.superadmin') : role === 'admin' ? t('roles.admin') : t('roles.teacher');
+  const roleLabel =
+    role === 'superadmin'
+      ? t('roles.superadmin')
+      : role === 'admin'
+      ? t('roles.admin')
+      : role === 'student'
+      ? t('roles.student')
+      : t('roles.teacher');
   const planLabel = plan === 'free' ? t('plans.free') : plan === 'professor' ? t('plans.professor') : t('plans.institution');
 
   const TEACHER_NAV = [
@@ -133,17 +166,22 @@ export function AppSidebar() {
             <div className={`w-10 h-10 rounded-full ${roleStyle.bg} flex items-center justify-center shrink-0`}>
               <RoleIcon className={`w-5 h-5 ${roleStyle.color}`} />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="font-poppins font-semibold text-sm text-foreground truncate">
                 {profile?.full_name ?? t('sidebar.user_fallback')}
               </p>
               <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`text-xs font-medium ${roleStyle.color}`}>{roleLabel}</span>
+              <div
+                className={`mt-1.5 flex items-center gap-1.5 px-1.5 py-0.5 rounded-r-md border-l-2 ${roleStyle.border} ${roleStyle.tint}`}
+              >
+                <RoleIcon className={`w-3 h-3 shrink-0 ${roleStyle.color}`} />
+                <span className={`text-xs font-poppins font-semibold ${roleStyle.color}`}>
+                  {roleLabel}
+                </span>
                 <span className="text-muted-foreground/40">·</span>
-                <div className="flex items-center gap-1">
-                  {plan !== 'free' && <Crown className="w-3 h-3 text-amber-400" />}
-                  <span className={`text-xs ${planStyle.color}`}>{planLabel}</span>
+                <div className="flex items-center gap-1 min-w-0">
+                  {plan !== 'free' && <Crown className="w-3 h-3 text-amber-400 shrink-0" />}
+                  <span className={`text-xs truncate ${planStyle.color}`}>{planLabel}</span>
                 </div>
               </div>
             </div>
