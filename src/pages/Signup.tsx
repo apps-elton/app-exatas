@@ -19,6 +19,16 @@ interface InviteData {
   tenant_name: string;
 }
 
+async function waitForProfile(userId: string, timeoutMs = 3000): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+    if (data) return true;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return false;
+}
+
 export default function Signup() {
   const { t } = useTranslation();
   const { session, loading } = useAuth();
@@ -136,8 +146,14 @@ export default function Signup() {
         return;
       }
 
-      // Wait for trigger to create profile
-      await new Promise(r => setTimeout(r, 1000));
+      // Wait for trigger to create profile (poll instead of fixed delay)
+      const profileReady = await waitForProfile(userId);
+      if (!profileReady) {
+        setError(t('signup.error_create_account'));
+        setSubmitting(false);
+        await supabase.auth.signOut();
+        return;
+      }
 
       // Sign in to get a session (needed for RPC calls)
       await supabase.auth.signInWithPassword({ email, password });
@@ -153,6 +169,7 @@ export default function Signup() {
         if (rpcError) {
           setError(t('signup.error_create_school', { message: rpcError.message }));
           setSubmitting(false);
+          await supabase.auth.signOut();
           return;
         }
       }
@@ -166,6 +183,7 @@ export default function Signup() {
         if (rpcError) {
           setError(t('signup.error_accept_invite', { message: rpcError.message }));
           setSubmitting(false);
+          await supabase.auth.signOut();
           return;
         }
       }
@@ -176,6 +194,7 @@ export default function Signup() {
         if (rpcError) {
           setError(t('signup.error_create_student', { message: rpcError.message }));
           setSubmitting(false);
+          await supabase.auth.signOut();
           return;
         }
       }
