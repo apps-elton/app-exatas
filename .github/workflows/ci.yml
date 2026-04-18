@@ -44,9 +44,6 @@ jobs:
     environment:
       name: production
       url: https://app.clickexatas.com.br
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
     steps:
       - name: Checkout
@@ -61,9 +58,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
@@ -71,13 +65,16 @@ jobs:
         env:
           VERCEL_TOKEN_RAW: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID_RAW: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID_RAW: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Trim whitespace/newlines from secrets (common paste error)
-          VERCEL_TOKEN_CLEAN=$(echo -n "$VERCEL_TOKEN_RAW" | tr -d '[:space:]')
-          VERCEL_SCOPE_CLEAN=$(echo -n "$VERCEL_ORG_ID_RAW" | tr -d '[:space:]')
-          vercel deploy \
-            --prod \
-            --yes \
-            --token="$VERCEL_TOKEN_CLEAN" \
-            --scope="$VERCEL_SCOPE_CLEAN" \
-            --cwd="$GITHUB_WORKSPACE"
+          # Trim whitespace/newlines from ALL secrets (common paste error from Windows)
+          TOKEN=$(printf '%s' "$VERCEL_TOKEN_RAW" | tr -d '[:space:]')
+          ORG=$(printf '%s' "$VERCEL_ORG_ID_RAW" | tr -d '[:space:]')
+          PRJ=$(printf '%s' "$VERCEL_PROJECT_ID_RAW" | tr -d '[:space:]')
+          export VERCEL_TOKEN="$TOKEN"
+          export VERCEL_ORG_ID="$ORG"
+          export VERCEL_PROJECT_ID="$PRJ"
+          echo "Scope length: ${#ORG}, Project ID length: ${#PRJ}"
+          vercel pull --yes --environment=production --token="$TOKEN"
+          vercel build --prod --token="$TOKEN"
+          vercel deploy --prebuilt --prod --yes --token="$TOKEN"
