@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Canvas as FabricCanvas, FabricText, PencilBrush, FabricObject } from 'fabric';
+import React, { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { Canvas as FabricCanvas, FabricText, PencilBrush } from 'fabric';
 import { toast } from 'sonner';
 
 export interface FabricDrawingCanvasRef {
@@ -21,19 +21,72 @@ interface FabricDrawingCanvasProps {
   opacity?: number;
   className?: string;
   onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
+  /**
+   * Optional initial canvas JSON to restore strokes on mount. Useful when the
+   * component is conditionally rendered or when a parent wants to persist
+   * strokes across unrelated UI changes (e.g. switching the 3D solid).
+   */
+  initialCanvasJSON?: string | null;
+  /**
+   * Fires whenever the canvas content changes (path created, object added,
+   * modified or removed). Parents can store the JSON to persist strokes.
+   */
+  onCanvasChange?: (json: string) => void;
 }
 
 export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDrawingCanvasProps>(
-  ({ isEnabled, tool, strokeColor, strokeWidth, opacity = 1, className, onHistoryChange }, ref) => {
+  ({ isEnabled, tool, strokeColor, strokeWidth, opacity = 1, className, onHistoryChange, initialCanvasJSON, onCanvasChange }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<FabricCanvas | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    
-    const [history, setHistory] = useState<string[]>([]);
-    const [historyIndex, setHistoryIndex] = useState(-1);
-    const [isDrawing, setIsDrawing] = useState(false);
 
-    // Initialize Fabric canvas
+    // Store history in refs so the Fabric event handlers (registered once)
+    // always see fresh values and don't corrupt the history due to stale
+    // closures. `historyIndexRef` tracks the pointer into `historyRef`.
+    const historyRef = useRef<string[]>([]);
+    const historyIndexRef = useRef<number>(-1);
+    // True while we are programmatically mutating the canvas (undo/redo/load)
+    // so the `object:added`/`object:removed` handlers don't record intermediate
+    // states as new history entries.
+    const isRestoringRef = useRef<boolean>(false);
+
+    const onHistoryChangeRef = useRef(onHistoryChange);
+    const onCanvasChangeRef = useRef(onCanvasChange);
+    useEffect(() => {
+      onHistoryChangeRef.current = onHistoryChange;
+    }, [onHistoryChange]);
+    useEffect(() => {
+      onCanvasChangeRef.current = onCanvasChange;
+    }, [onCanvasChange]);
+
+    // Keep the most recent initialCanvasJSON in a ref so the one-shot init
+    // effect doesn't need it as a dependency. Loading is explicitly performed
+    // once on mount from this ref.
+    const initialCanvasJSONRef = useRef(initialCanvasJSON);
+
+    const notifyHistory = useCallback(() => {
+      const canUndo = historyIndexRef.current > 0;
+      const canRedo = historyIndexRef.current < historyRef.current.length - 1;
+      onHistoryChangeRef.current?.(canUndo, canRedo);
+    }, []);
+
+    const saveState = useCallback(() => {
+      const canvas = fabricCanvasRef.current;
+      if (!canvas) return;
+
+      const state = JSON.stringify(canvas.toJSON());
+
+      // Drop any redo tail and append the new state.
+      const truncated = historyRef.current.slice(0, historyIndexRef.current + 1);
+      truncated.push(state);
+      historyRef.current = truncated;
+      historyIndexRef.current = truncated.length - 1;
+
+      notifyHistory();
+      onCanvasChangeRef.current?.(state);
+    }, [notifyHistory]);
+
+    // Initialize Fabric canvas (once)
     useEffect(() => {
       if (!canvasRef.current || !containerRef.current) return;
 
@@ -63,36 +116,57 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
       };
 
       resizeCanvas();
-      
+
       const resizeObserver = new ResizeObserver(resizeCanvas);
       resizeObserver.observe(container);
 
-      // Save initial state
-      saveState();
+      // If the parent provided persisted strokes, restore them before
+      // recording the initial state so undo returns to the restored snapshot.
+      const pendingInitialJSON = initialCanvasJSONRef.current;
+      if (pendingInitialJSON) {
+        isRestoringRef.current = true;
+        canvas.loadFromJSON(pendingInitialJSON, () => {
+          canvas.renderAll();
+          isRestoringRef.current = false;
+          saveState();
+        });
+      } else {
+        saveState();
+      }
 
-      // Event listeners
+      // Event listeners — these close over refs, not state, so they always
+      // read fresh values.
       canvas.on('path:created', () => {
+        if (isRestoringRef.current) return;
         saveState();
       });
 
       canvas.on('object:added', () => {
-        if (!isDrawing) {
-          saveState();
-        }
+        // `path:created` fires separately and also records the state; skip
+        // `object:added` for freehand paths to avoid double entries. We
+        // still need to record when other code adds objects (text, equations,
+        // eraser removals, etc.) outside of a restore operation.
+        // To keep behaviour consistent with the previous implementation we
+        // rely on `path:created` / `object:modified` / `object:removed` and
+        // do not record `object:added` here.
       });
 
       canvas.on('object:removed', () => {
+        if (isRestoringRef.current) return;
         saveState();
       });
 
       canvas.on('object:modified', () => {
+        if (isRestoringRef.current) return;
         saveState();
       });
 
       return () => {
         resizeObserver.disconnect();
         canvas.dispose();
+        fabricCanvasRef.current = null;
       };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Update canvas settings when props change
@@ -103,7 +177,7 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
       // Update drawing mode and selection
       canvas.isDrawingMode = isEnabled && (tool === 'pen' || tool === 'eraser');
       canvas.selection = isEnabled && tool === 'select';
-      
+
       // Update cursor
       if (isEnabled) {
         switch (tool) {
@@ -141,23 +215,6 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
       canvas.renderAll();
     }, [isEnabled, tool, strokeColor, strokeWidth, opacity]);
 
-    // Save state for undo/redo
-    const saveState = useCallback(() => {
-      const canvas = fabricCanvasRef.current;
-      if (!canvas) return;
-
-      const state = JSON.stringify(canvas.toJSON());
-      setHistory(prev => {
-        const newHistory = prev.slice(0, historyIndex + 1);
-        newHistory.push(state);
-        return newHistory;
-      });
-      setHistoryIndex(prev => prev + 1);
-      
-      // Update history buttons
-      onHistoryChange?.(true, false);
-    }, [historyIndex, onHistoryChange]);
-
     // Handle eraser tool clicks
     useEffect(() => {
       const canvas = fabricCanvasRef.current;
@@ -165,7 +222,7 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
 
       const handleEraserClick = (e: any) => {
         if (tool !== 'eraser') return;
-        
+
         const target = e.target;
         if (target && target !== canvas) {
           canvas.remove(target);
@@ -175,7 +232,7 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
       };
 
       canvas.on('mouse:down', handleEraserClick);
-      
+
       return () => {
         canvas.off('mouse:down', handleEraserClick);
       };
@@ -188,7 +245,7 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
 
       const handleCanvasClick = (e: any) => {
         if (tool !== 'text') return;
-        
+
         const pointer = canvas.getPointer(e.e);
         const text = new FabricText('Texto', {
           left: pointer.x,
@@ -199,18 +256,20 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
           selectable: true,
           editable: true,
         });
-        
+
         canvas.add(text);
         canvas.setActiveObject(text);
         canvas.renderAll();
+        // Text additions bypass path:created, so record explicitly.
+        saveState();
       };
 
       canvas.on('mouse:down', handleCanvasClick);
-      
+
       return () => {
         canvas.off('mouse:down', handleCanvasClick);
       };
-    }, [tool, isEnabled, strokeColor, strokeWidth]);
+    }, [tool, isEnabled, strokeColor, strokeWidth, saveState]);
 
     // Keyboard shortcuts
     useEffect(() => {
@@ -239,75 +298,79 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
     const clear = useCallback(() => {
       const canvas = fabricCanvasRef.current;
       if (canvas) {
+        isRestoringRef.current = true;
         canvas.clear();
         canvas.backgroundColor = 'transparent';
         canvas.renderAll();
+        isRestoringRef.current = false;
         saveState();
         toast.success('Canvas limpo!');
       }
     }, [saveState]);
 
     const undo = useCallback(() => {
-      if (historyIndex <= 0) return;
-      
+      if (historyIndexRef.current <= 0) return;
+
       const canvas = fabricCanvasRef.current;
-      if (canvas) {
-        const previousState = history[historyIndex - 1];
-        setIsDrawing(true);
-        
-        // Temporarily enable canvas interaction for undo
-        const wasDisabled = !isEnabled;
-        if (wasDisabled) {
-          canvas.upperCanvasEl.style.pointerEvents = 'auto';
-        }
-        
-        canvas.loadFromJSON(previousState, () => {
-          canvas.renderAll();
-          setIsDrawing(false);
-          
-          // Restore original interaction state
-          if (wasDisabled) {
-            canvas.upperCanvasEl.style.pointerEvents = 'none';
-          }
-        });
-        setHistoryIndex(prev => prev - 1);
-        onHistoryChange?.(historyIndex > 1, true);
+      if (!canvas) return;
+
+      const previousState = historyRef.current[historyIndexRef.current - 1];
+      isRestoringRef.current = true;
+
+      // Temporarily enable canvas interaction for undo
+      const wasDisabled = !isEnabled;
+      if (wasDisabled) {
+        canvas.upperCanvasEl.style.pointerEvents = 'auto';
       }
-    }, [history, historyIndex, onHistoryChange, isEnabled]);
+
+      canvas.loadFromJSON(previousState, () => {
+        canvas.renderAll();
+        isRestoringRef.current = false;
+
+        // Restore original interaction state
+        if (wasDisabled) {
+          canvas.upperCanvasEl.style.pointerEvents = 'none';
+        }
+
+        historyIndexRef.current -= 1;
+        notifyHistory();
+        onCanvasChangeRef.current?.(previousState);
+      });
+    }, [isEnabled, notifyHistory]);
 
     const redo = useCallback(() => {
-      if (historyIndex >= history.length - 1) return;
-      
+      if (historyIndexRef.current >= historyRef.current.length - 1) return;
+
       const canvas = fabricCanvasRef.current;
-      if (canvas) {
-        const nextState = history[historyIndex + 1];
-        setIsDrawing(true);
-        
-        // Temporarily enable canvas interaction for redo
-        const wasDisabled = !isEnabled;
-        if (wasDisabled) {
-          canvas.upperCanvasEl.style.pointerEvents = 'auto';
-        }
-        
-        canvas.loadFromJSON(nextState, () => {
-          canvas.renderAll();
-          setIsDrawing(false);
-          
-          // Restore original interaction state
-          if (wasDisabled) {
-            canvas.upperCanvasEl.style.pointerEvents = 'none';
-          }
-        });
-        setHistoryIndex(prev => prev + 1);
-        onHistoryChange?.(true, historyIndex < history.length - 2);
+      if (!canvas) return;
+
+      const nextState = historyRef.current[historyIndexRef.current + 1];
+      isRestoringRef.current = true;
+
+      const wasDisabled = !isEnabled;
+      if (wasDisabled) {
+        canvas.upperCanvasEl.style.pointerEvents = 'auto';
       }
-    }, [history, historyIndex, onHistoryChange, isEnabled]);
+
+      canvas.loadFromJSON(nextState, () => {
+        canvas.renderAll();
+        isRestoringRef.current = false;
+
+        if (wasDisabled) {
+          canvas.upperCanvasEl.style.pointerEvents = 'none';
+        }
+
+        historyIndexRef.current += 1;
+        notifyHistory();
+        onCanvasChangeRef.current?.(nextState);
+      });
+    }, [isEnabled, notifyHistory]);
 
     const save = useCallback(() => {
       const canvas = fabricCanvasRef.current;
       if (!canvas) return '';
-      
-      return canvas.toDataURL({ 
+
+      return canvas.toDataURL({
         format: 'png',
         multiplier: 1
       });
@@ -316,27 +379,27 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
     const exportImage = useCallback(() => {
       const canvas = fabricCanvasRef.current;
       if (!canvas) return;
-      
+
       // Create temporary canvas with white background
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = canvas.width || 800;
       tempCanvas.height = canvas.height || 600;
       const tempCtx = tempCanvas.getContext('2d');
-      
+
       if (tempCtx) {
         // White background
         tempCtx.fillStyle = 'white';
         tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        
+
         // Draw canvas content
-        const dataURL = canvas.toDataURL({ 
+        const dataURL = canvas.toDataURL({
           format: 'png',
           multiplier: 1
         });
         const img = new Image();
         img.onload = () => {
           tempCtx.drawImage(img, 0, 0);
-          
+
           // Download
           const link = document.createElement('a');
           link.download = `drawing_${Date.now()}.png`;
@@ -363,12 +426,14 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
         backgroundColor: 'rgba(255, 255, 255, 0.8)',
         padding: 5,
       });
-      
+
       canvas.add(text);
       canvas.setActiveObject(text);
       canvas.renderAll();
+      // Persist the new equation to history.
+      saveState();
       toast.success('Equação adicionada!');
-    }, [strokeColor]);
+    }, [strokeColor, saveState]);
 
     const setTool = useCallback((newTool: 'select' | 'pen' | 'eraser' | 'text') => {
       // This will be handled by the parent component
@@ -394,10 +459,10 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
     }), [clear, undo, redo, save, exportImage, addEquation, setTool, setBrushSettings]);
 
     return (
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className={`absolute inset-0 ${className || ''}`}
-        style={{ 
+        style={{
           pointerEvents: isEnabled ? 'auto' : 'none',
           cursor: isEnabled ? 'default' : 'not-allowed',
         }}
@@ -405,7 +470,7 @@ export const FabricDrawingCanvas = forwardRef<FabricDrawingCanvasRef, FabricDraw
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
-          style={{ 
+          style={{
             pointerEvents: isEnabled ? 'auto' : 'none',
           }}
         />
