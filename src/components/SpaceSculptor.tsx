@@ -30,6 +30,13 @@ function SpaceSculptorContent() {
   const geometryCanvasRef = useRef<HTMLDivElement>(null);
   const orbitControlsRef = useRef<any>(null);
   const drawingOverlayRef = useRef<FabricDrawingCanvasRef>(null);
+  // Persist Fabric drawing strokes across re-renders / potential remounts
+  // (e.g. when the 3D solid changes). Stored in a ref so updating it doesn't
+  // trigger re-renders.
+  const drawingCanvasJSONRef = useRef<string | null>(null);
+  const handleDrawingCanvasChange = useCallback((json: string) => {
+    drawingCanvasJSONRef.current = json;
+  }, []);
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
   const [hasAnnotations, setHasAnnotations] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelId>(null);
@@ -1293,6 +1300,8 @@ function SpaceSculptorContent() {
                         strokeWidth={drawingStrokeWidth}
                         opacity={drawingOpacity}
                         onHistoryChange={handleHistoryChange}
+                        initialCanvasJSON={drawingCanvasJSONRef.current}
+                        onCanvasChange={handleDrawingCanvasChange}
                       />
                     </div>
                   </DrawingOverlayWrapper>

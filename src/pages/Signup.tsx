@@ -6,16 +6,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Box, Check, GraduationCap, School, BookOpen } from 'lucide-react';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { validateSignupInput } from '@/lib/signup-validation';
 
-type AccountType = 'teacher' | 'school' | null;
+type AccountType = 'teacher' | 'school' | 'student' | null;
 
 interface InviteData {
   id: string;
   tenant_id: string;
   role: string;
   tenant_name: string;
+}
+
+async function waitForProfile(userId: string, timeoutMs = 3000): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+    if (data) return true;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  return false;
 }
 
 export default function Signup() {
@@ -85,23 +96,29 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
-    if (!passwordChecks.length) {
-      setError(t('signup.error_password_min'));
-      return;
-    }
-    if (!passwordChecks.match) {
-      setError(t('signup.error_passwords_mismatch'));
-      return;
-    }
-    if (accountType === 'school' && !schoolName.trim()) {
-      setError(t('signup.error_school_name_required'));
+    const validation = validateSignupInput({
+      accountType: accountType!,
+      fullName,
+      email,
+      password,
+      confirmPassword,
+      schoolName,
+    });
+    if (!validation.ok) {
+      setError(t(validation.errorKey));
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const role = inviteData ? inviteData.role : accountType === 'school' ? 'admin' : 'teacher';
+      const role = inviteData
+        ? inviteData.role
+        : accountType === 'school'
+          ? 'admin'
+          : accountType === 'student'
+            ? 'student'
+            : 'teacher';
 
       // 1. Create auth user
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -129,8 +146,14 @@ export default function Signup() {
         return;
       }
 
-      // Wait for trigger to create profile
-      await new Promise(r => setTimeout(r, 1000));
+      // Wait for trigger to create profile (poll instead of fixed delay)
+      const profileReady = await waitForProfile(userId);
+      if (!profileReady) {
+        setError(t('signup.error_create_account'));
+        setSubmitting(false);
+        await supabase.auth.signOut();
+        return;
+      }
 
       // Sign in to get a session (needed for RPC calls)
       await supabase.auth.signInWithPassword({ email, password });
@@ -146,6 +169,7 @@ export default function Signup() {
         if (rpcError) {
           setError(t('signup.error_create_school', { message: rpcError.message }));
           setSubmitting(false);
+          await supabase.auth.signOut();
           return;
         }
       }
@@ -159,6 +183,18 @@ export default function Signup() {
         if (rpcError) {
           setError(t('signup.error_accept_invite', { message: rpcError.message }));
           setSubmitting(false);
+          await supabase.auth.signOut();
+          return;
+        }
+      }
+
+      // 4. If student signup, finalize via RPC
+      if (accountType === 'student' && !inviteData) {
+        const { error: rpcError } = await supabase.rpc('create_student_account');
+        if (rpcError) {
+          setError(t('signup.error_create_student', { message: rpcError.message }));
+          setSubmitting(false);
+          await supabase.auth.signOut();
           return;
         }
       }
@@ -259,9 +295,11 @@ export default function Signup() {
               <p className="text-muted-foreground font-nunito mb-6">
                 {accountType === 'school'
                   ? t('signup.success_school', { schoolName })
-                  : inviteData
-                  ? t('signup.success_invite', { tenant: inviteData.tenant_name })
-                  : t('signup.success_default')}
+                  : accountType === 'student'
+                    ? t('signup.success_student')
+                    : inviteData
+                      ? t('signup.success_invite', { tenant: inviteData.tenant_name })
+                      : t('signup.success_default')}
               </p>
               <Link to="/login">
                 <Button className="h-12 px-8 font-poppins font-semibold">
@@ -311,6 +349,21 @@ export default function Signup() {
                     </p>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setAccountType('student')}
+                  className="w-full flex items-center gap-4 p-5 rounded-xl border border-border/50 hover:border-sky-400/50 hover:bg-sky-400/5 transition-colors text-left"
+                >
+                  <div className="w-12 h-12 rounded-full bg-sky-400/10 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-6 h-6 text-sky-400" />
+                  </div>
+                  <div>
+                    <p className="font-poppins font-semibold text-foreground">{t('signup.student_title')}</p>
+                    <p className="text-sm text-muted-foreground font-nunito">
+                      {t('signup.student_description')}
+                    </p>
+                  </div>
+                </button>
               </div>
 
               <div className="mt-8 text-center">
@@ -342,15 +395,19 @@ export default function Signup() {
                 {inviteData
                   ? t('signup.invite_for_tenant', { tenant: inviteData.tenant_name })
                   : accountType === 'school'
-                  ? t('signup.school_register_title')
-                  : t('signup.teacher_register_title')}
+                    ? t('signup.school_register_title')
+                    : accountType === 'student'
+                      ? t('signup.student_register_title')
+                      : t('signup.teacher_register_title')}
               </h2>
               <p className="text-muted-foreground font-nunito mb-8">
                 {inviteData
                   ? t('signup.invite_create_to_access', { tenant: inviteData.tenant_name })
                   : accountType === 'school'
-                  ? t('signup.school_admin_subtitle')
-                  : t('signup.teacher_free_subtitle')}
+                    ? t('signup.school_admin_subtitle')
+                    : accountType === 'student'
+                      ? t('signup.student_subtitle')
+                      : t('signup.teacher_free_subtitle')}
               </p>
 
               <form onSubmit={handleSignup} className="space-y-5">
@@ -468,8 +525,10 @@ export default function Signup() {
                   {submitting
                     ? t('signup.submitting')
                     : accountType === 'school'
-                    ? t('signup.submit_school')
-                    : t('signup.submit_teacher')}
+                      ? t('signup.submit_school')
+                      : accountType === 'student'
+                        ? t('signup.submit_student')
+                        : t('signup.submit_teacher')}
                 </Button>
               </form>
 

@@ -52,6 +52,167 @@ export type Database = {
           },
         ]
       }
+      class_enrollments: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          invited_by: string | null
+          invited_email: string | null
+          is_active: boolean
+          joined_at: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          invited_email?: string | null
+          is_active?: boolean
+          joined_at?: string | null
+          student_id: string
+          tenant_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          invited_email?: string | null
+          is_active?: boolean
+          joined_at?: string | null
+          student_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_enrollments_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_enrollments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          join_code: string | null
+          name: string
+          teacher_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          join_code?: string | null
+          name: string
+          teacher_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          join_code?: string | null
+          name?: string
+          teacher_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          limits: Json
+          name: string
+          prices: Json
+          profile_type: string
+          sort_order: number
+          stripe_price_ids: Json
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id: string
+          limits?: Json
+          name: string
+          prices?: Json
+          profile_type: string
+          sort_order?: number
+          stripe_price_ids?: Json
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          limits?: Json
+          name?: string
+          prices?: Json
+          profile_type?: string
+          sort_order?: number
+          stripe_price_ids?: Json
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -163,6 +324,7 @@ export type Database = {
           current_period_start: string | null
           id: string
           plan: Database["public"]["Enums"]["subscription_plan"]
+          plan_id: string
           projects_limit: number
           status: Database["public"]["Enums"]["subscription_status"]
           storage_limit_mb: number
@@ -178,6 +340,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          plan_id: string
           projects_limit?: number
           status?: Database["public"]["Enums"]["subscription_status"]
           storage_limit_mb?: number
@@ -193,6 +356,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          plan_id?: string
           projects_limit?: number
           status?: Database["public"]["Enums"]["subscription_status"]
           storage_limit_mb?: number
@@ -204,6 +368,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
@@ -213,7 +384,7 @@ export type Database = {
           {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -338,10 +509,15 @@ export type Database = {
       }
       tenants: {
         Row: {
+          branding_enabled_at: string | null
+          cloudflare_hostname_id: string | null
           created_at: string
           custom_domain: string | null
+          custom_domain_status: string | null
+          display_name: string | null
           id: string
           is_active: boolean
+          is_solo: boolean
           logo_url: string | null
           max_users: number
           name: string
@@ -351,10 +527,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          branding_enabled_at?: string | null
+          cloudflare_hostname_id?: string | null
           created_at?: string
           custom_domain?: string | null
+          custom_domain_status?: string | null
+          display_name?: string | null
           id?: string
           is_active?: boolean
+          is_solo?: boolean
           logo_url?: string | null
           max_users?: number
           name: string
@@ -364,10 +545,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          branding_enabled_at?: string | null
+          cloudflare_hostname_id?: string | null
           created_at?: string
           custom_domain?: string | null
+          custom_domain_status?: string | null
+          display_name?: string | null
           id?: string
           is_active?: boolean
+          is_solo?: boolean
           logo_url?: string | null
           max_users?: number
           name?: string
@@ -423,9 +609,25 @@ export type Database = {
     }
     Functions: {
       accept_invite: { Args: { invite_token: string }; Returns: undefined }
-      create_school_and_link_admin: { Args: { school_name: string; school_slug: string }; Returns: string }
+      create_school_and_link_admin: {
+        Args: { school_name: string; school_slug: string }
+        Returns: string
+      }
+      create_student_account: { Args: never; Returns: Json }
+      export_my_data: { Args: never; Returns: Json }
       get_my_tenant_id: { Args: never; Returns: string }
+      get_tenant_by_host: { Args: { p_host: string }; Returns: Json }
       is_superadmin: { Args: never; Returns: boolean }
+      write_audit_log: {
+        Args: {
+          p_action: string
+          p_actor_id: string
+          p_metadata?: Json
+          p_target_id?: string
+          p_target_type?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       subscription_plan: "free" | "professor" | "institution"
@@ -437,7 +639,7 @@ export type Database = {
         | "inactive"
       ticket_priority: "low" | "medium" | "high" | "critical"
       ticket_status: "open" | "in_progress" | "resolved" | "closed"
-      user_role: "superadmin" | "admin" | "teacher"
+      user_role: "superadmin" | "admin" | "teacher" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -575,7 +777,7 @@ export const Constants = {
       ],
       ticket_priority: ["low", "medium", "high", "critical"],
       ticket_status: ["open", "in_progress", "resolved", "closed"],
-      user_role: ["superadmin", "admin", "teacher"],
+      user_role: ["superadmin", "admin", "teacher", "student"],
     },
   },
 } as const
