@@ -562,5 +562,9 @@
   "admin.stats.total_students": "Students",
   "admin.stats.total_schools": "Schools",
   "admin.stats.total_solo_teachers": "Solo Teachers",
-  "roles.student": "Student"
+  "roles.student": "Student",
+  "school.invite_email_placeholder": "Teacher's email (optional)",
+  "school.invite_email_helper": "If provided, we will send the invite by email automatically",
+  "school.invite_sent_with_email": "Invite sent to {{email}}",
+  "school.invite_created_no_email": "Invite created. Copy the link below."
 }

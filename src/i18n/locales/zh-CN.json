@@ -562,5 +562,9 @@
   "admin.stats.total_students": "学生",
   "admin.stats.total_schools": "学校",
   "admin.stats.total_solo_teachers": "独立教师",
-  "roles.student": "学生"
+  "roles.student": "学生",
+  "school.invite_email_placeholder": "教师邮箱(可选)",
+  "school.invite_email_helper": "如填写,我们将自动通过邮件发送邀请",
+  "school.invite_sent_with_email": "邀请已发送至 {{email}}",
+  "school.invite_created_no_email": "邀请已创建。请复制下方链接。"
 }

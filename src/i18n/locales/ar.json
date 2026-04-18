@@ -562,5 +562,9 @@
   "admin.stats.total_students": "الطلاب",
   "admin.stats.total_schools": "المدارس",
   "admin.stats.total_solo_teachers": "معلمون مستقلون",
-  "roles.student": "طالب"
+  "roles.student": "طالب",
+  "school.invite_email_placeholder": "بريد المعلم الإلكتروني (اختياري)",
+  "school.invite_email_helper": "إذا تم إدخاله، سنرسل الدعوة عبر البريد الإلكتروني تلقائياً",
+  "school.invite_sent_with_email": "تم إرسال الدعوة إلى {{email}}",
+  "school.invite_created_no_email": "تم إنشاء الدعوة. انسخ الرابط أدناه."
 }

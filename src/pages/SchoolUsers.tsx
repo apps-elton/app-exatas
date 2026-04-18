@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { AppLayout } from '@/components/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { sendEmail } from '@/lib/email';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -46,6 +48,7 @@ export default function SchoolUsers() {
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [tenantName, setTenantName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
 
   const fetchData = useCallback(async () => {
     if (!profile?.tenant_id) return;
@@ -82,13 +85,41 @@ export default function SchoolUsers() {
     if (!profile?.tenant_id || !profile?.id) return;
     setCreating(true);
 
-    const { error } = await supabase.from('tenant_invites').insert({
-      tenant_id: profile.tenant_id,
-      created_by: profile.id,
-      role: 'teacher' as any,
-    });
+    const trimmedEmail = inviteEmail.trim();
+    const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
+    const emailToStore = emailIsValid ? trimmedEmail : null;
 
-    if (!error) await fetchData();
+    const { data: inserted, error } = await supabase
+      .from('tenant_invites')
+      .insert({
+        tenant_id: profile.tenant_id,
+        created_by: profile.id,
+        role: 'teacher' as any,
+        ...(emailToStore ? { email: emailToStore } : {}),
+      })
+      .select()
+      .single();
+
+    if (!error) {
+      if (emailToStore && inserted?.token) {
+        sendEmail({
+          template: 'invite',
+          to: emailToStore,
+          data: {
+            tenantName,
+            inviterName: profile?.full_name ?? 'Administrador',
+            inviteToken: inserted.token,
+          },
+        }).catch(() => {
+          // Non-blocking — invite is created even if email fails
+        });
+        toast.success(t('school.invite_sent_with_email', { email: emailToStore }));
+      } else {
+        toast.success(t('school.invite_created_no_email'));
+      }
+      setInviteEmail('');
+      await fetchData();
+    }
     setCreating(false);
   };
 
@@ -122,7 +153,7 @@ export default function SchoolUsers() {
     <AppLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-2xl font-poppins font-bold text-foreground">
               {t('school.title', { name: tenantName })}
@@ -131,14 +162,29 @@ export default function SchoolUsers() {
               {t('school.subtitle')}
             </p>
           </div>
-          <Button onClick={createInvite} disabled={creating} className="gap-2 font-poppins">
-            {creating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <UserPlus className="w-4 h-4" />
-            )}
-            {t('school.generate_invite')}
-          </Button>
+          <div className="flex flex-col gap-1 md:min-w-[340px]">
+            <div className="flex items-center gap-2">
+              <Input
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder={t('school.invite_email_placeholder')}
+                className="h-9 font-nunito"
+                disabled={creating}
+              />
+              <Button onClick={createInvite} disabled={creating} className="gap-2 font-poppins shrink-0">
+                {creating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <UserPlus className="w-4 h-4" />
+                )}
+                {t('school.generate_invite')}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground font-nunito">
+              {t('school.invite_email_helper')}
+            </p>
+          </div>
         </div>
 
         {/* Pending invites */}

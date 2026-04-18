@@ -562,5 +562,9 @@
   "admin.stats.total_students": "生徒",
   "admin.stats.total_schools": "学校",
   "admin.stats.total_solo_teachers": "個人教師",
-  "roles.student": "生徒"
+  "roles.student": "生徒",
+  "school.invite_email_placeholder": "教師のメールアドレス(任意)",
+  "school.invite_email_helper": "入力すると、自動的にメールで招待を送信します",
+  "school.invite_sent_with_email": "{{email}} に招待を送信しました",
+  "school.invite_created_no_email": "招待を作成しました。下のリンクをコピーしてください。"
 }

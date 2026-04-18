@@ -562,5 +562,9 @@
   "admin.stats.total_students": "Ученики",
   "admin.stats.total_schools": "Школы",
   "admin.stats.total_solo_teachers": "Учителя на себя",
-  "roles.student": "Ученик"
+  "roles.student": "Ученик",
+  "school.invite_email_placeholder": "Email преподавателя (необязательно)",
+  "school.invite_email_helper": "Если указано, мы отправим приглашение на email автоматически",
+  "school.invite_sent_with_email": "Приглашение отправлено на {{email}}",
+  "school.invite_created_no_email": "Приглашение создано. Скопируйте ссылку ниже."
 }

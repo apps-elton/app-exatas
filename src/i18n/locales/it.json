@@ -562,5 +562,9 @@
   "admin.stats.total_students": "Studenti",
   "admin.stats.total_schools": "Scuole",
   "admin.stats.total_solo_teachers": "Insegnanti Autonomi",
-  "roles.student": "Studente"
+  "roles.student": "Studente",
+  "school.invite_email_placeholder": "Email dell'insegnante (opzionale)",
+  "school.invite_email_helper": "Se indicato, invieremo l'invito via email automaticamente",
+  "school.invite_sent_with_email": "Invito inviato a {{email}}",
+  "school.invite_created_no_email": "Invito creato. Copia il link qui sotto."
 }
