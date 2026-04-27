@@ -3,6 +3,7 @@ import { EquationSidebar, EqPanelId } from '@/components/equation-breaker/Equati
 import { PolynomialTab } from '@/components/equation-breaker/PolynomialTab';
 import { FunctionsTab } from '@/components/equation-breaker/FunctionsTab';
 import { ComplexTab } from '@/components/equation-breaker/ComplexTab';
+import { BoardTab } from '@/components/equation-breaker/BoardTab';
 import { Card, CardContent } from "@/components/ui/card";
 import { FunctionSquare } from 'lucide-react';
 
@@ -37,6 +38,8 @@ export default function EquationBreaker() {
                 <FunctionsTab />
               ) : activeTab === 'complex' ? (
                 <ComplexTab />
+              ) : activeTab === 'board' ? (
+                <BoardTab />
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-muted/5">
                   <p className="text-muted-foreground italic flex flex-col items-center gap-2">
