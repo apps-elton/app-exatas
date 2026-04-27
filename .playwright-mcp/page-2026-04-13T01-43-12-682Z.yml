@@ -1,0 +1,45 @@
+- generic:
+  - generic:
+    - list
+    - region "Notifications alt+T"
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - button [active]:
+              - img
+              - generic: Forma Geométrica
+            - button:
+              - img
+              - generic: Visualización
+            - button:
+              - img
+              - generic: Estilo
+            - button:
+              - img
+              - generic: Tableta Digitalizadora
+            - button:
+              - img
+              - generic: Propiedades
+  - dialog "Forma Geométrica" [ref=e58]:
+    - heading "Forma Geométrica" [level=2] [ref=e61]
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - heading "Forma Geométrica" [level=3] [ref=e66]
+        - generic [ref=e68]:
+          - text: Tipo
+          - combobox [ref=e69] [cursor=pointer]:
+            - generic: Prisma
+            - img [ref=e70]
+      - generic [ref=e72]:
+        - heading "Parámetros" [level=3] [ref=e74]
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]: "Altura: 4.0"
+            - slider [ref=e82]
+          - generic [ref=e83]:
+            - generic [ref=e84]: "Lados: 5"
+            - slider [ref=e89]
+          - generic [ref=e90]:
+            - generic [ref=e91]: "Arista de la Base: 2.0"
+            - slider [ref=e96]

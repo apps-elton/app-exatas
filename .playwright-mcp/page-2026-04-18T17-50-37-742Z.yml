@@ -1,0 +1,51 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e163]:
+    - button "Português" [ref=e165] [cursor=pointer]:
+      - img
+      - generic [ref=e166]: Português
+    - generic [ref=e168]:
+      - img [ref=e170]
+      - heading "GeoTeach" [level=1] [ref=e173]
+      - paragraph [ref=e174]: Geometria 3D interativa para professores e escolas
+      - generic [ref=e175]:
+        - generic [ref=e176]:
+          - generic [ref=e177]: 20+
+          - generic [ref=e178]: Sólidos 3D
+        - generic [ref=e179]:
+          - generic [ref=e180]: 15+
+          - generic [ref=e181]: Ferramentas
+        - generic [ref=e182]:
+          - generic [ref=e183]: "2"
+          - generic [ref=e184]: Idiomas
+    - generic [ref=e189]:
+      - heading "Entrar" [level=2] [ref=e190]
+      - paragraph [ref=e191]: Acesse sua conta para continuar
+      - generic [ref=e192]:
+        - generic [ref=e193]:
+          - text: Email
+          - textbox "Email" [ref=e194]:
+            - /placeholder: seu@email.com
+            - text: superadmin@geoteach.dev
+        - generic [ref=e195]:
+          - text: Senha
+          - generic [ref=e196]:
+            - textbox "Senha" [ref=e197]:
+              - /placeholder: Sua senha
+              - text: GeoTeach@2026
+            - button [ref=e198] [cursor=pointer]:
+              - img [ref=e199]
+        - button "Entrar" [ref=e202] [cursor=pointer]:
+          - img
+          - text: Entrar
+      - generic [ref=e207]: ou
+      - button "Entrar com link no email" [ref=e208] [cursor=pointer]:
+        - img
+        - text: Entrar com link no email
+      - button "Esqueci minha senha" [ref=e210] [cursor=pointer]
+      - paragraph [ref=e212]:
+        - text: Ainda não tem conta?
+        - link "Criar conta grátis" [ref=e213] [cursor=pointer]:
+          - /url: /signup

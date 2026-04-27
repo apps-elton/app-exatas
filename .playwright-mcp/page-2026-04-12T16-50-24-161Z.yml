@@ -1,0 +1,421 @@
+- generic:
+  - generic:
+    - list
+    - region "Notifications alt+T"
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - img
+            - generic: GeoTeach
+          - button:
+            - img
+        - generic:
+          - generic:
+            - generic:
+              - img
+            - generic:
+              - paragraph: Admin Escola
+              - paragraph: admin@escola-teste.dev
+              - generic:
+                - generic: Admin
+                - generic: ·
+                - generic:
+                  - generic: Gratuito
+        - navigation:
+          - button:
+            - img
+            - generic: Dashboard
+          - button:
+            - img
+            - generic: Geometria 3D
+          - button:
+            - img
+            - generic: Meus Projetos
+          - button:
+            - img
+            - generic: Usuários da Escola
+          - button:
+            - img
+            - generic: Configurações
+        - generic:
+          - paragraph: Upgrade para Pro
+          - paragraph: Projetos ilimitados e mais recursos
+          - button [disabled]: Em breve
+        - generic:
+          - button [expanded]:
+            - img
+            - generic: 🇧🇷 Português
+        - generic:
+          - button:
+            - img
+            - generic: Sair
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - heading [level=1]: GeoTeach
+              - paragraph: Visualizador Interativo de Geometria Espacial
+            - generic:
+              - button:
+                - img
+                - text: Baixar
+              - button: 🎯 Centralizar Vista
+              - button:
+                - img
+                - text: Congelar Vista
+              - generic:
+                - button:
+                  - img
+                  - generic: Alternar tema
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Ferramentas
+                  - generic:
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Seleção
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Ponto Médio
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Seção Transversal
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Seção Meridiana
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Conectar Vértices
+                    - button:
+                      - generic:
+                        - img
+                        - generic: Criar Plano
+                - generic:
+                  - button [disabled]:
+                    - img
+                    - generic: Desfazer
+                  - button [disabled]:
+                    - img
+                    - generic: Refazer
+          - generic:
+            - complementary:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=3]: Forma Geométrica
+                  - generic:
+                    - generic:
+                      - text: Tipo
+                      - combobox:
+                        - generic: Prisma
+                        - img
+                - generic:
+                  - generic:
+                    - heading [level=3]: Parâmetros
+                  - generic:
+                    - generic:
+                      - generic: "Altura: 4.0"
+                      - generic:
+                        - generic:
+                          - slider
+                    - generic:
+                      - generic: "Lados: 5"
+                      - generic:
+                        - generic:
+                          - slider
+                    - generic:
+                      - generic: "Aresta da Base: 2.0"
+                      - generic:
+                        - generic:
+                          - slider
+                - generic:
+                  - generic:
+                    - heading [level=3]: Visualização
+                  - generic:
+                    - generic:
+                      - generic: Mostrar Arestas
+                      - switch [checked]
+                    - generic:
+                      - generic: Mostrar Vértices
+                      - switch [checked]
+                    - generic:
+                      - generic: Mostrar Faces
+                      - switch [checked]
+                    - generic:
+                      - generic:
+                        - generic: Mostrar Altura
+                        - switch
+                    - generic:
+                      - generic:
+                        - generic: Mostrar Raio da Base
+                        - switch [disabled]
+                    - generic:
+                      - generic:
+                        - generic: Raio Inscrito
+                        - switch
+                    - generic:
+                      - generic:
+                        - generic: Raio Circunscrito
+                        - switch
+                    - generic:
+                      - generic:
+                        - generic: Circunferência Inscrita
+                        - switch
+                    - generic:
+                      - generic:
+                        - generic: Circunferência Circunscrita
+                        - switch
+                    - generic:
+                      - generic: Rótulos
+                      - switch
+                    - generic:
+                      - generic: Malha
+                      - switch [checked]
+                    - generic:
+                      - generic: Seção Transversal
+                      - switch
+                    - generic:
+                      - generic: Seção Meridiana
+                      - switch
+                    - generic:
+                      - generic: Dimensões
+                      - switch
+                    - generic:
+                      - generic: Mostrar Sombra
+                      - switch
+                    - generic:
+                      - generic: Planificação
+                      - switch
+                    - generic:
+                      - generic:
+                        - generic: Conectar Vértices
+                        - switch
+                    - generic:
+                      - generic: 🎯 Modos de Seleção de Vértices
+                      - generic:
+                        - button: 🔶 Meridiana
+                        - button: 📐 Planos
+                        - button: 🔗 Conexões
+                        - button: 📏 Construções
+                    - generic:
+                      - generic:
+                        - generic: Definir Plano (3 Pontos)
+                        - switch
+                - generic:
+                  - generic:
+                    - heading [level=3]: Formas Inscritas/Circunscritas
+                  - generic:
+                    - paragraph: Selecione cubo, esfera, cilindro ou cone para ver opções de inscrição/circunscrição
+                - generic:
+                  - generic:
+                    - heading [level=3]: Estilo
+                  - generic:
+                    - generic:
+                      - text: Cor das Arestas
+                      - combobox:
+                        - generic:
+                          - generic: Azul
+                        - img
+                    - generic:
+                      - text: Cor Seção Meridiana
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor da Altura
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor da Face
+                      - combobox:
+                        - generic:
+                          - generic: Roxo
+                        - img
+                    - generic:
+                      - text: Cor da Circunferência Inscrita
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor da Circunferência Circunscrita
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor Formas Inscritas
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor Formas Circunscritas
+                      - combobox:
+                        - img
+                    - generic:
+                      - text: Cor Seção Meridiana
+                      - combobox [disabled]:
+                        - img
+                    - generic:
+                      - generic: "Opacidade da Seção Meridiana: 50%"
+                      - generic:
+                        - generic:
+                          - slider [disabled]
+                    - generic:
+                      - generic: "Opacidade: 70%"
+                      - generic:
+                        - generic:
+                          - slider
+                    - generic:
+                      - generic: "Velocidade: 1.0x"
+                      - generic:
+                        - generic:
+                          - slider
+                - generic:
+                  - generic:
+                    - heading [level=3]: Controles
+                  - generic:
+                    - button:
+                      - img
+                      - text: Navegação Normal
+                    - button:
+                      - img
+                      - text: Auto Rotação
+                    - button:
+                      - img
+                      - text: Baixar
+                - generic:
+                  - generic:
+                    - heading [level=3]: Propriedades
+                  - generic:
+                    - generic:
+                      - generic: "Área da Base:"
+                      - generic: "6.88"
+                    - generic:
+                      - generic: "Área Lateral:"
+                      - generic: "40.00"
+                    - generic:
+                      - generic: "Área Total:"
+                      - generic: "53.76"
+                    - generic:
+                      - generic: "Raio Inscrito:"
+                      - generic: "1.38"
+                    - generic:
+                      - generic: "Raio Circunscrito:"
+                      - generic: "1.70"
+                    - generic:
+                      - generic: "Volume:"
+                      - generic: "27.53"
+                - generic:
+                  - generic:
+                    - heading [level=3]: Cálculos Geométricos
+                  - generic:
+                    - generic:
+                      - generic:
+                        - strong: "Área da Base:"
+                        - text: "6.88"
+                      - generic:
+                        - strong: "Área Lateral:"
+                        - text: "40.00"
+                      - generic:
+                        - strong: "Área Total:"
+                        - text: "53.76"
+                      - generic:
+                        - strong: "Volume:"
+                        - text: "27.53"
+                      - generic:
+                        - strong: "Raio Inscrito (Apótema):"
+                        - text: 1.38 (centro ao meio da aresta)
+            - generic:
+              - generic:
+                - generic [ref=e337] [cursor=pointer]: 🎯 Centralizar Vista
+                - generic:
+                  - generic:
+                    - generic [ref=e338]:
+                      - generic [ref=e339]:
+                        - generic [ref=e340]:
+                          - generic [ref=e341]: Mesa Digitalizadora
+                          - button [ref=e385] [cursor=pointer]
+                          - button [ref=e386] [cursor=pointer]: ☀️
+                        - generic [ref=e346]:
+                          - button [ref=e387] [cursor=pointer]: ✒️
+                          - button [ref=e388] [cursor=pointer]: ✏️
+                          - button [ref=e389] [cursor=pointer]: 🖍️
+                          - button [ref=e390] [cursor=pointer]: 🧹
+                          - button [ref=e391] [cursor=pointer]: ↖️
+                        - generic [ref=e352]:
+                          - button [ref=e392] [cursor=pointer]: Aa
+                          - button [ref=e393] [cursor=pointer]:
+                            - generic [ref=e356]: ▭
+                            - generic [ref=e357]: ▼
+                          - button [ref=e394] [cursor=pointer]: ⎯
+                          - button [ref=e395] [cursor=pointer]: →
+                          - button [ref=e396] [cursor=pointer]: ◉
+                          - button [ref=e397] [cursor=pointer]: ⊞
+                        - generic [ref=e362]:
+                          - button [disabled] [ref=e398]: ↶
+                          - button [ref=e399] [cursor=pointer]: 🗑️
+                      - generic [ref=e365]:
+                        - generic [ref=e366]:
+                          - generic [ref=e367]: "Cor:"
+                          - button [ref=e368] [cursor=pointer]
+                          - button [ref=e369] [cursor=pointer]
+                          - button [ref=e370] [cursor=pointer]
+                          - button [ref=e371] [cursor=pointer]
+                          - button [ref=e372] [cursor=pointer]
+                          - button [ref=e373] [cursor=pointer]
+                          - button [ref=e374] [cursor=pointer]
+                          - button [ref=e375] [cursor=pointer]
+                          - textbox [ref=e376] [cursor=pointer]: "#ffffff"
+                        - generic [ref=e377]:
+                          - generic [ref=e378]: "Espessura:"
+                          - slider [ref=e379]: "3"
+                          - generic [ref=e380]: 3px
+                        - generic [ref=e381]:
+                          - generic [ref=e382]: "Opacidade:"
+                          - slider [ref=e383]: "1"
+                          - generic [ref=e384]: 100%
+                    - generic:
+                      - generic:
+                        - generic: Página 1/1
+                        - generic: "Traços: 0"
+  - menu "🇧🇷 Português 🇧🇷" [active] [ref=e400]:
+    - menuitem "🇧🇷 Português" [ref=e401]:
+      - generic [ref=e402]: 🇧🇷
+      - text: Português
+    - menuitem "🇺🇸 English" [ref=e403]:
+      - generic [ref=e404]: 🇺🇸
+      - text: English
+    - menuitem "🇲🇽 Español" [ref=e405]:
+      - generic [ref=e406]: 🇲🇽
+      - text: Español
+    - menuitem "🇫🇷 Français" [ref=e407]:
+      - generic [ref=e408]: 🇫🇷
+      - text: Français
+    - menuitem "🇩🇪 Deutsch" [ref=e409]:
+      - generic [ref=e410]: 🇩🇪
+      - text: Deutsch
+    - menuitem "🇮🇹 Italiano" [ref=e411]:
+      - generic [ref=e412]: 🇮🇹
+      - text: Italiano
+    - menuitem "🇷🇺 Русский" [ref=e413]:
+      - generic [ref=e414]: 🇷🇺
+      - text: Русский
+    - menuitem "🇯🇵 日本語" [ref=e415]:
+      - generic [ref=e416]: 🇯🇵
+      - text: 日本語
+    - menuitem "🇨🇳 中文" [ref=e417]:
+      - generic [ref=e418]: 🇨🇳
+      - text: 中文
+    - menuitem "🇰🇷 한국어" [ref=e419]:
+      - generic [ref=e420]: 🇰🇷
+      - text: 한국어
+    - menuitem "🇸🇦 العربية" [ref=e421]:
+      - generic [ref=e422]: 🇸🇦
+      - text: العربية
+    - menuitem "🇮🇳 हिन्दी" [ref=e423]:
+      - generic [ref=e424]: 🇮🇳
+      - text: हिन्दी

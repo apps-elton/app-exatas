@@ -1,0 +1,63 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - heading "GeoTeach" [level=1] [ref=e10]
+      - paragraph [ref=e11]: Geometria 3D interativa para professores e escolas
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: 20+
+          - generic [ref=e15]: Sólidos 3D
+        - generic [ref=e16]:
+          - generic [ref=e17]: 15+
+          - generic [ref=e18]: Ferramentas
+        - generic [ref=e19]:
+          - generic [ref=e20]: "2"
+          - generic [ref=e21]: Idiomas
+    - generic [ref=e26]:
+      - heading "Entrar" [level=2] [ref=e27]
+      - paragraph [ref=e28]: Acesse sua conta para continuar
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - text: Email
+          - textbox "Email" [ref=e31]:
+            - /placeholder: seu@email.com
+        - generic [ref=e32]:
+          - text: Senha
+          - generic [ref=e33]:
+            - textbox "Senha" [ref=e34]:
+              - /placeholder: Sua senha
+            - button [ref=e35] [cursor=pointer]:
+              - img [ref=e36]
+        - button "Entrar" [ref=e39] [cursor=pointer]:
+          - img
+          - text: Entrar
+      - button "Esqueci minha senha" [ref=e41] [cursor=pointer]
+      - paragraph [ref=e43]:
+        - text: Ainda não tem conta?
+        - link "Criar conta grátis" [ref=e44] [cursor=pointer]:
+          - /url: /signup
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - img [ref=e47]
+          - generic [ref=e49]: Painel de Desenvolvimento
+        - paragraph [ref=e50]: Acesso rápido com contas de teste. Na primeira vez, a conta será criada automaticamente.
+        - generic [ref=e51]:
+          - button "Super Admin Suporte e gestão global — superadmin@geoteach.dev" [ref=e52] [cursor=pointer]:
+            - img [ref=e53]
+            - generic [ref=e55]:
+              - generic [ref=e56]: Super Admin
+              - generic [ref=e57]: Suporte e gestão global — superadmin@geoteach.dev
+          - button "Admin Escola Diretor / Coordenador — admin@escola-teste.dev" [ref=e58] [cursor=pointer]:
+            - img [ref=e59]
+            - generic [ref=e64]:
+              - generic [ref=e65]: Admin Escola
+              - generic [ref=e66]: Diretor / Coordenador — admin@escola-teste.dev
+          - button "Professor Usuário individual — professor@geoteach.dev" [ref=e67] [cursor=pointer]:
+            - img [ref=e68]
+            - generic [ref=e71]:
+              - generic [ref=e72]: Professor
+              - generic [ref=e73]: Usuário individual — professor@geoteach.dev

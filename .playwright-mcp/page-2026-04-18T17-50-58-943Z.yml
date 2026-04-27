@@ -1,0 +1,122 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e214]:
+    - generic [ref=e215]:
+      - generic [ref=e216]:
+        - generic [ref=e217]:
+          - img [ref=e218]
+          - generic [ref=e220]: GeoTeach
+          - generic [ref=e221]: Admin
+        - button [ref=e222] [cursor=pointer]:
+          - img
+      - generic [ref=e224]:
+        - img [ref=e226]
+        - generic [ref=e228]:
+          - paragraph [ref=e229]: Super Admin
+          - paragraph [ref=e230]: geoteach26@gmail.com
+          - generic [ref=e231]:
+            - generic [ref=e232]: Super Admin
+            - generic [ref=e233]: ·
+            - generic [ref=e235]: Gratuito
+      - navigation [ref=e236]:
+        - button "Dashboard" [ref=e237] [cursor=pointer]:
+          - img [ref=e238]
+          - generic [ref=e243]: Dashboard
+        - button "Tenants" [ref=e244] [cursor=pointer]:
+          - img [ref=e245]
+          - generic [ref=e250]: Tenants
+        - button "Usuários" [ref=e251] [cursor=pointer]:
+          - img [ref=e252]
+          - generic [ref=e257]: Usuários
+        - button "Assinaturas" [ref=e258] [cursor=pointer]:
+          - img [ref=e259]
+          - generic [ref=e261]: Assinaturas
+        - button "Suporte" [ref=e262] [cursor=pointer]:
+          - img [ref=e263]
+          - generic [ref=e265]: Suporte
+        - button "Sistema" [ref=e266] [cursor=pointer]:
+          - img [ref=e267]
+          - generic [ref=e270]: Sistema
+        - button "Geometria 3D" [ref=e272] [cursor=pointer]:
+          - img [ref=e273]
+          - generic [ref=e276]: Geometria 3D
+        - button "Projetos" [ref=e277] [cursor=pointer]:
+          - img [ref=e278]
+          - generic [ref=e280]: Projetos
+      - generic [ref=e281]:
+        - paragraph [ref=e282]: Upgrade para Pro
+        - paragraph [ref=e283]: Projetos ilimitados e mais recursos
+        - button "Em breve" [disabled]
+      - button "Português" [ref=e285] [cursor=pointer]:
+        - img
+        - generic [ref=e286]: Português
+      - button "Sair" [ref=e288] [cursor=pointer]:
+        - img [ref=e289]
+        - generic [ref=e292]: Sair
+    - main [ref=e293]:
+      - generic [ref=e294]:
+        - generic [ref=e295]:
+          - heading "Dashboard" [level=1] [ref=e296]
+          - paragraph [ref=e297]: Visão geral do sistema GeoTeach
+        - generic [ref=e298]:
+          - generic [ref=e299]:
+            - img [ref=e301]
+            - generic [ref=e306]:
+              - paragraph [ref=e307]: Total Tenants
+              - paragraph [ref=e308]: "2"
+          - generic [ref=e309]:
+            - img [ref=e311]
+            - generic [ref=e316]:
+              - paragraph [ref=e317]: Total Usuários
+              - paragraph [ref=e318]: "6"
+          - generic [ref=e319]:
+            - img [ref=e321]
+            - generic [ref=e323]:
+              - paragraph [ref=e324]: Total Projetos
+              - paragraph [ref=e325]: "0"
+          - generic [ref=e326]:
+            - img [ref=e328]
+            - generic [ref=e331]:
+              - paragraph [ref=e332]: Tickets Abertos
+              - paragraph [ref=e333]: "0"
+        - generic [ref=e334]:
+          - generic [ref=e335]:
+            - heading "Últimos Usuários" [level=2] [ref=e336]
+            - table [ref=e338]:
+              - rowgroup [ref=e339]:
+                - row "Nome Email Role Criado em" [ref=e340]:
+                  - columnheader "Nome" [ref=e341]
+                  - columnheader "Email" [ref=e342]
+                  - columnheader "Role" [ref=e343]
+                  - columnheader "Criado em" [ref=e344]
+              - rowgroup [ref=e345]:
+                - row "Super Admin geoteach26@gmail.com superadmin 18/04/2026, 14:49" [ref=e346]:
+                  - cell "Super Admin" [ref=e347]
+                  - cell "geoteach26@gmail.com" [ref=e348]
+                  - cell "superadmin" [ref=e349]
+                  - cell "18/04/2026, 14:49" [ref=e350]
+                - row "Professor Colégio professor@colegio-teste.dev teacher 11/04/2026, 14:02" [ref=e351]:
+                  - cell "Professor Colégio" [ref=e352]
+                  - cell "professor@colegio-teste.dev" [ref=e353]
+                  - cell "teacher" [ref=e354]
+                  - cell "11/04/2026, 14:02" [ref=e355]
+                - row "Admin Colégio admin@colegio-teste.dev admin 11/04/2026, 14:02" [ref=e356]:
+                  - cell "Admin Colégio" [ref=e357]
+                  - cell "admin@colegio-teste.dev" [ref=e358]
+                  - cell "admin" [ref=e359]
+                  - cell "11/04/2026, 14:02" [ref=e360]
+                - row "Professor Demo professor@geoteach.dev teacher 11/04/2026, 14:00" [ref=e361]:
+                  - cell "Professor Demo" [ref=e362]
+                  - cell "professor@geoteach.dev" [ref=e363]
+                  - cell "teacher" [ref=e364]
+                  - cell "11/04/2026, 14:00" [ref=e365]
+                - row "Admin Escola admin@escola-teste.dev admin 11/04/2026, 14:00" [ref=e366]:
+                  - cell "Admin Escola" [ref=e367]
+                  - cell "admin@escola-teste.dev" [ref=e368]
+                  - cell "admin" [ref=e369]
+                  - cell "11/04/2026, 14:00" [ref=e370]
+          - generic [ref=e371]:
+            - heading "Tickets Recentes" [level=2] [ref=e372]
+            - paragraph [ref=e373]: Nenhum ticket encontrado.

@@ -20,6 +20,7 @@ import SchoolUsers from "./pages/SchoolUsers";
 import Settings from "./pages/Settings";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import EquationBreaker from "./pages/EquationBreaker";
 
 const Index = lazy(() => import("./pages/Index"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -68,6 +69,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Projects />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/equation-breaker"
+                element={
+                  <ProtectedRoute>
+                    <EquationBreaker />
                   </ProtectedRoute>
                 }
               />

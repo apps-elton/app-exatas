@@ -1,0 +1,42 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - button "Forma Geométrica" [ref=e6] [cursor=pointer]:
+          - img [ref=e7]
+        - button "Visualização" [ref=e10] [cursor=pointer]:
+          - img [ref=e11]
+        - button "Estilo" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+        - button "Mesa Digitalizadora" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+        - button "Propriedades" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+      - generic [ref=e33]:
+        - button "Dashboard" [ref=e34] [cursor=pointer]:
+          - img [ref=e35]
+        - button "Meus Projetos" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]
+        - button "Baixar" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+        - button "Configurações" [ref=e47] [cursor=pointer]:
+          - img [ref=e48]
+      - generic [ref=e51]:
+        - button "Estilo" [ref=e52] [cursor=pointer]:
+          - img [ref=e53]
+        - button "Português" [ref=e59] [cursor=pointer]:
+          - img
+        - button "Sair" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+    - generic [ref=e73]:
+      - generic [ref=e74]: Prisma · 5 lados · H:4.0 · R:2.0
+      - generic [ref=e75]:
+        - button "Centralizar Vista" [ref=e76] [cursor=pointer]:
+          - img [ref=e77]
+        - button "Congelar Vista" [ref=e83] [cursor=pointer]:
+          - img [ref=e84]
+        - button "Fullscreen" [ref=e87] [cursor=pointer]:
+          - img [ref=e88]

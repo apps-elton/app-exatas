@@ -1,0 +1,40 @@
+<h2>Como o sidebar deve funcionar no mobile?</h2>
+<p class="subtitle">O IconSidebar atual fica fixo com 64px e nunca esconde. Escolha a abordagem para telas < 768px.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Bottom Tab Bar (Recomendado)</h3>
+      <p>Esconder o sidebar lateral e mostrar uma barra de navegacao fixa no bottom da tela, estilo app nativo (Instagram, WhatsApp). Os icones principais ficam no bottom bar, os paineis abrem como sheets de baixo para cima.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Padrao mobile nativo — usuarios ja conhecem</li><li>Polegar alcanca todos os botoes</li><li>Libera 100% da largura para o canvas 3D</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Mais trabalho para implementar</li><li>Precisa adaptar os FloatingPanels para sheets</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Hamburger + Sheet Drawer</h3>
+      <p>Esconder o sidebar e adicionar um botao hamburger no canto superior. Ao clicar, abre um Sheet (drawer) lateral com todos os icones e opcoes. O canvas 3D ocupa tela toda quando o menu esta fechado.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Simples de implementar (shadcn Sheet ja existe)</li><li>100% da tela para o canvas quando fechado</li><li>Familiar para usuarios web</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Esconde toda a navegacao atras de 1 clique</li><li>Menos acessivel que bottom bar</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Mini Floating Action Button (FAB)</h3>
+      <p>Esconder tudo e mostrar um botao flutuante redondo no canto inferior direito. Ao tocar, expande um menu radial com as opcoes principais. Estilo Material Design.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Maximo espaco para o canvas 3D</li><li>Visual limpo e moderno</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Menus radiais sao confusos para muitas opcoes</li><li>Menos intuitivo, curva de aprendizado</li><li>Dificil encaixar paineis de controle</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

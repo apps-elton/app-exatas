@@ -1,0 +1,48 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - button "Português" [ref=e5] [cursor=pointer]:
+      - img
+      - generic [ref=e6]: Português
+    - generic [ref=e8]:
+      - img [ref=e10]
+      - heading "GeoTeach" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Comece grátis e explore geometria 3D como nunca antes
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - img [ref=e17]
+          - generic [ref=e19]: Visualize 20+ sólidos geométricos em 3D
+        - generic [ref=e20]:
+          - img [ref=e21]
+          - generic [ref=e23]: Use mesa digitalizadora com sensibilidade à pressão
+        - generic [ref=e24]:
+          - img [ref=e25]
+          - generic [ref=e27]: Crie cortes, planificações e construções geométricas
+        - generic [ref=e28]:
+          - img [ref=e29]
+          - generic [ref=e31]: Salve e compartilhe seus projetos
+    - generic [ref=e35]:
+      - heading "Criar conta" [level=2] [ref=e36]
+      - paragraph [ref=e37]: Como você quer usar o GeoTeach?
+      - generic [ref=e38]:
+        - button "Sou Professor Conta individual gratuita para usar geometria 3D" [ref=e39] [cursor=pointer]:
+          - img [ref=e41]
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Sou Professor
+            - paragraph [ref=e46]: Conta individual gratuita para usar geometria 3D
+        - button "Sou Escola Cadastre sua escola e convide professores" [ref=e47] [cursor=pointer]:
+          - img [ref=e49]
+          - generic [ref=e54]:
+            - paragraph [ref=e55]: Sou Escola
+            - paragraph [ref=e56]: Cadastre sua escola e convide professores
+        - button "Sou Aluno Estudar em casa com a plataforma" [ref=e57] [cursor=pointer]:
+          - img [ref=e59]
+          - generic [ref=e61]:
+            - paragraph [ref=e62]: Sou Aluno
+            - paragraph [ref=e63]: Estudar em casa com a plataforma
+      - paragraph [ref=e65]:
+        - text: Já tem conta?
+        - link "Fazer login" [ref=e66] [cursor=pointer]:
+          - /url: /login

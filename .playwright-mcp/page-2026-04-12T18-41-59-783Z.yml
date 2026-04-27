@@ -1,0 +1,92 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e368]:
+    - generic [ref=e369]:
+      - generic [ref=e370]:
+        - generic [ref=e371]:
+          - img [ref=e372]
+          - generic [ref=e375]: GeoTeach
+        - button [ref=e376] [cursor=pointer]:
+          - img
+      - generic [ref=e378]:
+        - img [ref=e380]
+        - generic [ref=e385]:
+          - paragraph [ref=e386]: Admin Escola
+          - paragraph [ref=e387]: admin@escola-teste.dev
+          - generic [ref=e388]:
+            - generic [ref=e389]: Admin
+            - generic [ref=e390]: ·
+            - generic [ref=e392]: Gratuito
+      - navigation [ref=e393]:
+        - button "Dashboard" [ref=e394] [cursor=pointer]:
+          - img [ref=e395]
+          - generic [ref=e400]: Dashboard
+        - button "Geometria 3D" [ref=e401] [cursor=pointer]:
+          - img [ref=e402]
+          - generic [ref=e405]: Geometria 3D
+        - button "Meus Projetos" [ref=e406] [cursor=pointer]:
+          - img [ref=e407]
+          - generic [ref=e409]: Meus Projetos
+        - button "Usuários da Escola" [ref=e410] [cursor=pointer]:
+          - img [ref=e411]
+          - generic [ref=e416]: Usuários da Escola
+        - button "Configurações" [ref=e417] [cursor=pointer]:
+          - img [ref=e418]
+          - generic [ref=e421]: Configurações
+      - generic [ref=e422]:
+        - paragraph [ref=e423]: Upgrade para Pro
+        - paragraph [ref=e424]: Projetos ilimitados e mais recursos
+        - button "Em breve" [disabled]
+      - button "Português" [ref=e426] [cursor=pointer]:
+        - img
+        - generic [ref=e427]: Português
+      - button "Sair" [ref=e429] [cursor=pointer]:
+        - img [ref=e430]
+        - generic [ref=e433]: Sair
+    - main [ref=e434]:
+      - generic [ref=e435]:
+        - generic [ref=e436]:
+          - heading "Olá, Admin!" [level=1] [ref=e437]
+          - paragraph [ref=e438]: Seu painel de atividades no GeoTeach
+        - generic [ref=e439]:
+          - generic [ref=e440]:
+            - img [ref=e442]
+            - generic [ref=e444]:
+              - paragraph [ref=e445]: Projetos
+              - paragraph [ref=e446]:
+                - text: "0"
+                - generic [ref=e447]: /3
+          - generic [ref=e448]:
+            - img [ref=e450]
+            - generic [ref=e452]:
+              - paragraph [ref=e453]: Plano
+              - paragraph [ref=e454]: Gratuito
+          - generic [ref=e455]:
+            - img [ref=e457]
+            - generic [ref=e462]:
+              - paragraph [ref=e463]: Escola
+              - paragraph [ref=e464]: Escola Demo
+          - generic [ref=e465]:
+            - img [ref=e467]
+            - generic [ref=e470]:
+              - paragraph [ref=e471]: Cargo
+              - paragraph [ref=e472]: Admin
+        - generic [ref=e473]:
+          - generic [ref=e474]:
+            - heading "Projetos Recentes" [level=2] [ref=e475]
+            - button "Ver todos" [ref=e476] [cursor=pointer]:
+              - text: Ver todos
+              - img
+          - generic [ref=e477]:
+            - img [ref=e478]
+            - paragraph [ref=e481]: Você ainda não criou nenhum projeto.
+            - button "Criar primeiro projeto" [ref=e482] [cursor=pointer]:
+              - img
+              - text: Criar primeiro projeto
+        - generic [ref=e484]:
+          - generic [ref=e485]:
+            - heading "Faça upgrade para desbloquear mais recursos" [level=3] [ref=e486]
+            - paragraph [ref=e487]: Projetos ilimitados, mais armazenamento e funcionalidades avançadas.
+          - button "Em breve" [disabled]

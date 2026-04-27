@@ -22,6 +22,7 @@ import {
   Crown,
   MessageSquare,
   Clock,
+  Calculator,
 } from 'lucide-react';
 
 const ROLE_STYLE = {
@@ -95,6 +96,7 @@ export function AppSidebar() {
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
     { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
     { id: 'projects', label: t('sidebar.my_projects'), icon: FolderOpen, path: '/projects' },
+    { id: 'equation-breaker', label: 'Equation Breaker', icon: Calculator, path: '/equation-breaker' },
     { id: 'settings', label: t('sidebar.settings'), icon: Settings, path: '/settings' },
   ];
 
@@ -102,6 +104,7 @@ export function AppSidebar() {
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
     { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
     { id: 'projects', label: t('sidebar.my_projects'), icon: FolderOpen, path: '/projects' },
+    { id: 'equation-breaker', label: 'Equation Breaker', icon: Calculator, path: '/equation-breaker' },
     { id: 'users', label: t('sidebar.school_users'), icon: Users, path: '/school/users' },
     { id: 'settings', label: t('sidebar.settings'), icon: Settings, path: '/settings' },
   ];
@@ -115,6 +118,7 @@ export function AppSidebar() {
     { id: 'system', label: t('sidebar.system'), icon: Settings, path: '/admin/settings' },
     { id: 'divider', label: '', icon: Box, path: '', divider: true },
     { id: 'app', label: t('sidebar.geometry3d'), icon: Box, path: '/' },
+    { id: 'equation-breaker', label: 'Equation Breaker', icon: Calculator, path: '/equation-breaker' },
     { id: 'projects', label: t('sidebar.projects'), icon: FolderOpen, path: '/projects' },
   ];
 

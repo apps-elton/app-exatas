@@ -1,0 +1,14 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - paragraph [ref=e6]: Carregando...
+  - generic [ref=e8]:
+    - paragraph [ref=e9]:
+      - text: Utilizamos cookies e tecnologias semelhantes para melhorar sua experiencia. Ao continuar navegando, voce concorda com nossa
+      - link "Politica de Privacidade" [ref=e10] [cursor=pointer]:
+        - /url: /privacy
+      - text: .
+    - generic [ref=e11]:
+      - button "Recusar" [ref=e12] [cursor=pointer]
+      - button "Aceitar" [ref=e13] [cursor=pointer]

@@ -1,0 +1,343 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e10]: GeoTeach
+        - button [ref=e11] [cursor=pointer]:
+          - img
+      - generic [ref=e13]:
+        - img [ref=e15]
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Admin Escola
+          - paragraph [ref=e22]: admin@escola-teste.dev
+          - generic [ref=e23]:
+            - generic [ref=e24]: Admin
+            - generic [ref=e25]: ·
+            - generic [ref=e27]: Free
+      - navigation [ref=e28]:
+        - button "Dashboard" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - generic [ref=e35]: Dashboard
+        - button "3D Geometry" [ref=e480] [cursor=pointer]:
+          - img [ref=e37]
+          - generic [ref=e40]: 3D Geometry
+        - button "My Projects" [ref=e481] [cursor=pointer]:
+          - img [ref=e42]
+          - generic [ref=e44]: My Projects
+        - button "School Users" [ref=e482] [cursor=pointer]:
+          - img [ref=e46]
+          - generic [ref=e51]: School Users
+        - button "Settings" [ref=e483] [cursor=pointer]:
+          - img [ref=e53]
+          - generic [ref=e56]: Settings
+      - generic [ref=e57]:
+        - paragraph [ref=e58]: Upgrade to Pro
+        - paragraph [ref=e59]: Unlimited projects and more features
+        - button "Coming soon" [disabled]
+      - button "🇺🇸 English" [active] [ref=e484] [cursor=pointer]:
+        - img
+        - generic [ref=e62]: 🇺🇸 English
+      - button "Logout" [ref=e485] [cursor=pointer]:
+        - img [ref=e65]
+        - generic [ref=e68]: Logout
+    - main [ref=e69]:
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - heading "GeoTeach" [level=1] [ref=e73]
+            - paragraph [ref=e74]: Visualizador Interativo de Geometria Espacial
+          - generic [ref=e75]:
+            - button "Download" [ref=e486] [cursor=pointer]:
+              - img
+              - text: Download
+            - button "🎯 Centralizar Vista" [ref=e77] [cursor=pointer]
+            - button "Freeze View" [ref=e487] [cursor=pointer]:
+              - img
+              - text: Freeze View
+            - button "Alternar tema" [ref=e80] [cursor=pointer]:
+              - img
+              - generic [ref=e81]: Alternar tema
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e87]: Ferramentas
+            - generic [ref=e89]:
+              - button "Seleção" [ref=e90] [cursor=pointer]:
+                - generic [ref=e91]:
+                  - img
+                  - generic [ref=e92]: Seleção
+              - button "Ponto Médio" [ref=e93] [cursor=pointer]:
+                - generic [ref=e94]:
+                  - img
+                  - generic [ref=e95]: Ponto Médio
+              - button "Seção Transversal" [ref=e96] [cursor=pointer]:
+                - generic [ref=e97]:
+                  - img
+                  - generic [ref=e98]: Seção Transversal
+              - button "Seção Meridiana" [ref=e99] [cursor=pointer]:
+                - generic [ref=e100]:
+                  - img
+                  - generic [ref=e101]: Seção Meridiana
+              - button "Conectar Vértices" [ref=e102] [cursor=pointer]:
+                - generic [ref=e103]:
+                  - img
+                  - generic [ref=e104]: Conectar Vértices
+              - button "Criar Plano" [ref=e105] [cursor=pointer]:
+                - generic [ref=e106]:
+                  - img
+                  - generic [ref=e107]: Criar Plano
+          - generic [ref=e108]:
+            - button "Desfazer" [disabled]:
+              - img
+              - generic: Desfazer
+            - button "Refazer" [disabled]:
+              - img
+              - generic: Refazer
+        - generic [ref=e109]:
+          - complementary [ref=e110]:
+            - generic [ref=e111]:
+              - generic [ref=e112]:
+                - heading "Geometric Form" [level=3] [ref=e488]
+                - generic [ref=e116]:
+                  - text: Type
+                  - combobox [ref=e117] [cursor=pointer]:
+                    - generic: Prism
+                    - img [ref=e118]
+              - generic [ref=e120]:
+                - heading "Parameters" [level=3] [ref=e489]
+                - generic [ref=e123]:
+                  - generic [ref=e124]:
+                    - generic [ref=e125]: "Height: 4.0"
+                    - slider [ref=e130]
+                  - generic [ref=e131]:
+                    - generic [ref=e132]: "Sides: 5"
+                    - slider [ref=e137]
+                  - generic [ref=e138]:
+                    - generic [ref=e139]: "Base Edge: 2.0"
+                    - slider [ref=e144]
+              - generic [ref=e145]:
+                - heading "Visualization" [level=3] [ref=e490]
+                - generic [ref=e148]:
+                  - generic [ref=e149]:
+                    - generic [ref=e150]: Show Edges
+                    - switch "Show Edges" [checked] [ref=e491] [cursor=pointer]
+                  - generic [ref=e152]:
+                    - generic [ref=e153]: Show Vertices
+                    - switch "Show Vertices" [checked] [ref=e492] [cursor=pointer]
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: Show Faces
+                    - switch "Show Faces" [checked] [ref=e493] [cursor=pointer]
+                  - generic [ref=e159]:
+                    - generic [ref=e160]: Show Height
+                    - switch "Show Height" [ref=e494] [cursor=pointer]
+                  - generic [ref=e163]:
+                    - generic [ref=e164]: Show Base Radius
+                    - switch "Show Base Radius" [disabled] [ref=e495]
+                  - generic [ref=e167]:
+                    - generic [ref=e168]: Inscribed Radius
+                    - switch "Inscribed Radius" [ref=e496] [cursor=pointer]
+                  - generic [ref=e171]:
+                    - generic [ref=e172]: Circumscribed Radius
+                    - switch "Circumscribed Radius" [ref=e497] [cursor=pointer]
+                  - generic [ref=e175]:
+                    - generic [ref=e176]: Inscribed Circumference
+                    - switch "Inscribed Circumference" [ref=e498] [cursor=pointer]
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: Circumscribed Circumference
+                    - switch "Circumscribed Circumference" [ref=e499] [cursor=pointer]
+                  - generic [ref=e182]:
+                    - generic [ref=e183]: Labels
+                    - switch "Labels" [ref=e500] [cursor=pointer]
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: Mesh
+                    - switch "Mesh" [checked] [ref=e501] [cursor=pointer]
+                  - generic [ref=e188]:
+                    - generic [ref=e189]: Cross Section
+                    - switch "Cross Section" [ref=e502] [cursor=pointer]
+                  - generic [ref=e191]:
+                    - generic [ref=e192]: Meridian Section
+                    - switch "Meridian Section" [ref=e503] [cursor=pointer]
+                  - generic [ref=e194]:
+                    - generic [ref=e195]: Dimensions
+                    - switch "Dimensions" [ref=e504] [cursor=pointer]
+                  - generic [ref=e197]:
+                    - generic [ref=e198]: Show Shadow
+                    - switch "Show Shadow" [ref=e505] [cursor=pointer]
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: Unfolding
+                    - switch "Unfolding" [ref=e506] [cursor=pointer]
+                  - generic [ref=e204]:
+                    - generic [ref=e205]: Connect Vertices
+                    - switch "Connect Vertices" [ref=e507] [cursor=pointer]
+                  - generic [ref=e207]:
+                    - generic [ref=e208]: 🎯 Vertex Selection Modes
+                    - generic [ref=e209]:
+                      - button "🔶 Meridian" [ref=e508] [cursor=pointer]
+                      - button "📐 Planes" [ref=e509] [cursor=pointer]
+                      - button "🔗 Connections" [ref=e510] [cursor=pointer]
+                      - button "📏 Constructions" [ref=e511] [cursor=pointer]
+                  - generic [ref=e215]:
+                    - generic [ref=e216]: Define Plane (3 Points)
+                    - switch "Define Plane (3 Points)" [ref=e512] [cursor=pointer]
+              - generic [ref=e218]:
+                - heading "Inscribed/Circumscribed Shapes" [level=3] [ref=e513]
+                - paragraph [ref=e222]: Select cube, sphere, cylinder or cone to see inscription/circumscription options
+              - generic [ref=e223]:
+                - heading "Style" [level=3] [ref=e514]
+                - generic [ref=e226]:
+                  - generic [ref=e227]:
+                    - text: Edge Color
+                    - combobox [ref=e228] [cursor=pointer]:
+                      - generic:
+                        - generic: Azul
+                      - img [ref=e229]
+                  - generic [ref=e231]:
+                    - text: Meridian Section Color
+                    - combobox [ref=e232] [cursor=pointer]:
+                      - img [ref=e233]
+                  - generic [ref=e235]:
+                    - text: Height Color
+                    - combobox [ref=e236] [cursor=pointer]:
+                      - img [ref=e237]
+                  - generic [ref=e239]:
+                    - text: Face Color
+                    - combobox [ref=e240] [cursor=pointer]:
+                      - generic:
+                        - generic: Roxo
+                      - img [ref=e241]
+                  - generic [ref=e243]:
+                    - text: Inscribed Circumference Color
+                    - combobox [ref=e244] [cursor=pointer]:
+                      - img [ref=e245]
+                  - generic [ref=e247]:
+                    - text: Circumscribed Circumference Color
+                    - combobox [ref=e248] [cursor=pointer]:
+                      - img [ref=e249]
+                  - generic [ref=e251]:
+                    - text: Inscribed Shapes Color
+                    - combobox [ref=e252] [cursor=pointer]:
+                      - img [ref=e253]
+                  - generic [ref=e255]:
+                    - text: Circumscribed Shapes Color
+                    - combobox [ref=e256] [cursor=pointer]:
+                      - img [ref=e257]
+                  - generic [ref=e259]:
+                    - text: Meridian Section Color
+                    - combobox [disabled] [ref=e260]:
+                      - img [ref=e261]
+                  - generic [ref=e263]:
+                    - generic [ref=e264]: "Meridian Section Opacity: 50%"
+                    - slider [disabled] [ref=e269]
+                  - generic [ref=e270]:
+                    - generic [ref=e271]: "Opacity: 70%"
+                    - slider [ref=e276]
+                  - generic [ref=e277]:
+                    - generic [ref=e278]: "Speed: 1.0x"
+                    - slider [ref=e283]
+              - generic [ref=e284]:
+                - heading "Controls" [level=3] [ref=e515]
+                - generic [ref=e287]:
+                  - button "Navegação Normal" [ref=e288] [cursor=pointer]:
+                    - img
+                    - text: Navegação Normal
+                  - button "Auto Rotation" [ref=e516] [cursor=pointer]:
+                    - img
+                    - text: Auto Rotation
+                  - button "Download" [ref=e517] [cursor=pointer]:
+                    - img
+                    - text: Download
+              - generic [ref=e291]:
+                - heading "Properties" [level=3] [ref=e518]
+                - generic [ref=e294]:
+                  - generic [ref=e295]:
+                    - generic [ref=e296]: "Base Area:"
+                    - generic [ref=e297]: "6.88"
+                  - generic [ref=e298]:
+                    - generic [ref=e299]: "Área Lateral:"
+                    - generic [ref=e300]: "40.00"
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: "Total Area:"
+                    - generic [ref=e303]: "53.76"
+                  - generic [ref=e304]:
+                    - generic [ref=e305]: "Inscribed Radius:"
+                    - generic [ref=e306]: "1.38"
+                  - generic [ref=e307]:
+                    - generic [ref=e308]: "Circumscribed Radius:"
+                    - generic [ref=e309]: "1.70"
+                  - generic [ref=e310]:
+                    - generic [ref=e311]: "Volume:"
+                    - generic [ref=e312]: "27.53"
+              - generic [ref=e313]:
+                - heading "Geometric Calculations" [level=3] [ref=e519]
+                - generic [ref=e317]:
+                  - generic [ref=e318]:
+                    - strong [ref=e319]: "Área da Base:"
+                    - text: "6.88"
+                  - generic [ref=e320]:
+                    - strong [ref=e321]: "Área Lateral:"
+                    - text: "40.00"
+                  - generic [ref=e322]:
+                    - strong [ref=e323]: "Área Total:"
+                    - text: "53.76"
+                  - generic [ref=e324]:
+                    - strong [ref=e325]: "Volume:"
+                    - text: "27.53"
+                  - generic [ref=e326]:
+                    - strong [ref=e327]: "Raio Inscrito (Apótema):"
+                    - text: 1.38 (centro ao meio da aresta)
+          - generic [ref=e329]:
+            - generic [ref=e337] [cursor=pointer]: 🎯 Centralizar Vista
+            - generic:
+              - generic:
+                - generic [ref=e338]:
+                  - generic [ref=e339]:
+                    - generic [ref=e340]:
+                      - generic [ref=e341]: Mesa Digitalizadora
+                      - button "Ativar/Desativar" [ref=e520] [cursor=pointer]
+                      - button "☀️" [ref=e521] [cursor=pointer]
+                    - generic [ref=e346]:
+                      - button "✒️" [ref=e522] [cursor=pointer]
+                      - button "✏️" [ref=e523] [cursor=pointer]
+                      - button "🖍️" [ref=e524] [cursor=pointer]
+                      - button "🧹" [ref=e525] [cursor=pointer]
+                      - button "↖️" [ref=e526] [cursor=pointer]
+                    - generic [ref=e352]:
+                      - button "Aa" [ref=e527] [cursor=pointer]
+                      - button "▭ ▼" [ref=e528] [cursor=pointer]:
+                        - generic [ref=e356]: ▭
+                        - generic [ref=e357]: ▼
+                      - button "⎯" [ref=e529] [cursor=pointer]
+                      - button "→" [ref=e530] [cursor=pointer]
+                      - button "◉" [ref=e531] [cursor=pointer]
+                      - button "⊞" [ref=e532] [cursor=pointer]
+                    - generic [ref=e362]:
+                      - button "↶" [disabled] [ref=e533]
+                      - button "🗑️" [ref=e534] [cursor=pointer]
+                  - generic [ref=e365]:
+                    - generic [ref=e366]:
+                      - generic [ref=e367]: "Cor:"
+                      - button [ref=e368] [cursor=pointer]
+                      - button [ref=e369] [cursor=pointer]
+                      - button [ref=e370] [cursor=pointer]
+                      - button [ref=e371] [cursor=pointer]
+                      - button [ref=e372] [cursor=pointer]
+                      - button [ref=e373] [cursor=pointer]
+                      - button [ref=e374] [cursor=pointer]
+                      - button [ref=e375] [cursor=pointer]
+                      - textbox [ref=e376] [cursor=pointer]: "#ffffff"
+                    - generic [ref=e377]:
+                      - generic [ref=e378]: "Espessura:"
+                      - slider [ref=e379]: "3"
+                      - generic [ref=e380]: 3px
+                    - generic [ref=e381]:
+                      - generic [ref=e382]: "Opacidade:"
+                      - slider [ref=e383]: "1"
+                      - generic [ref=e384]: 100%
+                - generic:
+                  - generic:
+                    - generic: Página 1/1
+                    - generic: "Traços: 0"
